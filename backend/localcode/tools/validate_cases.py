@@ -12,6 +12,7 @@ Run inside the app container (it needs the runner and an imported content.db):
 
 import argparse
 import json
+import queue
 import sys
 import threading
 import time
@@ -36,7 +37,9 @@ def cases_to_exclude(outcomes: dict[str, list[bool]]) -> set[int]:
     return {i for i in range(len(trusted[0])) if not any(o[i] for o in trusted)}
 
 
-def _outcomes(problem, lang: str, code: str, cases: list[dict], cpp_sig: dict | None) -> list[bool]:
+def _outcomes(
+    problem, lang: str, code: str, cases: list[dict], cpp_sig: dict | None, runner_url: str | None
+) -> list[bool]:
     """Per-case pass/fail. A case that hangs or crashes fails; the cases after it are run again."""
     ok = [False] * len(cases)
     pending = list(range(len(cases)))
@@ -52,7 +55,8 @@ def _outcomes(problem, lang: str, code: str, cases: list[dict], cpp_sig: dict | 
                 "cases": [cases[i]["args"] for i in chunk],
                 "timeout_ms": TIMEOUT_MS,
                 "cpp_sig": cpp_sig,
-            }
+            },
+            runner_url,
         )
         if res["compile_error"]:
             return [False] * len(cases)
@@ -76,10 +80,10 @@ def _load(slug: str) -> tuple[dict, list[dict], dict[str, str], dict | None]:
     return p, cases, codes, json.loads(cpp_row[0]) if cpp_row else None
 
 
-def _validate_one(slug: str) -> tuple[list[str], dict[str, str]]:
+def _validate_one(slug: str, runner_url: str | None) -> tuple[list[str], dict[str, str]]:
     p, cases, codes, cpp_sig = _load(slug)
     outcomes = {
-        lang: _outcomes(p, lang, codes[lang], cases, cpp_sig if lang == "cpp" else None)
+        lang: _outcomes(p, lang, codes[lang], cases, cpp_sig if lang == "cpp" else None, runner_url)
         for lang in REFERENCE_LANGS
         if lang in codes and lang in json.loads(p["langs"])
     }
@@ -87,24 +91,32 @@ def _validate_one(slug: str) -> tuple[list[str], dict[str, str]]:
     return sorted(case_key(cases[i]["args"]) for i in bad), {k: f"{sum(o)}/{len(o)}" for k, o in outcomes.items()}
 
 
-def validate(out: Path, only: list[str] | None = None, jobs: int = 1) -> dict[str, list[str]]:
+def validate(out: Path, only: list[str] | None = None, runners: list[str] | None = None) -> dict[str, list[str]]:
+    """Validate every runnable problem, one worker per runner URL (default: the configured runner)."""
     with content_session() as con:
         slugs = [r[0] for r in con.execute("select slug from problems where has_tests = 1 order by frontend_id")]
     result: dict[str, list[str]] = json.loads(out.read_text()) if out.exists() else {}
     todo = [s for s in slugs if s in only] if only else [s for s in slugs if s not in result]
     lock = threading.Lock()
     done = 0
+    pool_urls: queue.Queue[str | None] = queue.Queue()
+    for url in runners or [None]:
+        pool_urls.put(url)
 
     def work(slug: str) -> None:
         nonlocal done
-        keys, summary = _validate_one(slug)
+        url = pool_urls.get()
+        try:
+            keys, summary = _validate_one(slug, url)
+        finally:
+            pool_urls.put(url)
         with lock:
             done += 1
             result[slug] = keys
             out.write_text(json.dumps(result, indent=0, sort_keys=True))
             print(f"[{done}/{len(todo)}] {slug}: {summary} exclude {len(keys)}", flush=True)
 
-    with ThreadPoolExecutor(max_workers=jobs) as pool:
+    with ThreadPoolExecutor(max_workers=len(runners or [None])) as pool:
         for f in [pool.submit(work, s) for s in todo]:
             f.result()
     return result
@@ -114,10 +126,14 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("out", type=Path, help="JSON file to write (resumes if it exists)")
     ap.add_argument("--only", nargs="*", help="limit to these problem slugs")
-    ap.add_argument("--jobs", type=int, default=1, help="parallel runner requests (scale the runner service to match)")
+    ap.add_argument(
+        "--runners",
+        nargs="*",
+        help="runner base URLs to spread work across, e.g. http://localcode-runner-1:8080 (default: LOCALCODE_RUNNER)",
+    )
     args = ap.parse_args(argv)
     t0 = time.time()
-    result = validate(args.out, args.only, args.jobs)
+    result = validate(args.out, args.only, args.runners)
     print(
         f"done: {sum(map(len, result.values()))} cases excluded across {len(result)} problems "
         f"in {time.time() - t0:.0f}s",

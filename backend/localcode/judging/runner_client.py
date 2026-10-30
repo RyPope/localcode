@@ -10,8 +10,9 @@ _OVERHEAD_S = 90
 _versions: dict[str, str] | None = None
 
 
-def execute(req: RunnerRequest) -> RunnerResult:
-    r = httpx.post(f"{config.RUNNER_URL}/execute", json=req, timeout=req["timeout_ms"] / 1000 + _OVERHEAD_S)
+def execute(req: RunnerRequest, base_url: str | None = None) -> RunnerResult:
+    url = base_url or config.RUNNER_URL
+    r = httpx.post(f"{url}/execute", json=req, timeout=req["timeout_ms"] / 1000 + _OVERHEAD_S)
     r.raise_for_status()
     return r.json()
 
