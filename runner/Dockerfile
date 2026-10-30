@@ -2,7 +2,7 @@
 FROM python:3.12.12-slim-trixie AS runtime
 
 RUN apt-get update \
- && apt-get install -y --no-install-recommends g++ nlohmann-json3-dev curl unzip ca-certificates \
+ && apt-get install -y --no-install-recommends clang g++ nlohmann-json3-dev curl unzip ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 
 COPY --from=eclipse-temurin:21.0.5_11-jdk /opt/java/openjdk /opt/java
@@ -24,10 +24,11 @@ RUN mkdir -p /tmp/drv \
  && javac -cp /opt/lib/gson.jar -d /tmp/drv harness/jvm/Driver.java harness/jvm/javafx/util/Pair.java \
  && jar cf /opt/lib/driver.jar -C /tmp/drv . && rm -rf /tmp/drv
 
-# Precompiled C++ prelude; flags must match the g++ command in languages.py.
+# C++ is compiled with Clang (as LeetCode does) against libstdc++ (installed with g++).
+# Precompiled prelude; flags must match CPP_FLAGS in languages.py.
 RUN mkdir -p /opt/lc && cp harness/cpp/lc.hpp harness/cpp/lc_io.cpp /opt/lc/ \
- && g++ -std=c++20 -O2 -w -x c++-header /opt/lc/lc.hpp -o /opt/lc/lc.hpp.gch \
- && g++ -std=c++20 -O2 -w -I /opt/lc -c /opt/lc/lc_io.cpp -o /opt/lc/lc_io.o
+ && clang++ -std=c++23 -O2 -w -x c++-header /opt/lc/lc.hpp -o /opt/lc/lc.hpp.pch \
+ && clang++ -std=c++23 -O2 -w -I /opt/lc -include-pch /opt/lc/lc.hpp.pch -c /opt/lc/lc_io.cpp -o /opt/lc/lc_io.o
 
 COPY server.py execute.py sandbox.py languages.py ./
 

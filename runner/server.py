@@ -25,7 +25,7 @@ def versions() -> dict:
         _versions = {
             "python": first(["python3", "--version"]),
             "java": first(["java", "-version"]),
-            "cpp": first(["g++", "--version"]),
+            "cpp": first(["clang++", "--version"]),
             "kotlin": first(["kotlinc", "-version"]),
         }
     return _versions

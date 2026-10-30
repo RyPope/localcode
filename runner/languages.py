@@ -68,10 +68,24 @@ def _kotlin(req: dict, workdir: Path, memory_mb: int) -> Plan:
     return Plan(["kotlinc", "-nowarn", "-d", ".", *sources], _jvm_run(classpath, memory_mb), False)
 
 
+# Clang, as LeetCode uses; must match the flags the precompiled header was built with (Dockerfile).
+CPP_FLAGS = ["-std=c++23", "-O2", "-w"]
+
+
 def _cpp(req: dict, workdir: Path, memory_mb: int) -> Plan:
     (workdir / "main.cpp").write_text(gen_main(req["code"], req["cpp_sig"]))
-    # Flags must match the precompiled header built in the Dockerfile.
-    compile_cmd = ["g++", "-std=c++20", "-O2", "-w", "-I", "/opt/lc", "-o", "sol", "main.cpp", "/opt/lc/lc_io.o"]
+    compile_cmd = [
+        "clang++",
+        *CPP_FLAGS,
+        "-I",
+        "/opt/lc",
+        "-include-pch",
+        "/opt/lc/lc.hpp.pch",
+        "-o",
+        "sol",
+        "main.cpp",
+        "/opt/lc/lc_io.o",
+    ]
     return Plan(compile_cmd, ["./sol", CASES, RESULTS], True)
 
 

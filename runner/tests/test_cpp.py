@@ -177,7 +177,7 @@ def test_cpp_exception_is_runtime_error(run):
 
 
 def test_cpp_segfault_is_runtime_error(run):
-    code = "class Solution {\npublic:\n    int f(int x) { int* p = nullptr; return *p + x; }\n};"
+    code = "class Solution {\npublic:\n    int f(int x) { volatile int* p = nullptr; return *p + x; }\n};"
     r = run("cpp", code, "f", [{"name": "x", "type": "int"}], [[1]], cpp_sig=sig("f", "int", ("int", "x")))
     assert r["results"] == []
     assert r["exit_code"] == -11
@@ -209,3 +209,32 @@ def test_cpp_printf_is_captured_per_case(run):
     code = 'class Solution {\npublic:\n    int f(int x) { printf("p%d\\n", x); puts("q"); cout << "c" << x << "\\n"; return x; }\n};'
     r = run("cpp", code, "f", [{"name": "x", "type": "int"}], [[1], [2]], cpp_sig=sig("f", "int", ("int", "x")))
     assert [x["stdout"] for x in r["results"]] == ["p1\nq\nc1\n", "p2\nq\nc2\n"]
+
+
+def test_cpp_variable_length_array_in_lambda_compiles(run):
+    # A 2-D variable-length array captured by a lambda: accepted by Clang (LeetCode's compiler),
+    # rejected by GCC ("sorry, unimplemented: capture of variably-modified type").
+    code = """class Solution {
+public:
+    int f(int n) {
+        int grid[n][n];
+        memset(grid, 0, sizeof(grid));
+        auto fill = [&](int v) {
+            for (int i = 0; i < n; ++i) grid[i][i] = v;
+        };
+        fill(2);
+        int sum = 0;
+        for (int i = 0; i < n; ++i) sum += grid[i][i];
+        return sum;
+    }
+};"""
+    r = run("cpp", code, "f", [{"name": "n", "type": "int"}], [[5]], cpp_sig=sig("f", "int", ("int", "n")))
+    assert r["compile_error"] is None, r["compile_error"]
+    assert r["results"][0]["value"] == 10
+
+
+def test_cpp_uses_cpp23(run):
+    code = "class Solution {\npublic:\n    int f(int x) { return std::ranges::to<vector<int>>(views::iota(0, x)).size(); }\n};"
+    r = run("cpp", code, "f", [{"name": "x", "type": "int"}], [[4]], cpp_sig=sig("f", "int", ("int", "x")))
+    assert r["compile_error"] is None, r["compile_error"]
+    assert r["results"][0]["value"] == 4

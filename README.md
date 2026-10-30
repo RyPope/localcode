@@ -94,7 +94,7 @@ flowchart LR
     B["Browser<br/>localhost:4173"] --> A
     subgraph Docker["Docker Compose"]
         A["app<br/>FastAPI + React UI"]
-        R["runner<br/>Python 3.12 · JDK 21 · g++ 14 · Kotlin 2.0<br/>no network access"]
+        R["runner<br/>Python 3.12 · JDK 21 · Clang 19 · Kotlin 2.0<br/>no network access"]
         D[("localcode-data volume<br/>content.db · user.db")]
         A -- "code + test inputs" --> R
         R -- "raw outputs" --> A
@@ -157,7 +157,8 @@ docker compose cp app:/data/user.db ./localcode-user-backup.db
 - **Kotlin reference solutions are sparse upstream**, so the Solutions tab shows Java for most Kotlin problems. Kotlin submissions are judged normally.
 - **Problems with several valid answers** ("return any valid arrangement") are compared against a single expected answer, except where the statement says "in any order", which is compared ignoring order.
 - **Design, SQL, shell and concurrency problems** can be read but not run.
-- **Cold-start compile times** are about 1 s for Java and C++ and about 4 s for Kotlin.
+- **C++ is compiled with Clang 19 and `-std=c++23 -O2`**, as on LeetCode, but without AddressSanitizer, so some out-of-bounds bugs that LeetCode would report may go unnoticed.
+- **Cold-start compile times** are about 1 to 2 s for Java and C++ and about 4 s for Kotlin.
 
 ## Troubleshooting
 
