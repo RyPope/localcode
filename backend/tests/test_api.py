@@ -22,7 +22,9 @@ def test_unknown_problem_is_404(data_dir, runner):
 
 
 def test_run_rejects_bad_custom_input(data_dir, runner):
-    r = client(runner).post("/api/run", json={"slug": "pair-sum", "lang": "python", "code": "x", "custom": ["nums = [1"]})
+    r = client(runner).post(
+        "/api/run", json={"slug": "pair-sum", "lang": "python", "code": "x", "custom": ["nums = [1"]}
+    )
     assert r.status_code == 400
     assert "Custom case 1" in r.json()["detail"]
 

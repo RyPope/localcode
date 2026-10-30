@@ -2,8 +2,14 @@ from localcode.judging.verdicts import grade_run, grade_submission
 
 
 def res(values=(), **kw):
-    base = {"compile_error": None, "timed_out": False, "memory_kb": 10, "exit_code": 0, "stderr": "",
-            "results": [{"ok": True, "value": v, "stdout": "", "ms": 1.5} for v in values]}
+    base = {
+        "compile_error": None,
+        "timed_out": False,
+        "memory_kb": 10,
+        "exit_code": 0,
+        "stderr": "",
+        "results": [{"ok": True, "value": v, "stdout": "", "ms": 1.5} for v in values],
+    }
     return {**base, **kw}
 
 

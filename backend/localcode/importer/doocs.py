@@ -1,8 +1,9 @@
 """Parse doocs/leetcode problem folders (README_EN.md) into statements and reference solutions."""
+
 import re
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterator
 
 LANG_KEYS = {"Python3": "python", "Java": "java", "C++": "cpp", "Kotlin": "kotlin"}
 

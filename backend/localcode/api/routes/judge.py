@@ -1,4 +1,7 @@
 """Run and Submit."""
+
+from typing import Annotated
+
 from fastapi import APIRouter, Depends
 
 from localcode.api.deps import get_runner
@@ -10,10 +13,10 @@ router = APIRouter(prefix="/api", tags=["judge"])
 
 
 @router.post("/run")
-def run(body: RunRequest, runner: Runner = Depends(get_runner)) -> dict:
+def run(body: RunRequest, runner: Annotated[Runner, Depends(get_runner)]) -> dict:
     return judge.run(runner, body.slug, body.lang, body.code, body.custom)
 
 
 @router.post("/submit")
-def submit(body: SubmitRequest, runner: Runner = Depends(get_runner)) -> dict:
+def submit(body: SubmitRequest, runner: Annotated[Runner, Depends(get_runner)]) -> dict:
     return judge.submit(runner, body.slug, body.lang, body.code)

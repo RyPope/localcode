@@ -9,8 +9,13 @@ def test_java_two_sum(run):
         return new int[0];
     }
 }"""
-    r = run("java", code, "twoSum", [{"name": "nums", "type": "List[int]"}, {"name": "target", "type": "int"}],
-            [[[2, 7, 11, 15], 9], [[3, 3], 6]])
+    r = run(
+        "java",
+        code,
+        "twoSum",
+        [{"name": "nums", "type": "List[int]"}, {"name": "target", "type": "int"}],
+        [[[2, 7, 11, 15], 9], [[3, 3], 6]],
+    )
     assert r["compile_error"] is None, r
     assert [x["value"] for x in r["results"]] == [[0, 1], [0, 1]]
 
@@ -24,8 +29,13 @@ def test_java_list_of_lists(run):
         return out;
     }
 }"""
-    r = run("java", code, "pairs", [{"name": "a", "type": "List[int]"}, {"name": "tags", "type": "List[str]"}],
-            [[[1, 2, 3, 4], ["x", "y"]]])
+    r = run(
+        "java",
+        code,
+        "pairs",
+        [{"name": "a", "type": "List[int]"}, {"name": "tags", "type": "List[str]"}],
+        [[[1, 2, 3, 4], ["x", "y"]]],
+    )
     assert r["results"][0]["value"] == [[1, 2], [3, 4], [2]]
 
 
@@ -37,8 +47,13 @@ def test_java_char_grid(run):
     }
     public boolean other() { return false; }
 }"""
-    r = run("java", code, "first", [{"name": "grid", "type": "List[List[str]]"}, {"name": "words", "type": "List[List[str]]"}],
-            [[[["a", "b"], ["c", "d"]], [["hi"]]]])
+    r = run(
+        "java",
+        code,
+        "first",
+        [{"name": "grid", "type": "List[List[str]]"}, {"name": "words", "type": "List[List[str]]"}],
+        [[[["a", "b"], ["c", "d"]], [["hi"]]]],
+    )
     assert r["results"][0]["value"] == "z"
 
 
@@ -82,7 +97,7 @@ def test_java_runtime_error(run):
 
 
 def test_java_stdout_is_captured_per_case(run):
-    code = "class Solution { public int f(int x) { System.out.println(\"saw \" + x); return x * 2; } }"
+    code = 'class Solution { public int f(int x) { System.out.println("saw " + x); return x * 2; } }'
     r = run("java", code, "f", [{"name": "x", "type": "int"}], [[1], [2]])
     assert [x["stdout"] for x in r["results"]] == ["saw 1\n", "saw 2\n"]
     assert [x["value"] for x in r["results"]] == [2, 4]
@@ -96,7 +111,9 @@ def test_java_long_and_double(run):
 
 def test_java_boolean_and_string(run):
     code = "class Solution { public boolean same(String s, String t) { return s.equals(t); } }"
-    r = run("java", code, "same", [{"name": "s", "type": "str"}, {"name": "t", "type": "str"}], [["ab", "ab"], ["a", "b"]])
+    r = run(
+        "java", code, "same", [{"name": "s", "type": "str"}, {"name": "t", "type": "str"}], [["ab", "ab"], ["a", "b"]]
+    )
     assert [x["value"] for x in r["results"]] == [True, False]
 
 
@@ -130,8 +147,13 @@ def test_kotlin_tree_and_list(run):
         return 1 + maxOf(depth(root.left, xs), depth(root.right, xs))
     }
 }"""
-    r = run("kotlin", code, "depth", [{"name": "root", "type": "TreeNode"}, {"name": "xs", "type": "List[int]"}],
-            [[[3, 9, 20, None, None, 15, 7], []]])
+    r = run(
+        "kotlin",
+        code,
+        "depth",
+        [{"name": "root", "type": "TreeNode"}, {"name": "xs", "type": "List[int]"}],
+        [[[3, 9, 20, None, None, 15, 7], []]],
+    )
     assert r["results"][0]["value"] == 3
 
 

@@ -1,4 +1,5 @@
 """Serves the built single-page app, falling back to index.html for client-side routes."""
+
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 

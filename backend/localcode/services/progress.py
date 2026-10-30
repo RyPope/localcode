@@ -1,7 +1,8 @@
 """The user's own data: drafts, submissions, statistics and export."""
+
 import json
 from collections import Counter, defaultdict
-from datetime import date, datetime, timedelta, timezone
+from datetime import UTC, date, datetime, timedelta
 
 from localcode.db import content_session, user_session
 from localcode.services.errors import bad_request
@@ -13,7 +14,7 @@ STATS_COMPANIES = 8
 
 
 def now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+    return datetime.now(UTC).isoformat(timespec="seconds")
 
 
 def get_draft(slug: str, lang: str) -> str | None:
@@ -26,17 +27,32 @@ def save_draft(slug: str, lang: str, code: str) -> None:
     if lang not in LANGS:
         raise bad_request(f"Unknown language {lang!r}")
     with user_session() as u:
-        u.execute("insert into drafts values (?,?,?,?) on conflict(slug, lang) do update set "
-                  "code = excluded.code, updated_at = excluded.updated_at", (slug, lang, code, now_iso()))
+        u.execute(
+            "insert into drafts values (?,?,?,?) on conflict(slug, lang) do update set "
+            "code = excluded.code, updated_at = excluded.updated_at",
+            (slug, lang, code, now_iso()),
+        )
 
 
 def record_submission(slug: str, lang: str, code: str, grade: dict) -> int:
     with user_session() as u:
         cur = u.execute(
-            "insert into submissions (slug, lang, code, verdict, passed, total, runtime_ms, memory_kb, failing, created_at) "
+            "insert into submissions "
+            "(slug, lang, code, verdict, passed, total, runtime_ms, memory_kb, failing, created_at) "
             "values (?,?,?,?,?,?,?,?,?,?)",
-            (slug, lang, code, grade["verdict"], grade["passed"], grade["total"], grade["runtime_ms"],
-             grade["memory_kb"], json.dumps(grade["failing"]) if grade["failing"] else None, now_iso()))
+            (
+                slug,
+                lang,
+                code,
+                grade["verdict"],
+                grade["passed"],
+                grade["total"],
+                grade["runtime_ms"],
+                grade["memory_kb"],
+                json.dumps(grade["failing"]) if grade["failing"] else None,
+                now_iso(),
+            ),
+        )
         return int(cur.lastrowid)
 
 
@@ -55,18 +71,25 @@ def stats() -> dict:
     with content_session() as con:
         firsts = con.execute(
             "select s.slug, min(s.created_at) as at, p.difficulty, p.tags from u.submissions s "
-            "join problems p on p.slug = s.slug where s.verdict = 'Accepted' group by s.slug").fetchall()
+            "join problems p on p.slug = s.slug where s.verdict = 'Accepted' group by s.slug"
+        ).fetchall()
         difficulty_totals = dict(con.execute("select difficulty, count(*) from problems group by 1").fetchall())
-        topic_totals = Counter(dict(con.execute(
-            "select value, count(*) from problems, json_each(problems.tags) group by 1").fetchall()))
+        topic_totals = Counter(
+            dict(con.execute("select value, count(*) from problems, json_each(problems.tags) group by 1").fetchall())
+        )
         solved = [r["slug"] for r in firsts]
         by_company = []
         if solved:
             marks = ",".join("?" * len(solved))
-            by_company = [{"slug": s, "name": n, "solved": k, "total": t} for s, n, k, t in con.execute(
-                f"select c.slug, c.name, sum(cp.slug in ({marks})), count(*) from company_problems cp "
-                f"join companies c on c.slug = cp.company where cp.window = '6m' group by c.slug "
-                f"order by 3 desc, 4 desc limit {STATS_COMPANIES}", solved)]
+            by_company = [
+                {"slug": s, "name": n, "solved": k, "total": t}
+                for s, n, k, t in con.execute(
+                    f"select c.slug, c.name, sum(cp.slug in ({marks})), count(*) from company_problems cp "
+                    f"join companies c on c.slug = cp.company where cp.window = '6m' group by c.slug "
+                    f"order by 3 desc, 4 desc limit {STATS_COMPANIES}",
+                    solved,
+                )
+            ]
         since = con.execute("select min(created_at) from u.submissions").fetchone()[0]
 
     totals = {d.lower(): [0, difficulty_totals.get(d, 0)] for d in DIFFICULTIES}
@@ -83,14 +106,20 @@ def stats() -> dict:
         wk = (first_week + timedelta(weeks=i)).isoformat()
         series.append({"week": wk, **weeks.get(wk, {"easy": 0, "medium": 0, "hard": 0})})
     return {
-        "since": since, "totals": totals, "solved_by_week": series,
-        "by_topic": [{"name": n, "solved": topic_solved[n], "total": t} for n, t in topic_totals.most_common(STATS_TOPICS)],
+        "since": since,
+        "totals": totals,
+        "solved_by_week": series,
+        "by_topic": [
+            {"name": n, "solved": topic_solved[n], "total": t} for n, t in topic_totals.most_common(STATS_TOPICS)
+        ],
         "by_company": by_company,
     }
 
 
 def export() -> dict:
     with user_session() as u:
-        return {"exported_at": now_iso(),
-                "drafts": [dict(r) for r in u.execute("select * from drafts")],
-                "submissions": [dict(r) for r in u.execute("select * from submissions")]}
+        return {
+            "exported_at": now_iso(),
+            "drafts": [dict(r) for r in u.execute("select * from drafts")],
+            "submissions": [dict(r) for r in u.execute("select * from submissions")],
+        }

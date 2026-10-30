@@ -52,7 +52,9 @@ def test_parse_cases_skips_mismatched_names():
 def test_examples_from_description():
     p = rows()["pair-sum"]
     assert p.examples == [[[1, 4, 6], 10], [[5, 5], 10]]
-    assert parse_examples("Input: root = [1,null,2]\nOutput: x", [{"name": "root", "type": "TreeNode"}]) == [[[1, None, 2]]]
+    assert parse_examples("Input: root = [1,null,2]\nOutput: x", [{"name": "root", "type": "TreeNode"}]) == [
+        [[1, None, 2]]
+    ]
 
 
 def test_any_order_mode_detected():

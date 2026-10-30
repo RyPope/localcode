@@ -26,7 +26,14 @@ def test_python_tree_roundtrip(run):
             root.left, root.right = self.invert(root.right), self.invert(root.left)
         return root
 """
-    r = run("python", code, "invert", [{"name": "root", "type": "TreeNode"}], [[[4, 2, 7, 1, 3]], [[]], [[1, None, 2]]], ret="TreeNode")
+    r = run(
+        "python",
+        code,
+        "invert",
+        [{"name": "root", "type": "TreeNode"}],
+        [[[4, 2, 7, 1, 3]], [[]], [[1, None, 2]]],
+        ret="TreeNode",
+    )
     assert [x["value"] for x in r["results"]] == [[4, 7, 2, None, None, 3, 1], [], [1, 2]]
 
 

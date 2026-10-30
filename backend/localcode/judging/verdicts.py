@@ -1,4 +1,5 @@
 """Pure grading: turn a runner result plus expected values into Run/Submit verdicts. No I/O."""
+
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
@@ -63,12 +64,21 @@ def grade_run(arg_lists: list[list[Any]], expected: list[Any], res: RunnerResult
     if res["compile_error"]:
         return RunGrade(COMPILE_ERROR, res["compile_error"])
     grade = RunGrade(ACCEPTED)
-    for i, (args, exp) in enumerate(zip(arg_lists, expected)):
+    for i, (args, exp) in enumerate(zip(arg_lists, expected, strict=False)):
         r = res["results"][i] if i < len(res["results"]) else None
         if r and r.get("ok"):
             passed = exp is not None and judge(exp, r["value"], mode)
-            grade.cases.append(RunCase(args, exp, r["value"], r.get("stdout", ""), passed,
-                                       None if exp is not None else NO_REFERENCE, r.get("ms")))
+            grade.cases.append(
+                RunCase(
+                    args,
+                    exp,
+                    r["value"],
+                    r.get("stdout", ""),
+                    passed,
+                    None if exp is not None else NO_REFERENCE,
+                    r.get("ms"),
+                )
+            )
             kind = WRONG_ANSWER
         else:
             kind, err = case_failure(res, i)
@@ -108,9 +118,13 @@ def grade_submission(cases: list[Case], res: RunnerResult, mode: str) -> SubmitG
             grade.verdict, err = WRONG_ANSWER, None
         else:
             grade.verdict, err = case_failure(res, i)
-        grade.failing = {"args": case["args"], "expected": case["expected"],
-                         "actual": r["value"] if r and r.get("ok") else None,
-                         "stdout": r.get("stdout", "") if r else "", "error": err}
+        grade.failing = {
+            "args": case["args"],
+            "expected": case["expected"],
+            "actual": r["value"] if r and r.get("ok") else None,
+            "stdout": r.get("stdout", "") if r else "",
+            "error": err,
+        }
         return grade
     grade.runtime_ms = round(sum(r.get("ms") or 0 for r in res["results"]), 3)
     return grade

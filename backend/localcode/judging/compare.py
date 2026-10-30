@@ -1,4 +1,5 @@
 """Language-neutral judging of a solution's output against the expected value."""
+
 import json
 from typing import Any
 
@@ -17,7 +18,7 @@ def _eq(expected: Any, actual: Any) -> bool:
             return expected == actual
         return abs(expected - actual) <= FLOAT_TOL * max(1.0, abs(expected))
     if isinstance(expected, list) and isinstance(actual, list):
-        return len(expected) == len(actual) and all(_eq(e, a) for e, a in zip(expected, actual))
+        return len(expected) == len(actual) and all(_eq(e, a) for e, a in zip(expected, actual, strict=False))
     return expected == actual
 
 

@@ -30,9 +30,11 @@ def test_unknown_java_type_is_permissive():
 
 
 def test_filter_drops_overflowing_inputs_and_outputs():
-    cases = [{"args": [[1], 1], "expected": 1},
-             {"args": [[2**40], 1], "expected": 1},
-             {"args": [[1], 1], "expected": 2**40}]
+    cases = [
+        {"args": [[1], 1], "expected": 1},
+        {"args": [[2**40], 1], "expected": 1},
+        {"args": [[1], 1], "expected": 2**40},
+    ]
     assert filter_cases(cases, "int", INT_SIG, excluded=set()) == [cases[0]]
 
 

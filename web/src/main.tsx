@@ -14,7 +14,9 @@ import App from "./App";
 import { applyTheme, getTheme } from "./theme";
 
 applyTheme(getTheme());
-const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 30_000, refetchOnWindowFocus: false } } });
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { staleTime: 30_000, refetchOnWindowFocus: false } },
+});
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

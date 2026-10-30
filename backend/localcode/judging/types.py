@@ -1,4 +1,5 @@
 """Wire types shared by the app and the runner service."""
+
 from typing import Any, TypedDict
 
 

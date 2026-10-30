@@ -6,8 +6,14 @@ from localcode.services.errors import ServiceError
 
 
 def ok(values, ms=2.0):
-    return {"compile_error": None, "timed_out": False, "memory_kb": 2048, "exit_code": 0, "stderr": "",
-            "results": [{"ok": True, "value": v, "stdout": "", "ms": ms} for v in values]}
+    return {
+        "compile_error": None,
+        "timed_out": False,
+        "memory_kb": 2048,
+        "exit_code": 0,
+        "stderr": "",
+        "results": [{"ok": True, "value": v, "stdout": "", "ms": ms} for v in values],
+    }
 
 
 def test_submit_accepted_records_submission(data_dir, runner):
@@ -42,7 +48,10 @@ def test_timeout_maps_to_tle(data_dir, runner):
 def test_runtime_and_memory_errors(data_dir, runner):
     runner.user = {**ok([]), "results": [{"ok": False, "error": "ZeroDivisionError: x", "stdout": "", "ms": 0}]}
     assert judge.submit(runner, "pair-sum", "python", "c")["verdict"] == "Runtime Error"
-    runner.user = {**ok([]), "results": [{"ok": False, "error": "java.lang.OutOfMemoryError: heap", "stdout": "", "ms": 0}]}
+    runner.user = {
+        **ok([]),
+        "results": [{"ok": False, "error": "java.lang.OutOfMemoryError: heap", "stdout": "", "ms": 0}],
+    }
     assert judge.submit(runner, "pair-sum", "java", "c")["verdict"] == "Memory Limit Exceeded"
     runner.user = {**ok([]), "exit_code": -11}
     r = judge.submit(runner, "pair-sum", "cpp", "c")

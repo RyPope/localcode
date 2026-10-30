@@ -1,4 +1,5 @@
 """HTTP front for execute(): POST /execute, GET /health. One execution at a time."""
+
 import json
 import subprocess
 import threading
@@ -13,14 +14,20 @@ _versions: dict | None = None
 def versions() -> dict:
     global _versions
     if _versions is None:
+
         def first(cmd):
             try:
                 p = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
                 return (p.stdout or p.stderr).strip().splitlines()[0]
             except (OSError, subprocess.TimeoutExpired, IndexError):
                 return "unavailable"
-        _versions = {"python": first(["python3", "--version"]), "java": first(["java", "-version"]),
-                     "cpp": first(["g++", "--version"]), "kotlin": first(["kotlinc", "-version"])}
+
+        _versions = {
+            "python": first(["python3", "--version"]),
+            "java": first(["java", "-version"]),
+            "cpp": first(["g++", "--version"]),
+            "kotlin": first(["kotlinc", "-version"]),
+        }
     return _versions
 
 

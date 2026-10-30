@@ -1,11 +1,14 @@
 """Extract method signatures from Java/C++ reference code and render starter code (incl. Kotlin)."""
+
 import re
 
 _BLOCK_COMMENT = re.compile(r"/\*.*?\*/", re.S)
 _LINE_COMMENT = re.compile(r"//[^\n]*")
 _TYPE = r"(?:(?:unsigned|signed|long|short|const)\s+)*[\w:]+(?:\s*<[\w\s,<>:*&\[\]]*>)?(?:\s*\[\s*\])*\s*[*&]*"
 _JAVA_METHOD = re.compile(r"public\s+(?:static\s+)?(" + _TYPE + r")\s+(\w+)\s*\(([^)]*)\)\s*(?:throws [\w, ]+)?\{")
-_CPP_METHOD = re.compile(r"(?:^|\n)\s*(?:virtual\s+|static\s+|inline\s+)*(" + _TYPE + r")\s*\b(\w+)\s*\(([^)]*)\)\s*(?:const\s*)?\{")
+_CPP_METHOD = re.compile(
+    r"(?:^|\n)\s*(?:virtual\s+|static\s+|inline\s+)*(" + _TYPE + r")\s*\b(\w+)\s*\(([^)]*)\)\s*(?:const\s*)?\{"
+)
 
 
 def _strip_comments(src: str) -> str:
@@ -22,7 +25,7 @@ def _split_top(s: str) -> list[str]:
             cur = ""
         else:
             cur += ch
-    return [p.strip() for p in parts + [cur] if p.strip()]
+    return [p.strip() for p in [*parts, cur] if p.strip()]
 
 
 def _norm(t: str) -> str:
@@ -162,11 +165,31 @@ def cpp_starter(sig: dict) -> str:
     )
 
 
-_KT_PRIM = {"int": "Int", "long": "Long", "double": "Double", "float": "Float", "boolean": "Boolean", "char": "Char",
-            "String": "String", "Integer": "Int", "Long": "Long", "Double": "Double", "Boolean": "Boolean",
-            "Character": "Char", "void": "Unit", "ListNode": "ListNode?", "TreeNode": "TreeNode?"}
-_KT_PRIM_ARRAY = {"int": "IntArray", "long": "LongArray", "double": "DoubleArray", "boolean": "BooleanArray",
-                  "char": "CharArray", "float": "FloatArray"}
+_KT_PRIM = {
+    "int": "Int",
+    "long": "Long",
+    "double": "Double",
+    "float": "Float",
+    "boolean": "Boolean",
+    "char": "Char",
+    "String": "String",
+    "Integer": "Int",
+    "Long": "Long",
+    "Double": "Double",
+    "Boolean": "Boolean",
+    "Character": "Char",
+    "void": "Unit",
+    "ListNode": "ListNode?",
+    "TreeNode": "TreeNode?",
+}
+_KT_PRIM_ARRAY = {
+    "int": "IntArray",
+    "long": "LongArray",
+    "double": "DoubleArray",
+    "boolean": "BooleanArray",
+    "char": "CharArray",
+    "float": "FloatArray",
+}
 
 
 def kotlin_type(t: str) -> str:
@@ -186,7 +209,8 @@ def kotlin_type(t: str) -> str:
 
 def kotlin_starter(java_sig: dict) -> str:
     params = ", ".join(f"{p['name']}: {kotlin_type(p['type'])}" for p in java_sig["params"])
+    ret = kotlin_type(java_sig["ret"])
     return (
         _node_header(java_sig, _KT_LIST_NODE, _KT_TREE_NODE)
-        + f"class Solution {{\n    fun {java_sig['method']}({params}): {kotlin_type(java_sig['ret'])} {{\n        \n    }}\n}}\n"
+        + f"class Solution {{\n    fun {java_sig['method']}({params}): {ret} {{\n        \n    }}\n}}\n"
     )

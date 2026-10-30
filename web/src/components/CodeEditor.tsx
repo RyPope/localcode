@@ -6,17 +6,33 @@ import { useTheme } from "../useTheme";
 
 const MONACO_LANG: Record<Lang, string> = { python: "python", java: "java", cpp: "cpp", kotlin: "kotlin" };
 
-export default function CodeEditor({ lang, value, onChange, fontSize, onRun, onSubmit }: {
-  lang: Lang; value: string; onChange: (v: string) => void; fontSize: number; onRun: () => void; onSubmit: () => void;
+export default function CodeEditor({
+  lang,
+  value,
+  onChange,
+  fontSize,
+  onRun,
+  onSubmit,
+}: {
+  lang: Lang;
+  value: string;
+  onChange: (v: string) => void;
+  fontSize: number;
+  onRun: () => void;
+  onSubmit: () => void;
 }) {
   const theme = useTheme();
   // Monaco registers commands once; keep the latest callbacks in refs.
   const actions = useRef({ onRun, onSubmit });
-  useEffect(() => { actions.current = { onRun, onSubmit }; }, [onRun, onSubmit]);
+  useEffect(() => {
+    actions.current = { onRun, onSubmit };
+  }, [onRun, onSubmit]);
 
   const onMount: OnMount = (editor) => {
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => actions.current.onRun());
-    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Enter, () => actions.current.onSubmit());
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Enter, () =>
+      actions.current.onSubmit(),
+    );
     editor.focus();
   };
 
@@ -28,9 +44,15 @@ export default function CodeEditor({ lang, value, onChange, fontSize, onRun, onS
       onChange={(v) => onChange(v ?? "")}
       onMount={onMount}
       options={{
-        fontSize, fontFamily: "Geist Mono, ui-monospace, monospace", minimap: { enabled: false },
-        tabSize: lang === "python" ? 4 : 4, scrollBeyondLastLine: false, automaticLayout: true,
-        padding: { top: 10 }, renderLineHighlight: "line", smoothScrolling: true,
+        fontSize,
+        fontFamily: "Geist Mono, ui-monospace, monospace",
+        minimap: { enabled: false },
+        tabSize: 4,
+        scrollBeyondLastLine: false,
+        automaticLayout: true,
+        padding: { top: 10 },
+        renderLineHighlight: "line",
+        smoothScrolling: true,
       }}
     />
   );

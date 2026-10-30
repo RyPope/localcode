@@ -9,7 +9,9 @@ def make_repo(path: Path) -> str:
     subprocess.run(["git", "init", "-q", "-b", "main", str(path)], check=True)
     (path / "a.txt").write_text("hello")
     subprocess.run(["git", "-C", str(path), "add", "."], check=True)
-    subprocess.run(["git", "-C", str(path), "-c", "user.email=t@t", "-c", "user.name=t", "commit", "-qm", "init"], check=True)
+    subprocess.run(
+        ["git", "-C", str(path), "-c", "user.email=t@t", "-c", "user.name=t", "commit", "-qm", "init"], check=True
+    )
     return path.as_uri()
 
 
@@ -24,7 +26,10 @@ def test_fetch_git_updates_existing_checkout(tmp_path):
     good = make_repo(tmp_path / "mirror")
     fetch_git([good], tmp_path / "out", log=lambda m: None)
     (tmp_path / "mirror" / "a.txt").write_text("v2")
-    subprocess.run(["git", "-C", str(tmp_path / "mirror"), "-c", "user.email=t@t", "-c", "user.name=t", "commit", "-qam", "v2"], check=True)
+    subprocess.run(
+        ["git", "-C", str(tmp_path / "mirror"), "-c", "user.email=t@t", "-c", "user.name=t", "commit", "-qam", "v2"],
+        check=True,
+    )
     fetch_git([good], tmp_path / "out", log=lambda m: None)
     assert (tmp_path / "out" / "a.txt").read_text() == "v2"
 

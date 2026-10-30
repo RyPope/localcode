@@ -1,4 +1,5 @@
 """Python harness: py_driver.py <solution.py> <cases.json> <results.jsonl>"""
+
 import io
 import json
 import sys
@@ -113,9 +114,15 @@ def user_traceback(exc: BaseException) -> str:
 
 
 def main(sol_path, cases_path, out_path):
-    spec = json.load(open(cases_path))
-    out = open(out_path, "w")
+    with open(cases_path) as f:
+        spec = json.load(f)
+    with open(sol_path) as f:
+        source = f.read()
+    with open(out_path, "w") as out:
+        _run_cases(spec, source, out)
 
+
+def _run_cases(spec, source, out):
     def emit(obj):
         out.write(json.dumps(obj) + "\n")
         out.flush()
@@ -123,14 +130,19 @@ def main(sol_path, cases_path, out_path):
     ns = {"__name__": "solution"}
     try:
         exec(compile(PRELUDE, "prelude", "exec"), ns)
-        exec(compile(open(sol_path).read(), "solution.py", "exec"), ns)
+        exec(compile(source, "solution.py", "exec"), ns)
         getattr(ns["Solution"], spec["method"])
     except SyntaxError as e:
         emit({"compile_error": f"SyntaxError: {e.msg} (line {e.lineno})"})
         return
     except Exception as e:
-        emit({"compile_error": f"{type(e).__name__}: {e}" if not isinstance(e, (KeyError, AttributeError))
-              else f"class Solution with method {spec['method']} not found"})
+        emit(
+            {
+                "compile_error": f"{type(e).__name__}: {e}"
+                if not isinstance(e, (KeyError, AttributeError))
+                else f"class Solution with method {spec['method']} not found"
+            }
+        )
         return
 
     types = [p["type"] for p in spec["params"]]
@@ -139,7 +151,7 @@ def main(sol_path, cases_path, out_path):
         buf = io.StringIO()
         sys.stdout = buf
         try:
-            conv = [convert_in(ns, a, t) for a, t in zip(args, types)]
+            conv = [convert_in(ns, a, t) for a, t in zip(args, types, strict=False)]
             method = getattr(ns["Solution"](), spec["method"])
             t0 = time.perf_counter()
             result = method(*conv)
@@ -147,7 +159,7 @@ def main(sol_path, cases_path, out_path):
             if result is None and spec.get("ret") in ("ListNode", "TreeNode"):
                 result = []
             line = {"ok": True, "value": convert_out(ns, result), "ms": round(ms, 3)}
-        except BaseException as e:  # noqa: BLE001 - report every failure as the case's error
+        except BaseException as e:
             line = {"ok": False, "error": user_traceback(e), "ms": 0}
         finally:
             sys.stdout = real_stdout

@@ -40,7 +40,12 @@ def test_build_from_fixtures(tmp_path):
     assert con.execute("select count(*) from solutions where slug='pair-sum'").fetchone()[0] == 2
     assert len(json.loads(con.execute("select cases from tests where slug='pair-sum'").fetchone()[0])) == 4
     assert con.execute("select count(*) from companies").fetchone()[0] == 2
-    assert con.execute("select frequency from company_problems where company='acme' and slug='pair-sum' and window='30d'").fetchone()[0] == 100.0
+    assert (
+        con.execute(
+            "select frequency from company_problems where company='acme' and slug='pair-sum' and window='30d'"
+        ).fetchone()[0]
+        == 100.0
+    )
     assert "problems" in steps and "companies" in steps
 
 
@@ -70,7 +75,9 @@ def test_build_filters_invalid_cases_and_applies_exclusions(tmp_path):
 
     src = make_src(tmp_path)
     rows = [json.loads(line) for line in (src / "dataset" / "LeetCodeDataset-train.jsonl").read_text().splitlines()]
-    rows[0]["test"] += "    assert candidate(nums = [1, 2],goal = 4294967296) == [0, 1]\n    assert candidate(nums = [1],goal = 7) == None\n"
+    rows[0]["test"] += (
+        "    assert candidate(nums = [1, 2],goal = 4294967296) == [0, 1]\n    assert candidate(nums = [1],goal = 7) == None\n"
+    )
     (src / "dataset" / "LeetCodeDataset-train.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows))
     out = tmp_path / "content.db"
     build_content_db(src, out, progress=lambda *a: None, excluded={"pair-sum": {case_key([[0, 1], 1])}})

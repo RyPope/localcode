@@ -1,4 +1,5 @@
 """Company routes."""
+
 from fastapi import APIRouter
 
 from localcode.services import companies

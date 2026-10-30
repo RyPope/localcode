@@ -1,9 +1,10 @@
 """Download upstream sources, trying each mirror in order."""
+
 import shutil
 import subprocess
 import urllib.request
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable
 
 from localcode import config
 

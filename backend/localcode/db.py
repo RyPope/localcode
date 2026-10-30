@@ -3,6 +3,7 @@
 content.db is rebuilt from upstream sources on every import and swapped in atomically.
 user.db holds drafts and submissions and is never touched by an import.
 """
+
 import sqlite3
 from collections.abc import Iterator
 from contextlib import contextmanager

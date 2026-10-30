@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
+import { ICONS } from "../lib/icons";
 import { NavLink, useNavigate } from "react-router-dom";
 import { api } from "../api";
 import { applyTheme, getTheme } from "../theme";
-import { Icon, ICONS } from "./ui";
+import { Icon } from "./ui";
 
 export default function Header() {
   const nav = useNavigate();
@@ -38,28 +39,52 @@ export default function Header() {
   return (
     <header className="hdr">
       <NavLink to="/" className="logo">
-        <span className="logo-mark"><Icon d={ICONS.logo} stroke={2.6} /></span>
+        <span className="logo-mark">
+          <Icon d={ICONS.logo} stroke={2.6} />
+        </span>
         localcode
       </NavLink>
       <nav aria-label="Primary" style={{ display: "flex", gap: 2 }}>
-        <NavLink className="navlink" to="/" end>Problems</NavLink>
-        <NavLink className="navlink" to="/companies">Companies</NavLink>
-        <NavLink className="navlink" to="/progress">Progress</NavLink>
+        <NavLink className="navlink" to="/" end>
+          Problems
+        </NavLink>
+        <NavLink className="navlink" to="/companies">
+          Companies
+        </NavLink>
+        <NavLink className="navlink" to="/progress">
+          Progress
+        </NavLink>
       </nav>
       <div style={{ flex: 1 }} />
       <form onSubmit={jump} style={{ position: "relative", width: 280 }}>
-        <label className="sr" htmlFor="jump">Jump to problem</label>
-        <span style={{ position: "absolute", left: 10, top: 8, color: "var(--fg3)" }}><Icon d={ICONS.search} /></span>
-        <input id="jump" ref={input} className="inp icon" placeholder="Jump to problem…" value={q}
-          onChange={(e) => setQ(e.target.value)} autoComplete="off" />
-        <span className="kbd" style={{ position: "absolute", right: 8, top: 7 }}>⌘K</span>
+        <label className="sr" htmlFor="jump">
+          Jump to problem
+        </label>
+        <span style={{ position: "absolute", left: 10, top: 8, color: "var(--fg3)" }}>
+          <Icon d={ICONS.search} />
+        </span>
+        <input
+          id="jump"
+          ref={input}
+          className="inp icon"
+          placeholder="Jump to problem…"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          autoComplete="off"
+        />
+        <span className="kbd" style={{ position: "absolute", right: 8, top: 7 }}>
+          ⌘K
+        </span>
       </form>
       <span className="mono muted" style={{ fontSize: 11.5, display: "flex", alignItems: "center", gap: 6 }}>
         <span className="dot" style={{ background: "var(--easy)", width: 6, height: 6 }} />
         {window.location.host}
       </span>
-      <button className="btn ghost ibtn" aria-label="Toggle light or dark theme"
-        onClick={() => applyTheme(getTheme() === "dark" ? "light" : "dark")}>
+      <button
+        className="btn ghost ibtn"
+        aria-label="Toggle light or dark theme"
+        onClick={() => applyTheme(getTheme() === "dark" ? "light" : "dark")}
+      >
         <Icon d={ICONS.sun} size={15} />
       </button>
     </header>

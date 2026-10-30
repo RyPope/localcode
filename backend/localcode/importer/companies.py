@@ -1,8 +1,9 @@
 """Company question lists (liquidslr/leetcode-company-wise-problems)."""
+
 import csv
 import re
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Iterator
 
 WINDOWS = {"1": "30d", "2": "3m", "3": "6m", "4": "older", "5": "all"}
 _SLUG_RE = re.compile(r"leetcode\.com/problems/([\w-]+)")

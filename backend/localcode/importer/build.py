@@ -1,9 +1,11 @@
 """Merge the three sources into a fresh content.db (written to a temp file, then swapped in)."""
+
 import html
 import json
-from datetime import datetime, timezone
+from collections.abc import Callable
+from contextlib import suppress
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Callable
 
 from localcode import config, db
 from localcode.importer.case_filter import filter_cases
@@ -40,8 +42,7 @@ def _sig(parse, code: str | None, method: str | None, nparams: int | None) -> di
     return sig
 
 
-def _problem_rows(ds: DatasetProblem | None, dc: DoocsProblem | None, acceptance: float | None,
-                  excluded: set[str]):
+def _problem_rows(ds: DatasetProblem | None, dc: DoocsProblem | None, acceptance: float | None, excluded: set[str]):
     slug = (ds or dc).slug
     method = ds.method if ds else None
     nparams = len(ds.params) if ds else None
@@ -53,10 +54,8 @@ def _problem_rows(ds: DatasetProblem | None, dc: DoocsProblem | None, acceptance
         starters.append((slug, "python", ds.starter_python, None))
     if java:
         starters.append((slug, "java", java_starter(java), None))
-        try:
+        with suppress(ValueError):  # a Java type with no Kotlin mapping: no Kotlin for this problem
             starters.append((slug, "kotlin", kotlin_starter(java), None))
-        except ValueError:
-            pass
     if cpp:
         starters.append((slug, "cpp", cpp_starter(cpp), json.dumps(cpp)))
 
@@ -64,8 +63,10 @@ def _problem_rows(ds: DatasetProblem | None, dc: DoocsProblem | None, acceptance
     has_tests = bool(ds and ds.has_tests and len(cases) >= MIN_CASES)
     langs = [lang for lang in ("python", "java", "cpp", "kotlin") if has_tests and any(s[1] == lang for s in starters)]
     examples = (ds.examples or [c["args"] for c in cases[:MIN_CASES]]) if ds else []
-    description = dc.description_html if dc and dc.description_html else (
-        f'<pre class="plain">{html.escape(ds.description)}</pre>' if ds else ""
+    description = (
+        dc.description_html
+        if dc and dc.description_html
+        else (f'<pre class="plain">{html.escape(ds.description)}</pre>' if ds else "")
     )
     problem = (
         slug,
@@ -85,14 +86,20 @@ def _problem_rows(ds: DatasetProblem | None, dc: DoocsProblem | None, acceptance
         json.dumps(langs),
     )
     solutions = [
-        (slug, i, s["title"], s["explanation_md"], json.dumps(s["code"])) for i, s in enumerate(dc.solutions if dc else [])
+        (slug, i, s["title"], s["explanation_md"], json.dumps(s["code"]))
+        for i, s in enumerate(dc.solutions if dc else [])
     ]
     tests = (slug, json.dumps(cases)) if has_tests else None
     return problem, starters, solutions, tests
 
 
-def build_content_db(src: Path, out: Path, progress: Progress, sources_used: dict | None = None,
-                     excluded: dict[str, set[str]] | None = None) -> dict:
+def build_content_db(
+    src: Path,
+    out: Path,
+    progress: Progress,
+    sources_used: dict | None = None,
+    excluded: dict[str, set[str]] | None = None,
+) -> dict:
     excluded = load_excluded() if excluded is None else excluded
     progress("problems", 0, 0)
     dataset: dict[str, DatasetProblem] = {}
@@ -121,7 +128,8 @@ def build_content_db(src: Path, out: Path, progress: Progress, sources_used: dic
     slugs = sorted(set(dataset) | set(doocs))
     for i, slug in enumerate(slugs):
         problem, starters, solutions, tests = _problem_rows(
-            dataset.get(slug), doocs.get(slug), acceptance.get(slug), excluded.get(slug, set()))
+            dataset.get(slug), doocs.get(slug), acceptance.get(slug), excluded.get(slug, set())
+        )
         con.execute("insert into problems values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", problem)
         con.executemany("insert into starters values (?,?,?,?)", starters)
         con.executemany("insert into solutions values (?,?,?,?,?)", solutions)
@@ -147,7 +155,7 @@ def build_content_db(src: Path, out: Path, progress: Progress, sources_used: dic
         "companies": len(names),
     }
     meta = {
-        "imported_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "imported_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "stats": json.dumps(stats),
         "sources": json.dumps(sources_used or {}),
     }

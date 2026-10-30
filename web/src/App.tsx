@@ -13,7 +13,11 @@ import Setup from "./pages/Setup";
 const Workspace = lazy(() => import("./pages/Workspace"));
 
 export default function App() {
-  const status = useQuery({ queryKey: ["status"], queryFn: api.status, refetchInterval: (q) => (q.state.data?.imported ? false : 1500) });
+  const status = useQuery({
+    queryKey: ["status"],
+    queryFn: api.status,
+    refetchInterval: (q) => (q.state.data?.imported ? false : 1500),
+  });
   if (status.isLoading) return null;
   if (!status.data?.imported) return <Setup />;
   return (
@@ -21,7 +25,14 @@ export default function App() {
       <Header />
       <Routes>
         <Route path="/" element={<ProblemList />} />
-        <Route path="/problems/:slug" element={<Suspense fallback={null}><Workspace /></Suspense>} />
+        <Route
+          path="/problems/:slug"
+          element={
+            <Suspense fallback={null}>
+              <Workspace />
+            </Suspense>
+          }
+        />
         <Route path="/companies" element={<CompanyIndex />} />
         <Route path="/companies/:slug" element={<CompanyPage />} />
         <Route path="/progress" element={<Progress />} />

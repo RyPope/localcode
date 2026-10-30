@@ -1,4 +1,5 @@
 """Run and Submit: build runner requests, compute expected values, grade, and record submissions."""
+
 import json
 import sqlite3
 from collections.abc import Callable
@@ -30,9 +31,12 @@ class ExpectedCache:
         slug = problem["slug"]
         missing = [a for a in arg_lists if self._key(slug, a) not in self._values]
         if missing:
-            res = runner(_request(problem, "python", problem["ref_python"], missing,
-                                  config.LIMITS["run_per_case_ms"] * len(missing)))
-            for args, r in zip(missing, res["results"]):
+            res = runner(
+                _request(
+                    problem, "python", problem["ref_python"], missing, config.LIMITS["run_per_case_ms"] * len(missing)
+                )
+            )
+            for args, r in zip(missing, res["results"], strict=False):
                 if r.get("ok"):
                     self._values[self._key(slug, args)] = r["value"]
         return [self._values.get(self._key(slug, a)) for a in arg_lists]
@@ -44,16 +48,27 @@ class ExpectedCache:
 expected_cache = ExpectedCache()
 
 
-def _request(p: sqlite3.Row, lang: str, code: str, cases: list[list[Any]], timeout_ms: int,
-             cpp_sig: dict | None = None) -> RunnerRequest:
-    return {"lang": lang, "code": code, "method": p["method"], "params": json.loads(p["params"]), "ret": p["ret"],
-            "cases": cases, "timeout_ms": timeout_ms, "cpp_sig": cpp_sig}
+def _request(
+    p: sqlite3.Row, lang: str, code: str, cases: list[list[Any]], timeout_ms: int, cpp_sig: dict | None = None
+) -> RunnerRequest:
+    return {
+        "lang": lang,
+        "code": code,
+        "method": p["method"],
+        "params": json.loads(p["params"]),
+        "ret": p["ret"],
+        "cases": cases,
+        "timeout_ms": timeout_ms,
+        "cpp_sig": cpp_sig,
+    }
 
 
 def _cpp_sig(con: sqlite3.Connection, slug: str, lang: str) -> dict | None:
     if lang != "cpp":
         return None
-    return json.loads(con.execute("select cpp_sig from starters where slug = ? and lang = 'cpp'", (slug,)).fetchone()[0])
+    return json.loads(
+        con.execute("select cpp_sig from starters where slug = ? and lang = 'cpp'", (slug,)).fetchone()[0]
+    )
 
 
 def _check_runnable(p: sqlite3.Row, lang: str) -> None:

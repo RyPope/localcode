@@ -9,6 +9,7 @@ Run inside the app container (it needs the runner and an imported content.db):
 
     docker compose exec app python -m localcode.tools.validate_cases /data/excluded_cases.json
 """
+
 import argparse
 import json
 import sys
@@ -41,17 +42,25 @@ def _outcomes(problem, lang: str, code: str, cases: list[dict], cpp_sig: dict | 
     pending = list(range(len(cases)))
     while pending:
         chunk, pending = pending, []
-        res = runner_client.execute({
-            "lang": lang, "code": code, "method": problem["method"], "params": json.loads(problem["params"]),
-            "ret": problem["ret"], "cases": [cases[i]["args"] for i in chunk], "timeout_ms": TIMEOUT_MS,
-            "cpp_sig": cpp_sig})
+        res = runner_client.execute(
+            {
+                "lang": lang,
+                "code": code,
+                "method": problem["method"],
+                "params": json.loads(problem["params"]),
+                "ret": problem["ret"],
+                "cases": [cases[i]["args"] for i in chunk],
+                "timeout_ms": TIMEOUT_MS,
+                "cpp_sig": cpp_sig,
+            }
+        )
         if res["compile_error"]:
             return [False] * len(cases)
-        for i, r in zip(chunk, res["results"]):
+        for i, r in zip(chunk, res["results"], strict=False):
             ok[i] = bool(r.get("ok")) and judge(cases[i]["expected"], r["value"], problem["compare_mode"])
         done = len(res["results"])
         if done < len(chunk):  # chunk[done] hung or crashed the process; retry what followed it
-            pending = chunk[done + 1:]
+            pending = chunk[done + 1 :]
     return ok
 
 
@@ -69,8 +78,11 @@ def _load(slug: str) -> tuple[dict, list[dict], dict[str, str], dict | None]:
 
 def _validate_one(slug: str) -> tuple[list[str], dict[str, str]]:
     p, cases, codes, cpp_sig = _load(slug)
-    outcomes = {lang: _outcomes(p, lang, codes[lang], cases, cpp_sig if lang == "cpp" else None)
-                for lang in REFERENCE_LANGS if lang in codes and lang in json.loads(p["langs"])}
+    outcomes = {
+        lang: _outcomes(p, lang, codes[lang], cases, cpp_sig if lang == "cpp" else None)
+        for lang in REFERENCE_LANGS
+        if lang in codes and lang in json.loads(p["langs"])
+    }
     bad = cases_to_exclude(outcomes)
     return sorted(case_key(cases[i]["args"]) for i in bad), {k: f"{sum(o)}/{len(o)}" for k, o in outcomes.items()}
 
@@ -106,8 +118,11 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
     t0 = time.time()
     result = validate(args.out, args.only, args.jobs)
-    print(f"done: {sum(map(len, result.values()))} cases excluded across {len(result)} problems "
-          f"in {time.time() - t0:.0f}s", flush=True)
+    print(
+        f"done: {sum(map(len, result.values()))} cases excluded across {len(result)} problems "
+        f"in {time.time() - t0:.0f}s",
+        flush=True,
+    )
     return 0
 
 

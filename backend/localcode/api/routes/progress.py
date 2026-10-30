@@ -1,4 +1,5 @@
 """Drafts, submissions, stats and export."""
+
 from fastapi import APIRouter, Response
 from fastapi.responses import JSONResponse
 
@@ -31,4 +32,6 @@ def stats() -> dict:
 
 @router.get("/export")
 def export() -> JSONResponse:
-    return JSONResponse(progress.export(), headers={"Content-Disposition": 'attachment; filename="localcode-progress.json"'})
+    return JSONResponse(
+        progress.export(), headers={"Content-Disposition": 'attachment; filename="localcode-progress.json"'}
+    )

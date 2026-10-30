@@ -1,4 +1,5 @@
 """Generate main.cpp: user code plus a typed driver for the problem's method signature."""
+
 import re
 
 
@@ -9,11 +10,12 @@ def _local_type(t: str) -> str:
 
 def gen_main(user_code: str, sig: dict) -> str:
     decls = "\n".join(
-        f"            auto a{i} = lc::conv<{_local_type(p['type'])}>::from(c[{i}]);" for i, p in enumerate(sig["params"])
+        f"            auto a{i} = lc::conv<{_local_type(p['type'])}>::from(c[{i}]);"
+        for i, p in enumerate(sig["params"])
     )
     call_args = ", ".join(f"a{i}" for i in range(len(sig["params"])))
     ret = _local_type(sig["ret"])
-    return f'''#include <lc.hpp>
+    return f"""#include <lc.hpp>
 #line 1 "solution.cpp"
 {user_code}
 #line 1 "driver"
@@ -50,4 +52,4 @@ int main(int argc, char** argv) {{
         out.flush();
     }}
 }}
-'''
+"""

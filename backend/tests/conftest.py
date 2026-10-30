@@ -12,6 +12,7 @@ FIX = Path(__file__).parent / "fixtures"
 @pytest.fixture(autouse=True)
 def _fresh_expected_cache():
     from localcode.services.judge import expected_cache
+
     expected_cache.clear()
 
 
@@ -38,10 +39,19 @@ class FakeRunner:
 
     def __call__(self, req):
         import json
+
         self.calls.append(req)
         if req["code"].startswith("from typing import *"):  # the fixture rows' reference header
-            return {"compile_error": None, "timed_out": False, "memory_kb": 100, "exit_code": 0, "stderr": "",
-                    "results": [{"ok": True, "value": self.ref_values[json.dumps(a)], "stdout": "", "ms": 1} for a in req["cases"]]}
+            return {
+                "compile_error": None,
+                "timed_out": False,
+                "memory_kb": 100,
+                "exit_code": 0,
+                "stderr": "",
+                "results": [
+                    {"ok": True, "value": self.ref_values[json.dumps(a)], "stdout": "", "ms": 1} for a in req["cases"]
+                ],
+            }
         return self.user
 
 
