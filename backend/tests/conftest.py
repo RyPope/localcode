@@ -30,12 +30,12 @@ def data_dir(tmp_path, monkeypatch):
 
 
 class FakeRunner:
-    """Answers for the reference (python + ref code) from `ref`, for user code from `user`."""
+    """Answers reference-solution runs from `ref_values` (keyed by JSON args) and user runs with `user`."""
 
     def __init__(self):
-        self.calls = []
-        self.user = None  # dict returned for non-reference calls
-        self.ref_values = {}  # json(args) -> value
+        self.calls: list[dict] = []
+        self.user: dict | None = None
+        self.ref_values: dict[str, object] = {}
 
     def __call__(self, req):
         import json

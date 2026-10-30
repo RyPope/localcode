@@ -1,4 +1,4 @@
-/* Design tokens and primitives from the localcode Claude Design canvas. */
+/* Design tokens (dark by default, `.light` overrides) and shared UI primitives. */
 :root {
   --bg: #0c0e11;
   --panel: #121519;

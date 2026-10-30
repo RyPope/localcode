@@ -96,7 +96,7 @@ def connect_user(path: Path | None = None) -> sqlite3.Connection:
 @contextmanager
 def _session(con: sqlite3.Connection) -> Iterator[sqlite3.Connection]:
     try:
-        with con:  # commit on success, roll back on error
+        with con:
             yield con
     finally:
         con.close()

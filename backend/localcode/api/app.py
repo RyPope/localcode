@@ -18,7 +18,7 @@ from localcode.services.errors import ServiceError
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     db.migrate_user_db()  # fail fast at startup rather than on the first request
     if not db.CONTENT_DB.exists():
-        manager.start()  # first launch: import content in the background
+        manager.start()
     yield
 
 
