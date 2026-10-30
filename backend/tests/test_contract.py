@@ -27,8 +27,14 @@ GETS = [
 @pytest.fixture
 def client(data_dir, runner, monkeypatch):
     monkeypatch.setattr(manager, "start", lambda: True)
-    runner.user = {"compile_error": None, "timed_out": False, "memory_kb": 1, "exit_code": 0, "stderr": "",
-                   "results": [{"ok": True, "value": v, "stdout": "", "ms": 1} for v in ([1, 2], [0, 1], [0, 2], [0, 1])]}
+    runner.user = {
+        "compile_error": None,
+        "timed_out": False,
+        "memory_kb": 1,
+        "exit_code": 0,
+        "stderr": "",
+        "results": [{"ok": True, "value": v, "stdout": "", "ms": 1} for v in ([1, 2], [0, 1], [0, 2], [0, 1])],
+    }
     runner.ref_values = {"[[1, 4, 6], 10]": [1, 2], "[[5, 5], 10]": [0, 1]}
     app = create_app()
     app.dependency_overrides[get_runner] = lambda: runner

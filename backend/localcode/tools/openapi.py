@@ -1,6 +1,6 @@
 """Write the API's OpenAPI document (the source for the web client's generated types).
 
-    python -m localcode.tools.openapi web/openapi.json
+python -m localcode.tools.openapi web/openapi.json
 """
 
 import json

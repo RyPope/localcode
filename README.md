@@ -18,7 +18,7 @@ docker compose up -d --build
 
 Open **http://localhost:4173**. On first launch localcode downloads and indexes the open datasets, which is about 200 MB and takes a few minutes. Your progress is stored in the `localcode-data` Docker volume.
 
-To stop it, run `docker compose down`. Your data is kept. To update the problem data later, use **Progress → Check for updates**.
+To stop it, run `docker compose down`. Your data is kept. To update the problem data later, use **Progress → Check for updates** or `make update`.
 
 ## Features
 
@@ -81,6 +81,8 @@ make up           # build and run the stack
 make dev-web      # Vite dev server on :5173 against the running API
 make test         # backend, runner (in Docker) and web checks
 make lint         # ruff, ESLint, Prettier
+make api-types    # regenerate the web client's types after changing an API response
+make smoke        # end-to-end check against the running stack
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the project layout and conventions.

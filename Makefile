@@ -51,7 +51,10 @@ api-types: ## Regenerate web/openapi.json and the web client's TypeScript types 
 	npm --prefix web run api-types
 
 smoke: ## End-to-end smoke test against the running stack
-	python3 scripts/smoke.py
+	$(PY)/python -m localcode.tools.smoke
+
+update: ## Re-download sources and rebuild problem data (your progress is kept)
+	docker compose exec app python -m localcode.importer
 
 validate-cases: ## Maintainers: regenerate the excluded test-case list (slow)
 	docker compose up -d --scale runner=3
@@ -59,4 +62,4 @@ validate-cases: ## Maintainers: regenerate the excluded test-case list (slow)
 		--runners http://localcode-runner-1:8080 http://localcode-runner-2:8080 http://localcode-runner-3:8080
 	docker compose cp app:/data/excluded_cases.json backend/localcode/data/excluded_cases.json
 
-.PHONY: help up down logs setup test test-backend test-runner test-web lint format dev-web api-types smoke validate-cases
+.PHONY: help up down logs setup test test-backend test-runner test-web lint format dev-web api-types smoke update validate-cases

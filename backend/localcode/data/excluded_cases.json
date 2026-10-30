@@ -1,1 +1,1778 @@
-{}
+{
+ "3sum-with-multiplicity": [
+  "90eee1e5a5007d5b",
+  "935d03fea778aaf7"
+ ],
+ "advantage-shuffle": [
+  "78a955c43eb2f05b"
+ ],
+ "alphabet-board-path": [
+  "3cc43fff2c266151"
+ ],
+ "alt-and-tab-simulation": [
+  "f751436941b007d6"
+ ],
+ "apply-discount-to-prices": [
+  "aeb8fb56533e74b7"
+ ],
+ "arithmetic-subarrays": [
+  "c4be070e9d944f47"
+ ],
+ "average-salary-excluding-the-minimum-and-maximum-salary": [
+  "426a7dc83b5aff54",
+  "66b83abf25bc3f40"
+ ],
+ "basic-calculator-ii": [
+  "14cbf4720c9b07ab",
+  "2410377ec0642512",
+  "3684b89944935610",
+  "5a9aa5e50870d97c",
+  "d0805c29d48b0496",
+  "ea11dfededdd315a"
+ ],
+ "brace-expansion-ii": [
+  "549add7b664f8da7",
+  "fc2c05a79c0da646"
+ ],
+ "car-fleet-ii": [
+  "ca25b90f45d516b8"
+ ],
+ "car-pooling": [
+  "c6f32eca46b8fea5"
+ ],
+ "cells-in-a-range-on-an-excel-sheet": [
+  "00f3d5da282f5973",
+  "049fb0fba71e5649",
+  "07b50fb8acbea7c3",
+  "0a5bfb02a31be7d9",
+  "0d2af3cd0aaf2f55",
+  "10e4f6f78bfb834c",
+  "182b1a3135174a26",
+  "1dd6bbde176be96f",
+  "1f0748401f1e0d35",
+  "2ab0037244e5028a",
+  "2e772ce53a1d1710",
+  "355034257d3210c8",
+  "36f9acde35647d68",
+  "3db50992ae2ce294",
+  "406cc4cb54b834f0",
+  "432739a1d328cc9c",
+  "433b85f35ceaa0c5",
+  "441a4fbeea6008e6",
+  "53b196c28f63ff8c",
+  "5750d005f587e42f",
+  "5d2afe70dde5005c",
+  "5f899ae724b29ef1",
+  "63b9510f7314e33e",
+  "6fe802743a75cd81",
+  "76c5f019f63019b9",
+  "85a29ab3768bd82e",
+  "8fb7d90ad3d2861c",
+  "90e4da20f2526fa4",
+  "918e3d523db798d2",
+  "9823ca4c7fb23c3c",
+  "9941e1258fb0189e",
+  "a1a1a693fa9b8c43",
+  "a5658b9d546b9aee",
+  "a806830fcec7aa14",
+  "aa5698a7601c6a5d",
+  "ab082eac82fe7876",
+  "b063a4ae2b7eb60b",
+  "b0f5d2dbaed77e25",
+  "b6ba743147130f28",
+  "b92b1b3729d72bf6",
+  "d64e0cc3df07e5d8",
+  "da03c720cd8a6777",
+  "dd314f898c9f5564",
+  "dd48d6aaf5525c09",
+  "eba18540c47df807",
+  "ec4d67686899dda7",
+  "f817fc85e4f345a0",
+  "f89608a64e5f21da",
+  "fa0872dc7dd74fc4",
+  "fdcfcd427e5a9296"
+ ],
+ "check-if-all-characters-have-equal-number-of-occurrences": [
+  "665f66b0cf05eb7f"
+ ],
+ "check-if-every-row-and-column-contains-all-numbers": [
+  "9b37b577259e73a7",
+  "ca8f6f2202eb96b0"
+ ],
+ "choose-edges-to-maximize-score-in-a-tree": [
+  "02652f58fb194d40",
+  "04ad1878bf832be4",
+  "4353dbc969629e39",
+  "55dd01ff574182dc",
+  "7ca814d4f044561b",
+  "cfcde26ecbddc923",
+  "e8caa7128c8d3eaa"
+ ],
+ "closest-divisors": [
+  "8f5cc3d3dc5cbc1a"
+ ],
+ "collect-coins-in-a-tree": [
+  "7decb78320ebba0c",
+  "a41486e69a41adc9",
+  "ad6a8209feac5f65",
+  "b5fa397d7bd413d8",
+  "cd5390ea18b2efbc",
+  "e85bf5528ad9417c"
+ ],
+ "consecutive-numbers-sum": [
+  "8f5cc3d3dc5cbc1a"
+ ],
+ "construct-string-with-minimum-cost": [
+  "82656a20e0d91cb4"
+ ],
+ "convert-an-array-into-a-2d-array-with-conditions": [
+  "0ba37f2650119659",
+  "0d5a4dcddc756357",
+  "0ea171666b9ddb6c",
+  "0f6ca61ac20b5119",
+  "1519e7ae039d5324",
+  "2f65f8f3966ee0b7",
+  "3af871595e99a1fa",
+  "3f42625bd1fa7b65",
+  "4358e3f1ba0ba889",
+  "49f0615f9e97f20e",
+  "4c455b08e40655ce",
+  "530fab5706b65f54",
+  "5a357ee0d55c92ab",
+  "8844b0454e34ea9e",
+  "8c14822cf1fe36e7",
+  "b213f87fd6cfcff3",
+  "ba5b19310bad72c4",
+  "be2ddbaeedcafee0",
+  "c00ba36e1c295c78",
+  "c0f19b61d88be355",
+  "cb78ac63eeb8e399",
+  "d01b72e41dc18fce",
+  "d261c424463dafe1",
+  "e380956e5193f5a8",
+  "e87c1970e8e58b6d",
+  "f14b2d5d005000bc",
+  "f1ee20fdbad7e832",
+  "ffb3507e064577cc"
+ ],
+ "count-number-of-rectangles-containing-each-point": [
+  "ee437cbb16dba5d0"
+ ],
+ "count-positions-on-street-with-required-brightness": [
+  "5f89bc554ae523ca",
+  "db26474362886dd3"
+ ],
+ "count-special-subsequences": [
+  "86f741d4aa809f08"
+ ],
+ "count-substrings-that-can-be-rearranged-to-contain-a-string-i": [
+  "1a61b9e471770461"
+ ],
+ "count-the-number-of-fair-pairs": [
+  "1c33cb8a8b5d758b",
+  "99bdee9e4480fc4b",
+  "a23fe6ed2fa84b9c",
+  "af987bf4f951179c",
+  "deef2a8a0fd11b38",
+  "ebb4bf3b89df6f23"
+ ],
+ "count-the-number-of-vowel-strings-in-range": [
+  "a188714e2b54f6d4"
+ ],
+ "count-unique-characters-of-all-substrings-of-a-given-string": [
+  "8f19a5c07e128336",
+  "dffc0afec578ab93"
+ ],
+ "count-words-obtained-after-adding-a-letter": [
+  "0d4426bb54520e95",
+  "2eb323868ecba9ff",
+  "6c6b4d4063d83da1",
+  "d048f0744ad79d41",
+  "e591ec40e64a7d30"
+ ],
+ "counting-elements": [
+  "1fd87c6173b65ca9",
+  "29d311b10933772f",
+  "331359d6a2e2ece3",
+  "57ba542c2a39d6df",
+  "5a13e632d046115c",
+  "80da361819220d92",
+  "db42391058c8dcf9"
+ ],
+ "course-schedule-iv": [
+  "4022893714c14c98",
+  "82c36d039095425c",
+  "baccacc18896c44b"
+ ],
+ "create-target-array-in-the-given-order": [
+  "07fcee8ccdc13d17",
+  "176ac8cbdd752aa5",
+  "1bc6716446835ac9",
+  "1d2ee0de4414b421",
+  "248054ae017d5fa3",
+  "2fa9b527ebe75dca",
+  "3481a0a0cc5dd51c",
+  "363f314b30a2a50b",
+  "373a9a8090cee169",
+  "3d434801e9d6df29",
+  "3ed82d324e5af85c",
+  "4066cec016007ebd",
+  "41994bec0d1727a0",
+  "444b07abf75ef3b6",
+  "59e73150dcf4b8cb",
+  "5e7f56c2c50ed8f1",
+  "600205495dc86a64",
+  "61962176bb22ecbd",
+  "6443d711a4aa1bf4",
+  "654739935610682d",
+  "6f10fcc908229a3b",
+  "7343bc7e9e74e988",
+  "78452e8159a54a09",
+  "7da1287ed74ddba3",
+  "7da1287ed74ddba3",
+  "848e1dcdbf0a3956",
+  "8748f2b3219991a7",
+  "882b6dc56941a26f",
+  "8a13354c821d1d5f",
+  "94d06b871a8128f6",
+  "a0ba19a19661b981",
+  "a3995682dd58769f",
+  "acb5816c3754ae4b",
+  "b0af60879ddcc27d",
+  "b20732de8b336f3b",
+  "bac9947de757b3d1",
+  "bdb36bc10284dd0f",
+  "c91b41c07060e152",
+  "cbd329c86e577765",
+  "ce4a7594e7f2d949",
+  "d6e34a49ba739a81",
+  "daeae49b57281423",
+  "e827b50f8a1388a6",
+  "f424930bcce6aa5f",
+  "f51e807dc667897a",
+  "f85390dfb64d6081"
+ ],
+ "decrypt-string-from-alphabet-to-integer-mapping": [
+  "b682c51a0e4b4ce7"
+ ],
+ "delete-and-earn": [
+  "4dc037733e02ef85"
+ ],
+ "delivering-boxes-from-storage-to-ports": [
+  "52b63f4b590d596f"
+ ],
+ "depth-of-bst-given-insertion-order": [
+  "39cfafb32d36a879",
+  "477ce47d10d5e2b8",
+  "e0b10429797b9386"
+ ],
+ "different-ways-to-add-parentheses": [
+  "146090e9102e68f1",
+  "2ddc33dd1d3a17d9",
+  "325186779b1cfc22",
+  "9303b47f93d7935c",
+  "e790da9b57ad75e2"
+ ],
+ "divide-an-array-into-subarrays-with-minimum-cost-i": [
+  "6a491d0e647be997"
+ ],
+ "divide-an-array-into-subarrays-with-minimum-cost-ii": [
+  "1ae2689b23d46eb7",
+  "1ae2689b23d46eb7",
+  "4cb0b4f1c49aeef1",
+  "75c19ab736399123",
+  "aa82bfbb9e53101f",
+  "cda6c8db71b11ec1",
+  "d574ddc475741200",
+  "f4b8e8bb0f39d55c"
+ ],
+ "erect-the-fence": [
+  "16aa088d4fbc3d26",
+  "360c16e38b392049",
+  "bcc296e1c34998f3"
+ ],
+ "evaluate-reverse-polish-notation": [
+  "075a3279eacc67ad",
+  "203266c1e3a634f2",
+  "254b7fc601db51b6",
+  "3069334f46ee0ecf",
+  "42af9663f1595e8c",
+  "70bc09906892c164",
+  "70d372a098bc6a4c",
+  "73bcc189cacc0df7",
+  "7e7a28733cf11ec0",
+  "a97baf2b8303a0e7",
+  "b77afe32935ac36d",
+  "c44f06b7d05c4106",
+  "c4af643b03956a7b",
+  "cc767ee540823cbf",
+  "ed067dab6a5af0d1"
+ ],
+ "find-a-good-subset-of-the-matrix": [
+  "210b43d9328a23f0",
+  "263b753eab9243cc",
+  "3f34da45648f8438",
+  "58326f9c64e9f16e",
+  "5b6efd0adda04baa",
+  "6fc84f74b4e55fa3",
+  "958fe526dd967331",
+  "b6b9848eddc8f11c",
+  "b7eff0ef20441739",
+  "bf3f4f016e360201",
+  "c5fdd0dc57efa0c0",
+  "c938a0ebb8e81864",
+  "ce15dbae7b1d18a9",
+  "e3e47704b0557efe"
+ ],
+ "find-all-numbers-disappeared-in-an-array": [
+  "002712ac1b41c4c3",
+  "0ba576ba73776ae7",
+  "1470b4576a9f534c",
+  "4454ce968a332cda",
+  "4ae706c79c077d54",
+  "7ad4a67f87c9b669",
+  "854d37a650cf6b78",
+  "b7060f9ceb29d6ae",
+  "db4ac0d0ab128c60",
+  "dbf688afa7b59a81"
+ ],
+ "find-and-replace-in-string": [
+  "64fb4ff71606a0b5",
+  "f40f3687fa466bc2"
+ ],
+ "find-and-replace-pattern": [
+  "ff80b6f430f7d843"
+ ],
+ "find-eventual-safe-states": [
+  "012438fd2eb3c487",
+  "052e2f26118b5345",
+  "05be78f2d716afec",
+  "2004397a654857e7",
+  "2c0e3704486bf77c",
+  "57c660c87747bdf9",
+  "644ec9e5f8f26162",
+  "6be973e6aef782c5",
+  "80266d3d20032ea7",
+  "806984a60dc3a592",
+  "8d20c5aa6f3f117e",
+  "bd87cb29ae6693e7",
+  "dd76bfc30e45ee7d",
+  "f52ec084bd443d56"
+ ],
+ "find-kth-largest-xor-coordinate-value": [
+  "ddeeee58351464f9"
+ ],
+ "find-maximum-number-of-string-pairs": [
+  "1641f971a1627648",
+  "1c16bd3d2e857a65",
+  "67062760fea4fc5d",
+  "67e88138ee6cd704",
+  "6b6be14237016efa",
+  "74db8c555d37658d",
+  "a0be34c6461e666d",
+  "aa503196eb5f546c",
+  "d8917ac1af7cd0a4",
+  "e3fa7f5c43bbf37f",
+  "eb768f9864040c13"
+ ],
+ "find-maximum-removals-from-source-string": [
+  "29dc987440b84c37",
+  "3f7c7ad805d078b0",
+  "4806674718ce58af",
+  "7cf13d061e256533",
+  "e4b401d8479e736d"
+ ],
+ "find-minimum-diameter-after-merging-two-trees": [
+  "54b61807dc547269",
+  "89b1f90e479be9d5"
+ ],
+ "find-minimum-in-rotated-sorted-array": [
+  "006890f8a729a1df",
+  "1295d282405dabc1",
+  "2dfee1b753394fbc",
+  "2eb06c62e2087aad",
+  "3b8489cbf819f3c7",
+  "b09a49300b130991",
+  "f6519bcb3846da3b"
+ ],
+ "find-missing-and-repeated-values": [
+  "07123d07478d0e82",
+  "16f17648fd96fe86",
+  "2db29bb6ba5c5387",
+  "32764d3f296d037f",
+  "469f4bb6f87b6118",
+  "758a224f3fccac34",
+  "8b5d7de5c6c887de",
+  "8e6279a0a0cd3cc7",
+  "ab3c78679f765e08",
+  "b2fa5effbaffa052",
+  "b6b096aec8528682",
+  "d4853f027c2b94cc"
+ ],
+ "find-occurrences-of-an-element-in-an-array": [
+  "86c14c3c59654319"
+ ],
+ "find-servers-that-handled-most-number-of-requests": [
+  "2b515f9129a0161d",
+  "83c32117e4f3b29b",
+  "a92383f5e4b3d691"
+ ],
+ "find-the-array-concatenation-value": [
+  "012bd310bdda02b2",
+  "265ff0e4823bc554",
+  "2931eb7016c161a4",
+  "315be98d3aa98857",
+  "4085116661863c48",
+  "52663f22d15b1910",
+  "582a9f455fbe0c10",
+  "65f016dcb3068420",
+  "845551b1e9f15ef7",
+  "8833affc5128c2f4",
+  "885221f9873ca9d4",
+  "8abba44719cc0bd5",
+  "8cc940fb17561d4f",
+  "9b64999be9e55a92",
+  "b776d19b0e0f61d4",
+  "bc272f725b286ac5",
+  "c51f6fbba7375a41",
+  "ce9dae956d68e1a7",
+  "d0ef24eb4195a01f",
+  "d0ef24eb4195a01f",
+  "d9531eeab4e6acb6",
+  "e9d37373d91a8abb",
+  "ee24a916a3c4487a",
+  "f8a0cfb0d65c3772",
+  "ff52ac4d65772215"
+ ],
+ "find-the-difference": [
+  "b8852970cb3fcaa9"
+ ],
+ "find-the-difference-of-two-arrays": [
+  "047f2e5f9f37bbe9",
+  "0dad89ebbec81c2d",
+  "0f8966eca063b580",
+  "151faaa2c1e104ff",
+  "16464d8036afa5d0",
+  "188405ce7f1e94f2",
+  "217612de44dcc79b",
+  "285f5782dacd826c",
+  "29fef7c202ac8fc5",
+  "2dd9c309782f9171",
+  "2df5a365fd569d76",
+  "3079b4ef6eff1191",
+  "402e068a4c016cf9",
+  "40960d7583d88eb0",
+  "54af4c14c4f46d23",
+  "58651c88025462d1",
+  "59d8a54f1b5e5b92",
+  "7087c86d3d59f05e",
+  "7b9bd1fa901fb8cf",
+  "8323f6a0a785d15f",
+  "85a22518efba3ff4",
+  "85a34061dec835fd",
+  "86ed0409381ccd1a",
+  "88c3ab9a5550b981",
+  "92317812eccc6ab3",
+  "92ada7899283250b",
+  "96bf763862fe34f2",
+  "9ad20d6128932d64",
+  "a1243e1b89115ac0",
+  "a9d63245ef11e76d",
+  "aeb2ddf491ef22f4",
+  "b6152d79d5e4eebe",
+  "b68eac679766b64b",
+  "b8f916a3ba58abaf",
+  "bf31c64efb0c1ee0",
+  "c19ef99192a2500b",
+  "c19ef99192a2500b",
+  "d3bc4d3a56ce906a",
+  "d4dcbb9006ffc221",
+  "e02b1956d3f44755",
+  "e899d37e4ffd22ad",
+  "f567e6c10da2b7c3",
+  "fafd1fb38faff1a5"
+ ],
+ "find-the-duplicate-number": [
+  "227557900527f96d",
+  "43a93011be205c92",
+  "47d5cada6ef27e70",
+  "6c9a22decc101364",
+  "9804e5481e1da79e",
+  "aeea687f57d723d4",
+  "ba7a0360b04c15e3",
+  "c2ae2be553128f00",
+  "c8800cc260c99401",
+  "e3979e549e889e15"
+ ],
+ "find-the-k-th-lucky-number": [
+  "8f5cc3d3dc5cbc1a"
+ ],
+ "find-the-kth-smallest-sum-of-a-matrix-with-sorted-rows": [
+  "f5aa2713c347302c"
+ ],
+ "find-the-lexicographically-largest-string-from-the-box-i": [
+  "fad483d733425603"
+ ],
+ "find-the-lexicographically-largest-string-from-the-box-ii": [
+  "0f430e1d3a43b28b",
+  "79844c7758109e15"
+ ],
+ "find-the-maximum-number-of-fruits-collected": [
+  "e2e4133c0b895d45"
+ ],
+ "find-the-minimum-number-of-fibonacci-numbers-whose-sum-is-k": [
+  "2748597a4ea36240",
+  "45f9490be8628f0f"
+ ],
+ "find-the-original-typed-string-ii": [
+  "f866dcb9391ecbca"
+ ],
+ "find-the-prefix-common-array-of-two-arrays": [
+  "79c0a9c2bc308379",
+  "8e93fb35e57004d8",
+  "99134479a0dcc01e",
+  "a524bfc8122e6fbf"
+ ],
+ "find-the-shortest-superstring": [
+  "2589d6c84968865a",
+  "3741cd00c5dca03a",
+  "45863d52a6c8e29c",
+  "4886bf25c0b6d5f1",
+  "4b4d6dab8e0cde6e",
+  "63a1f18aed010b98",
+  "67c1d3e5ed3d0719",
+  "76067c0f5dc87530",
+  "7bf6a0783b428b76",
+  "86f7fdbb1d428589",
+  "ae2f22961b71db90",
+  "b49de2957764441a",
+  "b9c59237d36b0971",
+  "ba754f1919dd54a2",
+  "d547ebfec815f055",
+  "e48a85405b9149dd",
+  "eb4bca78c17a69f1",
+  "ee81fa517a739d03",
+  "f5e16c8423f534f8"
+ ],
+ "find-the-smallest-divisor-given-a-threshold": [
+  "16921a751450cd46",
+  "943553ef22d8154f",
+  "f5cbe30a31d53814"
+ ],
+ "find-the-substring-with-maximum-cost": [
+  "0aca144b9ee62637",
+  "cacb07bd54ede416",
+  "ffcb3bed4a746b63"
+ ],
+ "find-the-width-of-columns-of-a-grid": [
+  "c9b0df096a9b5b89"
+ ],
+ "find-the-xor-of-numbers-which-appear-twice": [
+  "333f429c5330bd70",
+  "3f08ccb79d5ec66d",
+  "4f36ba8d7a002808",
+  "4fee493397c7ae50",
+  "987488758e3ce47a",
+  "99e64faf034e566a",
+  "a8b056f7cf717d4b",
+  "b737ae0bbaea4d25",
+  "b7b03df0cce50964",
+  "be60bc66e83ba51a",
+  "bff6cd8051a509fe",
+  "c0a9da398c9beec5",
+  "c69b4c39a115ef5a",
+  "cefdd1b01f03c57e",
+  "f6df7d3eca49d97b",
+  "fbae659318536d75"
+ ],
+ "find-words-that-can-be-formed-by-characters": [
+  "e0fc497a000882b0"
+ ],
+ "flipping-an-image": [
+  "085a06e627d2a76c",
+  "4cb844a7b25471b5",
+  "76b87dd285829503",
+  "7a6dc55d4b00fe6c",
+  "9690136cdc1e7c52",
+  "b2330165ee108bf7",
+  "cd28b60228290923",
+  "db5dda3afa5f4284"
+ ],
+ "fraction-addition-and-subtraction": [
+  "099f321252f37d98",
+  "58e3b981132ca8a2",
+  "727e3ebc10f5e786",
+  "85909548392bbf7e",
+  "9827a53fd89d59ed",
+  "9e4b13def894dc88",
+  "b8e6f7434b2df953",
+  "c779a088c1000702",
+  "d53ed9dbae2b62f9"
+ ],
+ "greatest-common-divisor-of-strings": [
+  "69e355245bf65e48"
+ ],
+ "greatest-common-divisor-traversal": [
+  "213317db76ab92ab",
+  "61ba69f52cc0efc5",
+  "9cfd5989a28ddd60",
+  "aa7e475324251f0f",
+  "fb52f1825ba7ae54"
+ ],
+ "hexspeak": [
+  "2bbfce30cbba689b",
+  "2f36be4cae90a769",
+  "6d5f60a10118c538",
+  "8852f26bd7f83f80",
+  "a33c0586c989796e",
+  "ba2440ea0c268d39",
+  "c213a25c482ddebc",
+  "cf30d4ffec968fb2",
+  "d27484f79c172c35",
+  "d8ca1413a4920925",
+  "db75cf354948e052",
+  "e48031eeeea3b463",
+  "f6cebb3019a57e50",
+  "f92e882187ece3ed",
+  "fb5f3ce990d20552"
+ ],
+ "high-access-employees": [
+  "099045be2251ed11",
+  "0d71179d41c364a8",
+  "4ee9df21a7a66c99",
+  "58a0874f54c9c792",
+  "7cf6aa2881858b28",
+  "94f5b2c177384e1b",
+  "9af3e79facb62ae9",
+  "9af3e79facb62ae9",
+  "a8a452e7258f92d8",
+  "ac4504b3790aa5df",
+  "d6e66c06cc9e96b0"
+ ],
+ "house-robber-iv": [
+  "4f8c3afcb396140e",
+  "60d4962378b50186",
+  "c71f3678e3c4753a",
+  "c81aedffd70ef8ef",
+  "e514252136408e8c"
+ ],
+ "intersection-of-two-arrays": [
+  "1b71f13635904a51"
+ ],
+ "isomorphic-strings": [
+  "0414a14c8625e2dd",
+  "c5af7996092c97f7"
+ ],
+ "koko-eating-bananas": [
+  "1176c6bd91427779",
+  "141c696b3adc1a31",
+  "1a8307b64ffa3ef7",
+  "2741b59be7f49f0f",
+  "293959a58f9b6623",
+  "34e5b7a117a19420",
+  "34e5b7a117a19420",
+  "4b27f7c3c72dcd0a",
+  "51df8183d98fcfad",
+  "5ef8dc67aa5633fa",
+  "5fc756e4d5e5aabf",
+  "63c8e8ab745f67ad",
+  "7537fcb7dfcaf5eb",
+  "9374a65aae2fea79",
+  "943553ef22d8154f",
+  "973d37ea46cb98ae",
+  "a7cb603c71874713",
+  "bf8e9200bad3b9bc",
+  "c6f7c3ddedeed8ec",
+  "f685864e7d318506",
+  "f685864e7d318506",
+  "fcc340a0e8255a02"
+ ],
+ "kth-smallest-product-of-two-sorted-arrays": [
+  "071f4a26b5946307",
+  "1735fa50412768ad",
+  "1c2578a3c9047dc9",
+  "289e29d2672640b7",
+  "38e603d3f9604711",
+  "392741d157a3cccb",
+  "41b66c668433dff1",
+  "56e3965d66da001c",
+  "5cbe5d00cf8656dc",
+  "90e135f1e2d25f3a",
+  "ad532b032934160e",
+  "d3725ca57bbc0e4f",
+  "f25cbfe6e16fdacc",
+  "f434d9858f903c47",
+  "f98cab5aac4d2ae4"
+ ],
+ "kth-smallest-subarray-sum": [
+  "3b921a9078079634",
+  "40c86fba89287ea0",
+  "4586683bd18d4941",
+  "53ab584e740b42c0",
+  "5bba9eccf8ea4ec9",
+  "815d4d5748781f2f",
+  "850ab9ffefaf9224",
+  "86467272a8401024",
+  "97399d60e6f3f8f6",
+  "b6f4fc067bd5ac26",
+  "b89d0815124a5ce7",
+  "b8a34468de9f0d8e",
+  "c0333c707d99ded6",
+  "cf76cf5d9352a014",
+  "e2cfa9122e7931ff",
+  "ea20f51d5618f04f",
+  "ec6866edbdf8e200",
+  "f1a93a538def8326",
+  "f3e9fa84ad9fc5aa",
+  "fad5a3aaf72ced88"
+ ],
+ "largest-number-after-mutating-substring": [
+  "0f5b50f45c24d818"
+ ],
+ "largest-unique-number": [
+  "3158d1989be89750",
+  "5989ac92c885e212",
+  "eb4744d380ce307b"
+ ],
+ "last-day-where-you-can-still-cross": [
+  "7af5f01ef576ae16"
+ ],
+ "latest-time-you-can-obtain-after-replacing-characters": [
+  "0b2d50439b80608c",
+  "1b48b698d3f086ac",
+  "325deca46ea2ed04",
+  "4fe2e8c735e767f4",
+  "53627407a51a549e",
+  "56da5f08909dba58",
+  "5aa78e0eeae14cae",
+  "67bf3c56e220edf0",
+  "8d7b4e5d4f4a88b1",
+  "8ec47d0cf51d7414",
+  "94ed93a084102b93",
+  "cf954aba2d4f36e1",
+  "da2d279586a9dafc",
+  "ebccb0074a522ad6"
+ ],
+ "letter-combinations-of-a-phone-number": [
+  "7368aeeaa22c7343",
+  "8a78127b265a9491"
+ ],
+ "lexicographically-smallest-string-after-applying-operations": [
+  "0e25afb162964c3c",
+  "1a16a1426ad5a55f",
+  "2a1a4645ac5c4b5e",
+  "4e818e50379c5439",
+  "66952ea0d87e1172",
+  "a9e7689512539de8",
+  "b4b4a00ca6f9e48f"
+ ],
+ "longest-common-suffix-queries": [
+  "3ed905d9c0e1bd15"
+ ],
+ "longest-palindromic-subsequence-after-at-most-k-operations": [
+  "07fcccdd4ed3456a"
+ ],
+ "longest-substring-of-one-repeating-character": [
+  "0b765ee4be50a5a8",
+  "1a1a3ffc0d9ae535",
+  "23b76f1a256b609e",
+  "5f3cbb68ad6615f9",
+  "69690ed38cdc2eed",
+  "6afa85fd41048a43",
+  "d732a525fe3647b5"
+ ],
+ "make-array-zero-by-subtracting-equal-amounts": [
+  "4332dbed06f0f975",
+  "51ed758338c345d5",
+  "779c254346775400"
+ ],
+ "masking-personal-information": [
+  "063148798017c1fa",
+  "e4243bbd50d4ad16"
+ ],
+ "max-points-on-a-line": [
+  "295f761b14260797"
+ ],
+ "maximize-happiness-of-selected-children": [
+  "0fa22149a261db1e"
+ ],
+ "maximize-the-distance-between-points-on-a-square": [
+  "1e5413d6c82458e2",
+  "471d57d00384adae",
+  "51a03d68a61af904",
+  "51fc09a0eb3624c9",
+  "6685e6f372b6f848",
+  "7f53f7b29634f3be",
+  "e52881e9a6a97bda",
+  "f1abe6a44630e438"
+ ],
+ "maximum-average-subarray-ii": [
+  "ccd8ea32c478f956"
+ ],
+ "maximum-gap": [
+  "c41b7b4383ed4b60"
+ ],
+ "maximum-number-of-moves-to-kill-all-pawns": [
+  "136cf5a4bd18f65c",
+  "141078365e4b07c5",
+  "15505cb78cc6f26b",
+  "79672d9a30907565",
+  "ef4947ee57255189"
+ ],
+ "maximum-number-of-vowels-in-a-substring-of-given-length": [
+  "bd2cd93b77a76a33"
+ ],
+ "maximum-number-of-words-you-can-type": [
+  "06e0ad161c3cfbbb",
+  "be3794554f04ee5e"
+ ],
+ "maximum-performance-of-a-team": [
+  "77d845d45c228ee1"
+ ],
+ "maximum-product-of-the-length-of-two-palindromic-substrings": [
+  "63de10428590c503",
+  "6c224cb06a270dee",
+  "816f5c0848c6a684"
+ ],
+ "maximum-score-of-spliced-array": [
+  "e5c3751d61527d75",
+  "fa92588716875e43"
+ ],
+ "maximum-strong-pair-xor-ii": [
+  "2d004c2d5148b08e"
+ ],
+ "maximum-subarray-with-equal-products": [
+  "38b74840439b22f2",
+  "38b74840439b22f2",
+  "3a0c7c1012c3ebd2",
+  "3a0c7c1012c3ebd2",
+  "778028853f56f742",
+  "8391b6aa91f613b8",
+  "ab3cd0fc07ace07f",
+  "e453938fa85d39f5"
+ ],
+ "maximum-sum-of-3-non-overlapping-subarrays": [
+  "15a33445e592d230",
+  "c415525cbe529648"
+ ],
+ "maximum-total-area-occupied-by-pistons": [
+  "09cb931504b28ed8",
+  "365fc45bab3c62c5",
+  "8156f63c7aa04ba0"
+ ],
+ "minimize-deviation-in-array": [
+  "07053329220da202"
+ ],
+ "minimize-result-by-adding-parentheses-to-expression": [
+  "1aaddf273da41e81",
+  "2f51300f3f9af1b0",
+  "c2479706c99d79db",
+  "d4b266f0cf03ff84"
+ ],
+ "minimize-the-difference-between-target-and-chosen-elements": [
+  "22a0fb12d56e5d51"
+ ],
+ "minimize-xor": [
+  "1e90b186264f0e8c",
+  "266527e63230b423",
+  "42b244f9e0bbdcec"
+ ],
+ "minimized-maximum-of-products-distributed-to-any-store": [
+  "14b95a9aafe8793c",
+  "14c2167ce39a7a4f",
+  "88218bba2a6c9e49"
+ ],
+ "minimum-area-rectangle": [
+  "2831a1cf090c3e87"
+ ],
+ "minimum-cost-homecoming-of-a-robot-in-a-grid": [
+  "f880497e851f3aed"
+ ],
+ "minimum-cost-to-change-the-final-value-of-expression": [
+  "e1dd9c7489573368"
+ ],
+ "minimum-cost-to-convert-string-i": [
+  "1d10c78738652fe2",
+  "2d83a3a64f2b6ac4",
+  "6111eec2b2982ea1",
+  "626303caf21d8940",
+  "b46f8496657e60b4",
+  "c85f719926b077fa",
+  "d154ed759b154fec",
+  "fd77ea2d229ec13b"
+ ],
+ "minimum-cost-to-split-an-array": [
+  "141c696b3adc1a31",
+  "14785029eb365f94",
+  "248fadc032a9a7b5",
+  "3cfdf26285dbb009",
+  "41d98db3eb9a1d59",
+  "57989759cf973c94",
+  "76f9105fcd202d9f",
+  "7efd52d0aa5ee9e0",
+  "a1758b9ccec9e4e8",
+  "a8d9784028e03541",
+  "b02377513120626d",
+  "b3cdb8d18e3617c6",
+  "da1863fe495e7906",
+  "eaeab626cdb7a58f",
+  "ebdf93789d37d132"
+ ],
+ "minimum-domino-rotations-for-equal-row": [
+  "0cc7a3742908b259"
+ ],
+ "minimum-falling-path-sum": [
+  "015139e29bc0c642",
+  "33a5d7a795899a79",
+  "7d8df3e498f0cc9e"
+ ],
+ "minimum-knight-moves": [
+  "042a7e382616312f",
+  "0517996cd0b79387",
+  "1eade71beb0a5421",
+  "2236892efc0324e2",
+  "22e472849a25aa56",
+  "26db081efba2e1c7",
+  "425f24d291524c37",
+  "465bc993d5f0dd14",
+  "470c411a2764af27",
+  "4c44455a2f0989a4",
+  "4c99ede9577d0081",
+  "54c3a1f5ae31f1f8",
+  "6cc1b83a21d3650d",
+  "730d052964d83430",
+  "766eed8525ea6d53",
+  "8008e3cc15ed0d51",
+  "82121add0ddf0ee8",
+  "96145b4b7d5071d2",
+  "b16c5a058a40d72a",
+  "b746641c6c7afbaa",
+  "b7e73df1ab484fa7",
+  "bd8607aea9503e63",
+  "cabe3c34edf05e91",
+  "cd1b4794e09dc5d6",
+  "e557f4efb00ed759",
+  "ea1ae3fddfd7fae8"
+ ],
+ "minimum-moves-to-spread-stones-over-grid": [
+  "0750ffaf989a6e95",
+  "24ead0e47217eb46",
+  "340748dfdbceb642",
+  "7667a25f4ca7ce71",
+  "84d87aee9efc4ae2",
+  "8f5de59a8191dd5b",
+  "aaaa1d7d24b6fd40",
+  "ab1134f87c138033",
+  "bb2ca379836a8f52",
+  "bdfd2b218b010afb",
+  "f00c9b1b197fd759",
+  "f75621514cfea1a3",
+  "faafd5a90d8399d3"
+ ],
+ "minimum-number-of-keypresses": [
+  "b53dc9f393341516"
+ ],
+ "minimum-number-of-operations-to-convert-time": [
+  "66e4db27adccace7",
+  "b70dfd1b3adae448",
+  "f9c8a68c4c8f68eb"
+ ],
+ "minimum-number-of-operations-to-make-arrays-similar": [
+  "07895b458b8f0172",
+  "1678c076493330ef",
+  "1dc61e906cc613bb",
+  "26056025dcbf432e",
+  "2ff0ee8828f954a4",
+  "3af7eeeb59ab791b",
+  "3beace3f44b96501",
+  "3d9e3d9626a8add8",
+  "402e068a4c016cf9",
+  "402e068a4c016cf9",
+  "4724520803737275",
+  "4b43efc0a373ba36",
+  "4b43efc0a373ba36",
+  "508dfc82f3ac6340",
+  "53733bb3b8b8b8cb",
+  "578193fb6fe445c7",
+  "58651c88025462d1",
+  "66595648560c0301",
+  "6971b5ca395d1812",
+  "6a05350720674d63",
+  "7053691a6b0f9855",
+  "799e287a8321791b",
+  "7fc01d32db05d1f2",
+  "85a34061dec835fd",
+  "85a34061dec835fd",
+  "8a075a030d39ec1c",
+  "8bcf49bd6c1415d3",
+  "9a585b9512ebeb50",
+  "aa107a3a50a619da",
+  "aa107a3a50a619da",
+  "b42ec7e35da8a5a3",
+  "b6a83d573980f32d",
+  "b9c89eeb03742691",
+  "ba4bc3fcabcda99f",
+  "bc2e56e730240d26",
+  "c0573a767df3f83e",
+  "c084bdf3d3030309",
+  "c3f542e394573233",
+  "c817b860190055b1",
+  "ca87f96a37012112",
+  "d1d4ab2b85fa77ca",
+  "d4dcbb9006ffc221",
+  "d4dcbb9006ffc221",
+  "e28604fbfffa69f9",
+  "e3517b4a81ee1b09",
+  "e8fc60708ca60010",
+  "e98bc0d075a93c86",
+  "f9afc704a43ad907",
+  "ffefc0eaec43dae2"
+ ],
+ "minimum-number-of-steps-to-make-two-strings-anagram": [
+  "6da7000100aae987"
+ ],
+ "minimum-number-of-steps-to-make-two-strings-anagram-ii": [
+  "d2009ee70a1c07f0"
+ ],
+ "minimum-operations-to-make-array-elements-zero": [
+  "9bc119fbf156a822",
+  "a248ebd57ae0e432",
+  "a248ebd57ae0e432",
+  "e7c9b1b9fb792562"
+ ],
+ "minimum-operations-to-write-the-letter-y-on-a-grid": [
+  "69c4f413478923cd",
+  "e2eeeb6f1e8a8a6b"
+ ],
+ "minimum-processing-time": [
+  "0734fe7dd5a52f28",
+  "0b3895d44acd3dc0",
+  "0fd4b154f145ce62",
+  "126dab41e6023db8",
+  "12c1d2a54cd9daae",
+  "22fa4b44928b3756",
+  "23f3e6a9d69477a7",
+  "25aa5a09a4dab7a6",
+  "279177a04ebfa661",
+  "2c70eb4ff9e1a501",
+  "2d71763af4d3f5a9",
+  "320c55f1b001bfb8",
+  "3bae25dcbe1cb7ce",
+  "460305e1899c12a1",
+  "4948651d69e68c00",
+  "4e3a1f188d2d8e17",
+  "51d3d48d41d0a396",
+  "5424caa024637974",
+  "681b34f42105dab1",
+  "6eb1b90090de7f16",
+  "774489336a3193eb",
+  "8cfb9df80ac99753",
+  "8ddf488fd4e26f73",
+  "918a692cd625be32",
+  "95d129ba5e77f753",
+  "9a4fc0da323b33c9",
+  "9d89dd5c20def4ad",
+  "9e271354ce07e737",
+  "a38485de578b8055",
+  "b3020347042a43bd",
+  "c7a8e3310545d41a",
+  "c808e9a8d7ea1849",
+  "d3065c826b9295b9",
+  "d45a8aa0137b720a",
+  "d9914619afe7b2d9",
+  "d9e2118b6bc40634",
+  "dd45833c626f29d3",
+  "f03adcc96f48deb6",
+  "f7df123f9a2c5e7f",
+  "fc676d4f739621b1"
+ ],
+ "minimum-runes-to-add-to-cast-spell": [
+  "c2e74d13a3a5a932"
+ ],
+ "minimum-score-triangulation-of-polygon": [
+  "e3056c2b57f4e520"
+ ],
+ "minimum-total-space-wasted-with-k-resizing-operations": [
+  "00460bb2cf742204",
+  "820e8c4225c18678"
+ ],
+ "minimum-xor-sum-of-two-arrays": [
+  "4cd05b889f9de2a1"
+ ],
+ "most-frequent-number-following-key-in-an-array": [
+  "a62b3870025ab9bd"
+ ],
+ "movement-of-robots": [
+  "172280b9791a3fd0",
+  "24a8259062826c9d",
+  "2be6e072c8b849f3",
+  "2f9f3f7e68c7a7d0",
+  "897e95af5f0a8694",
+  "9220ec3b36b8ac16",
+  "c16c3c29a20012b6",
+  "d79a7a84e8a95825",
+  "daf179a849777207"
+ ],
+ "nth-magical-number": [
+  "76a8b139464eaa20",
+  "93e306f22a813477",
+  "9c181fbf4f70d360",
+  "cdd847fb236c3c40"
+ ],
+ "number-of-beautiful-integers-in-the-range": [
+  "2367bf856f0e75dc"
+ ],
+ "number-of-equivalent-domino-pairs": [
+  "dd30fc3b48c3b1f5"
+ ],
+ "number-of-single-divisor-triplets": [
+  "164baa606d3acf2f",
+  "1a806c1b82ad8d68",
+  "1bbee11a17426a59",
+  "1db780d6a6fd95c3",
+  "2a978d862eedd49e",
+  "2d0b22e95d17ddda",
+  "3787082994d27710",
+  "41e7059e884c38f8",
+  "49e47928571e2128",
+  "517cf72d39cdd608",
+  "5a207bcbc90328a3",
+  "5a8a6b41ca3fe0e8",
+  "6a491d0e647be997",
+  "6a491d0e647be997",
+  "6bf0c97f21a8bd35",
+  "6c89f51d05c52901",
+  "8c4aeeaf214ea254",
+  "9063ac310b0ae72e",
+  "92c041f2c8753bdb",
+  "9ce3a052148f772f",
+  "abddad93982f500f",
+  "abddad93982f500f",
+  "b240485cf4c82c17",
+  "b4766caea13dc502",
+  "b48ba6107f43bd64",
+  "c0fd27a2e36b9966",
+  "cb6dcbd223bd8dcc",
+  "d6302b9ab902f2c4",
+  "d6302b9ab902f2c4",
+  "eec4c7c37dcd2c29",
+  "f145526770f805ee",
+  "f24c3608240693ed",
+  "f24c3608240693ed"
+ ],
+ "number-of-ways-of-cutting-a-pizza": [
+  "812665e177035afa",
+  "ff31f323b7486f77"
+ ],
+ "number-of-ways-to-form-a-target-string-given-a-dictionary": [
+  "0eff58ec94425f95",
+  "1395698abec18f3c",
+  "1b379df4e3d54256",
+  "1eb9b24bcf9a76dc",
+  "1f91253f382739ab",
+  "23410f0841c524a0",
+  "2517e43b69ef0a4b",
+  "269e0d1ea7917534",
+  "29fbd6334386d812",
+  "506e36c6df81b91d",
+  "52a1f3381c66ef5e",
+  "56204d7909b51cfa",
+  "64b926f709658745",
+  "6d86c9d256933e90",
+  "9a118d74109496d9",
+  "a2d45539d62e0f8d",
+  "acdad6a2e39ba584",
+  "c4b59eaaa2c9e35e",
+  "cde9e7118a6d180a",
+  "d06cb1290685d207",
+  "d556d17825285d27",
+  "d7092694edce287e",
+  "dee8de3c01364dea",
+  "fe307cad149b4179"
+ ],
+ "number-of-wonderful-substrings": [
+  "451c51b218d646b3",
+  "a8f42d4ef2087678"
+ ],
+ "odd-string-difference": [
+  "11967dab02ec41da",
+  "1772a86a355a8829",
+  "1c419b5e1296488f",
+  "3d821e1d23a94bf5",
+  "3f98b7960a9b79a4",
+  "44bf73b868862e80",
+  "518c0bbcf58b4702",
+  "574cc2cf89e24bba",
+  "5aa8c10b3f8635b2",
+  "6fd56cac07d1035c",
+  "7687000b921d2843",
+  "78b0558315f75e52",
+  "7e4aef485ee34aa3",
+  "87fd44055b1ca246",
+  "8d93fde6368459ac",
+  "92b5a1486139fcb9",
+  "a4f7214fad8cec50",
+  "aae6e7bfccb07262",
+  "ad7900bd97a40dbe",
+  "b10c4e947ef27b46",
+  "b55668b00138eb6f",
+  "c2f6ef98252897b7",
+  "ed1e3e16ddacc07c",
+  "f05594f193169ba1",
+  "f7361ad06806ac55",
+  "fa1529e5243eb2a2"
+ ],
+ "optimal-account-balancing": [
+  "47ac2b318a549f25",
+  "4de58c3390331aff",
+  "8213c5971cc4afc4"
+ ],
+ "palindrome-rearrangement-queries": [
+  "6c4cca3c077c28ef",
+  "ec91e331fa9c8849"
+ ],
+ "parsing-a-boolean-expression": [
+  "47f7180c332cf474",
+  "680e386d9469691b"
+ ],
+ "path-in-zigzag-labelled-binary-tree": [
+  "8f5cc3d3dc5cbc1a"
+ ],
+ "path-with-maximum-probability": [
+  "c666f711d564d67e"
+ ],
+ "permutation-difference-between-two-strings": [
+  "278420e63f9d94f6",
+  "29c00617cfd5fca9",
+  "401a65130cf73721",
+  "7b0026a3cf1bcfbb",
+  "a6f82fa1aa62c7cb",
+  "ba08a5408b3e25a3",
+  "bfbc6fbbd137f5db",
+  "c2ad1e55d488f0a0",
+  "ec2b37c7ca78e747",
+  "ed5b75cb5e5b1d01"
+ ],
+ "preimage-size-of-factorial-zeroes-function": [
+  "8f5cc3d3dc5cbc1a"
+ ],
+ "pyramid-transition-matrix": [
+  "0e10aa49f515313f",
+  "19c27d88cb99eb85",
+  "2240191007483c35",
+  "330e712caa1a7777",
+  "333c945949dbbf11",
+  "33d2b55906012956",
+  "390ce48306c03085",
+  "406a21e3e47da8c9",
+  "4ce96fb188c127ef",
+  "5b6ee88fb8d446b0",
+  "61a08fa9891c507e",
+  "7dacdd94602427bc",
+  "821a0f159ac933f8",
+  "86379358f890f817",
+  "8af6e86277d4b1dd",
+  "8b8647e9db399af0",
+  "8d1af797ee52128e",
+  "942ed53ef17efdf5",
+  "9ad68e86c1d69936",
+  "9cd3340c6451f470",
+  "a652b3d3f74c274b",
+  "a6b722150f1f11a7",
+  "c6a52bb2f833bf9f",
+  "c7c30aeed663caf7",
+  "c9f2953da07809ee",
+  "cb263f8520bbc55d",
+  "d42978976076a7c2",
+  "d4c7704a3fd27826",
+  "dfe9e5c41195eaed",
+  "ef74052414c02dca"
+ ],
+ "query-kth-smallest-trimmed-number": [
+  "0147c7b3a3d7ee20",
+  "12d4f690e13e8e26",
+  "3ad7b5f362c26d72",
+  "423a66f34004f60b",
+  "5b65ef0a03d97eec",
+  "a7d4dc0677d03acd",
+  "b138f8805d8d9a1f",
+  "e1fb58589db085ec"
+ ],
+ "queue-reconstruction-by-height": [
+  "0e145b1debe726a2",
+  "2d63bbd889d46b49",
+  "32bb34aac72aa499",
+  "3ad0e66d4ffdf50b",
+  "62025eca1462ad58",
+  "62550fa808faebd0",
+  "65b1643cee9790e9",
+  "66a27caf3cb0cb2c",
+  "6958c6d8d748d3a4",
+  "6b199c88e5bdc1c5",
+  "76e76a89a0511a4b",
+  "84bc27b6e0c6c5e9",
+  "8a1125b49ecc38a7",
+  "8aa1734cd92942e8",
+  "8fb85dda77a37aa4",
+  "998a29ad307a5161",
+  "9b78e293cdb0b6f4",
+  "9f01e29fb6e8f988",
+  "9f320920b44e7d90",
+  "9fd6555e6fd7c9d9",
+  "a8e1c41bc33a632a",
+  "ab64bad60b4556e9",
+  "b129c091fc67c82f",
+  "b5b1b47ac533c525",
+  "c12c7eaba49323be",
+  "c2bc20b1f3768b24",
+  "c3374ea3abf50897",
+  "c9ff3fdedbb9c746",
+  "cb125bfeec83eb9f",
+  "d61ff0f0aace3348",
+  "e20c24e500574c9b",
+  "f02a72d116af35d1",
+  "f45501a7cd61b240"
+ ],
+ "range-addition": [
+  "594278649dfd2416",
+  "727ec0259ad74189",
+  "a380fdf0acb8d1d1",
+  "caddcf470cb29034",
+  "e3d2ca770eeff83a"
+ ],
+ "range-product-queries-of-powers": [
+  "03ff71c699aae7ef",
+  "2126c59495e76c3a",
+  "2a216f8062b56b1f",
+  "327634f9ee065c59",
+  "3c405fe21a2107e5",
+  "3cb84b626cc37b3a",
+  "3d41dc3b3480708a",
+  "48ea4ee890ab2d6b",
+  "526de68ff6acd09f",
+  "52c167c7607c3bca",
+  "54f913740c0245aa",
+  "57623d3d064debbf",
+  "5d2257e2eff34bdd",
+  "6358a21c0b51015f",
+  "67219e69c12a629d",
+  "68344ab6353252da",
+  "6e1b42f1553909e4",
+  "71326c64a83b39c7",
+  "7fb41eec41f6eb48",
+  "8ecd2f18d32bfc57",
+  "a86bf49539a54af8",
+  "d034db09abc740dc",
+  "d66dcf030e1e9e06",
+  "e157f38d06402058",
+  "f56bf7fe58061bc7",
+  "f7536549be409cd8",
+  "fcb405886387c143"
+ ],
+ "range-sum-of-sorted-subarray-sums": [
+  "177cd1176882d268",
+  "177cd1176882d268",
+  "27596ab463619aa9",
+  "2edd8719a16553a4",
+  "370fd2ae3b995cf1",
+  "3ccfb320236b2acf",
+  "42380c946a3ab9b7",
+  "5972b4edb67a7e85",
+  "5a8391903891d9db",
+  "650cc89c9911a4a3",
+  "6cab92fad95eec35",
+  "775c4f436ad9c10a",
+  "7f77e79918007796",
+  "832b81d5f18bfeb5",
+  "838a638c576c53d3",
+  "8f19920ca621d31a",
+  "a34614f5a0a68b7f",
+  "aa8f3aaff3634ebe",
+  "ac71578c78f92e6c",
+  "b41781a00ea66abd",
+  "c4b5771661fb3779",
+  "cdd72ad6f95ab85f",
+  "ce150bcb59a944aa",
+  "d5ac8518bc3c0fba",
+  "e975032ee1c96168",
+  "ed35da94c8c9a018",
+  "ede6b841072d742a"
+ ],
+ "rank-teams-by-votes": [
+  "15d23963a4a8652d",
+  "26edf9b482d5cdfb",
+  "2f3cefcf01c5be12",
+  "4aad3fc2c349773a",
+  "642c79475441970a",
+  "68e3d1d7c39431d2",
+  "74800bd72df98990",
+  "daeecb3ebe08b09e",
+  "fcf96f19f1dc5a54"
+ ],
+ "ransom-note": [
+  "c2978107bb31c6a4",
+  "fcf9602f82c7e758"
+ ],
+ "reach-a-number": [
+  "777bbfb99b4c6c66"
+ ],
+ "rearrange-k-substrings-to-form-target-string": [
+  "0dbfb2d557ba3ceb",
+  "0fb755e23344c41c",
+  "3fbd732f696b96b5",
+  "4884dc33fbb4d348",
+  "4cbb8665b2be42ac",
+  "57790a5bd2b0d899",
+  "7e629420fe58b038",
+  "903f72760cb9083c",
+  "968d813236056f73",
+  "b002df53c372c207",
+  "bbb9f186d9c3cf6d",
+  "d1efc2b28ab6d1d4"
+ ],
+ "rearrange-spaces-between-words": [
+  "89d634c685b2c6dc"
+ ],
+ "recover-the-original-array": [
+  "0a02526c5b35d123",
+  "72d4f1c0d84739ed",
+  "e1d3ecd5651869a9"
+ ],
+ "remove-all-adjacent-duplicates-in-string-ii": [
+  "69ba4b1fae637923"
+ ],
+ "remove-all-ones-with-row-and-column-flips-ii": [
+  "1bcb889ee836b14c",
+  "29cb00eecd3b3a54",
+  "356df3231b57445a",
+  "4a7f2c8d849fd4e2",
+  "520493d1ca840afb",
+  "5d2ab661316164d9",
+  "5d44975209257531",
+  "69497d27285fa4cf",
+  "71ff950cdf0775db",
+  "7778f6e6b72bf051",
+  "ccc291893bcae427",
+  "d322b3514f5f15c4",
+  "efad6b9c5e1412aa"
+ ],
+ "remove-k-digits": [
+  "90c7258162c40e5d",
+  "d67aa0163e9c339d"
+ ],
+ "reorganize-string": [
+  "c08d64aa1597acd9"
+ ],
+ "reschedule-meetings-for-maximum-free-time-i": [
+  "2479e7645ee39b1f",
+  "bc8a9e549865f7ec",
+  "d38a739966d2da00",
+  "ef52c190fd908de7",
+  "f02fb640364564a2"
+ ],
+ "restore-the-array-from-adjacent-pairs": [
+  "3b84b224b64e88f3"
+ ],
+ "select-cells-in-grid-with-maximum-score": [
+  "1ad55e46dddafdcb",
+  "ab74b42a5ad3e781",
+  "b231da32510a9e93",
+  "c3f24748a5a73f28"
+ ],
+ "selling-pieces-of-wood": [
+  "0ae3a0d1f180a97f",
+  "8ecfc64ea01a4237",
+  "f6b3019fd058a1be"
+ ],
+ "shift-distance-between-two-strings": [
+  "507eb29d302f8cea",
+  "63c617fb663d75c1",
+  "7477e6ebc1c67fb0",
+  "7d6065ff44bfb0df",
+  "b4a5d0689f63bd1f",
+  "faa2dee7a8de25aa"
+ ],
+ "shifting-letters-ii": [
+  "6054de6c9e0b01ce"
+ ],
+ "shopping-offers": [
+  "5310ea5a1a5fcc1c",
+  "d98faefaf4dbb8e7",
+  "daac72e5496346eb",
+  "dde1c4e3240204b2"
+ ],
+ "shortest-matching-substring": [
+  "54c6bfbc24949cad",
+  "cbd14d4d4b2d4aa8"
+ ],
+ "shortest-path-to-get-all-keys": [
+  "4d9cba6bb284ec05",
+  "5030f0540ea539de",
+  "5d1e5b8a3bf35ea9",
+  "944d409bec21b2dc"
+ ],
+ "shuffle-the-array": [
+  "0f1062f08a07dd57",
+  "250ad836396d5baf",
+  "25e4e030843af3ed",
+  "422b837c82dccde6",
+  "62c3a2e4645bc2dd",
+  "77b304d61a63b923",
+  "8f7808ba9d9bcb25",
+  "e7cadf6d172625b5"
+ ],
+ "single-number-ii": [
+  "7e52b3c6539c43c0",
+  "a8d4e0074a74f340",
+  "ac0656baa38b7882",
+  "ea6ad312f623c8e1"
+ ],
+ "single-row-keyboard": [
+  "38c5876702a407a8",
+  "421cd01427571834",
+  "48c69b9634032a81",
+  "51a518e8bea7267a",
+  "7e230c910d288f10"
+ ],
+ "slowest-key": [
+  "5110dcf8afb669fb",
+  "55f2968de96b9705",
+  "fecefff602543220"
+ ],
+ "smallest-good-base": [
+  "20e0158f9c3ed183",
+  "2e9426b3f47c1297",
+  "432ed555937f82a4",
+  "7f4255bd828c55b4",
+  "b6ec1d21ee96c1cf",
+  "c08b3f85d65fb3bf",
+  "c382dee56bed9f1d",
+  "cdb3896be40787ac",
+  "d27484f79c172c35",
+  "d7ea17aa3dea19d7",
+  "f92e882187ece3ed",
+  "fb5f3ce990d20552"
+ ],
+ "smallest-integer-divisible-by-k": [
+  "13d951eacb7a4bb7",
+  "6906685ea2879092"
+ ],
+ "smallest-missing-genetic-value-in-each-subtree": [
+  "1857f17f31e55365",
+  "a87f73d898c8a443",
+  "e5147a8a0331267a"
+ ],
+ "smallest-missing-non-negative-integer-after-operations": [
+  "c43657c61ce3262e",
+  "cb363460aca13e74",
+  "cb363460aca13e74",
+  "d572d040b48a19e3",
+  "e2915e571c3ff578",
+  "ef988b32c3135cc3"
+ ],
+ "smallest-rotation-with-highest-score": [
+  "79778b8329a78525",
+  "934b082015a31cf0",
+  "966100e371be0815",
+  "99fd2cbc8afff2f9"
+ ],
+ "smallest-string-with-a-given-numeric-value": [
+  "1ed04aab62515327",
+  "458537e4b4c0c7fa",
+  "5aff7a09c2c90f4a",
+  "7a10ffd3037e5048"
+ ],
+ "smallest-subsequence-of-distinct-characters": [
+  "73d34cdcf5b042a7"
+ ],
+ "solve-the-equation": [
+  "0e9c6ad8ffe770c4",
+  "2375c3e703b51648",
+  "5b129848cfcb187a",
+  "5d31bbe45fbe2456",
+  "6052f5b91592c24f",
+  "6a2ae69fcd82975c",
+  "88a0476b2edbfc73",
+  "988f402c08fd5667",
+  "c4d35b01bbf7a1c5",
+  "cab3cf0c81afbb9b",
+  "d1df8550efa22fca",
+  "e489e58ab0bf6cdd",
+  "eb943e9c290f9a72"
+ ],
+ "sort-integers-by-the-number-of-1-bits": [
+  "36e3a41ea3745ae1",
+  "a31f084a6762173a",
+  "bf2b7c01cdc65691",
+  "ca9446d84ad0098b",
+  "d066c9d1784be654",
+  "d3ee483bb2edea94"
+ ],
+ "sorting-the-sentence": [
+  "119b2c9f765cdd6c",
+  "28abe2e640b952cd",
+  "6cca0e14decc516a",
+  "b1fd0b5c856f8d27",
+  "be7a834467d7b558"
+ ],
+ "split-the-array": [
+  "55828a3ebad8a363"
+ ],
+ "split-two-strings-to-make-palindrome": [
+  "3a7f210eb424616b"
+ ],
+ "string-transforms-into-another-string": [
+  "2abecc3a5935ef8d",
+  "5883ca6aea4397bb",
+  "5b7a3b6f6e054437",
+  "fbf00096f737eaa7"
+ ],
+ "subarray-product-less-than-k": [
+  "29273957ac59ce32",
+  "c0bc2438c04edb49",
+  "f07d7f68ac1a8d41"
+ ],
+ "subarrays-with-k-different-integers": [
+  "327d4cde4642aedc",
+  "5fc756e4d5e5aabf",
+  "738a112ff2df61b8",
+  "ac9780eb5e9b2467",
+  "c5680d3e71167ff3"
+ ],
+ "sum-in-a-matrix": [
+  "62b43484f3ec573a"
+ ],
+ "sum-of-good-subsequences": [
+  "80da361819220d92",
+  "9684d3356eda55f9"
+ ],
+ "sum-of-remoteness-of-all-cells": [
+  "07b0fca396ba8074"
+ ],
+ "sum-of-unique-elements": [
+  "229d3637f75c0340"
+ ],
+ "super-palindromes": [
+  "0950378e9c45d075",
+  "102a0cb352a7ed76",
+  "15e3e1929ae0e1b3",
+  "4bd38d5f9cabe435",
+  "55da4761e87efbab",
+  "6670363b055c93ae",
+  "82f232d094b62305",
+  "fbba87718081496a"
+ ],
+ "surface-area-of-3d-shapes": [
+  "2579dbca405f4abd",
+  "a3515fe5386fa0c4",
+  "de4fc5c757774651"
+ ],
+ "swim-in-rising-water": [
+  "414b449c929b34c6",
+  "808aaaef11a28c2f"
+ ],
+ "tallest-billboard": [
+  "d9531eeab4e6acb6"
+ ],
+ "text-justification": [
+  "4b3a18588be60e48",
+  "96a5ac74cf9c3add",
+  "ae3408cf1496962a",
+  "d3f474d61d2b2ce2",
+  "e427bc52130be0bc"
+ ],
+ "the-k-weakest-rows-in-a-matrix": [
+  "6c40f14adc4d9e04"
+ ],
+ "the-number-of-beautiful-subsets": [
+  "0c244a204d2767b2",
+  "0c244a204d2767b2",
+  "18ae07e2c5a25180",
+  "6288375b2234a5fe",
+  "c53478d8969d86f4",
+  "e8c4b7bb62eb15b5",
+  "f98923250544383f"
+ ],
+ "the-score-of-students-solving-math-expression": [
+  "3d0418fec5de94e0",
+  "3e860cc46f179d6d",
+  "ebc69c1d2d287268"
+ ],
+ "the-skyline-problem": [
+  "338bddb43de119d5",
+  "b6540cb7f713e721"
+ ],
+ "the-two-sneaky-numbers-of-digitville": [
+  "0039cd28914b9b4c",
+  "31151442dd489809",
+  "4e451e144bf671c4",
+  "73a269f6971a6935",
+  "973b82e96504d67b",
+  "c1736272eecc84d7"
+ ],
+ "top-k-frequent-elements": [
+  "045e53f3052ebc98",
+  "141c696b3adc1a31",
+  "334b4da5f8008f76",
+  "41c6319590b72568",
+  "55a8b9d9be84953c",
+  "66a8df66b177b35f",
+  "7dce357e3665c48e",
+  "8fa6358caf9519e4",
+  "971bb86a40b652c4",
+  "a5611de835a32ec5",
+  "f34d9e865fb49ffd"
+ ],
+ "total-characters-in-string-after-transformations-ii": [
+  "233e46b4a544281c",
+  "7308587f6337c9ef",
+  "9267e82951c2c29d",
+  "c046f0a1b6671d10",
+  "fe3b171dd02d105e"
+ ],
+ "tree-of-coprimes": [
+  "09cf6dd3364c4ac2",
+  "38359dfbd5585c5d",
+  "3d7a7f42eb303190",
+  "568f9f3a1969c910",
+  "74432cbb63f8da94",
+  "82135de05d7138b9",
+  "a40589e8cfb3e1dd",
+  "d64d669d329e07d2"
+ ],
+ "truncate-sentence": [
+  "45243c866b9825f7",
+  "5f64474f56c1109c"
+ ],
+ "tuple-with-same-product": [
+  "1221c3e79370480b",
+  "22d162feffb65b62",
+  "5b2aab527d591d63"
+ ],
+ "two-furthest-houses-with-different-colors": [
+  "90b6cb52d7fa6f51"
+ ],
+ "two-out-of-three": [
+  "394f9b3fd60fcb07"
+ ],
+ "verifying-an-alien-dictionary": [
+  "3ce6e99bf3f83090",
+  "63c7a7a504c252b0",
+  "6574a41a9623530d",
+  "b56b2fcc822e6d85",
+  "dd023f2b62cac8c3"
+ ],
+ "widest-pair-of-indices-with-equal-range-sum": [
+  "28f38872433ecfa6",
+  "96c10d4dbcfd7396",
+  "9b2f47d1510bdc8f",
+  "bb2ced683f4f4c8b"
+ ],
+ "words-within-two-edits-of-dictionary": [
+  "0bdc514a846bd7a9",
+  "22647f9a6a0112b9",
+  "232a94557543168f",
+  "a8e8f1851f206d0d",
+  "f2b5fa4a8eca789b"
+ ]
+}

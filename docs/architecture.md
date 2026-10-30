@@ -16,18 +16,19 @@ Data lives in the `localcode-data` volume mounted at `/data`:
 ## Backend layout (`backend/localcode`)
 
 ```
-config.py            paths, upstream sources (+ mirrors), limits
-db.py                schemas; content_session() (user.db attached as `u`) and user_session()
+config.py            paths, upstream sources (+ mirrors), execution limits (single source of truth)
+db.py                schemas, user.db migrations, content_session() (user.db attached as `u`), user_session()
 importer/            dataset.py · doocs.py · signatures.py · companies.py · case_filter.py
-                     fetch.py (mirror fallback) · build.py (merge → content.db) · manager.py (background job)
+                     fetch.py (mirror fallback, cached copies) · build.py (merge → content.db)
+                     pipeline.py (fetch + build) · manager.py (background job) · __main__.py (CLI)
 judging/             compare.py (equality rules) · verdicts.py (pure grading) · kwargs.py
                      types.py (runner wire types) · runner_client.py (HTTP)
-services/            problems · companies · judge · progress · errors
-api/                 app.py (factory) · routes/ (one router per domain) · schemas.py · deps.py · static.py
-tools/               validate_cases.py (maintainer tool that generates the exclusion list)
+services/            problems · companies · judge · progress · system · models (response types) · errors
+api/                 app.py (factory) · routes/ (one router per domain) · schemas.py (requests) · deps.py · static.py
+tools/               validate_cases · openapi · smoke · sample_refs (maintainer tools)
 ```
 
-Dependencies point one way: `api → services → (judging, db)`, and `importer → (judging.kwargs, db)`. Services raise `ServiceError(status, message)`, and only the API layer turns that into an HTTP response. `judging.verdicts` is pure, so verdict rules are unit-tested without a runner.
+Dependencies point one way: `api → services → (judging, importer, db)`, and `importer → (judging, db)`; nothing below `services` imports from it. Services raise `ServiceError(status, message)`, and only the API layer turns that into an HTTP response. `judging.verdicts` is pure, so verdict rules are unit-tested without a runner.
 
 ## Test format
 
@@ -39,14 +40,14 @@ Every runnable problem stores:
 - `examples`: argument lists parsed from the statement, used by Run.
 - `compare_mode`: `exact`, or `any_order` when the statement says "in any order".
 
-Run computes expected values by executing the dataset's Python reference solution, and caches them per input.
+Run computes expected values by executing the dataset's Python reference solution. They're cached per input, keyed by the content version, so a re-import invalidates them.
 
 ## Runner protocol
 
 `POST /execute` with `{lang, code, method, params, ret, cases, timeout_ms, cpp_sig}` returns
 `{compile_error, results: [{ok, value | error, stdout, ms}], timed_out, memory_kb, exit_code, stderr}`.
 
-Each language's harness reads `cases.json` and writes one JSON line per case, flushing after each line, so partial results survive a timeout or crash:
+`runner/languages.py` describes each language (source layout, compile and run commands); `runner/sandbox.py` drops privileges, applies limits and cleans up after every run; `runner/execute.py` orchestrates. Each language's harness reads `cases.json` and writes one JSON line per case, flushing after each line, so partial results survive a timeout or crash:
 
 | Language | Harness | Notes |
 |---|---|---|
@@ -54,16 +55,19 @@ Each language's harness reads `cases.json` and writes one JSON line per case, fl
 | Java / Kotlin | `harness/jvm/Driver.java` | Reflection over the `Solution` method's generic types; Gson; `javafx.util.Pair` provided |
 | C++ | `harness/cpp_gen.py` + `cpp/lc.hpp` | Generated `main` from the C++ signature; precompiled prelude and JSON I/O object |
 
-Limits: Run gets 2 s per case and Submit gets 10 s in total, plus a per-language start-up allowance. Memory is capped at 1 GiB of address space (Python, C++) or a 768 MB heap (JVM). Output files are capped and process counts are limited.
+Limits are defined once in `config.Limits` and sent with every request: Run gets 2 s per case and Submit 10 s in total, plus a per-language start-up allowance; memory is 1 GiB, applied as an address-space limit (Python, C++) or a heap of 75% of it (JVM). Output files are capped and the sandbox user is limited to 256 processes.
 
 ## Frontend layout (`web/src`)
 
 ```
-api.ts               typed API client and wire types
-hooks/               useWorkspace (editor/run/submit state) · useSplit · useQueryParams
-components/          Header · ProblemTable · CompanyPicker · CodeEditor · TestPanel · SolutionsTab · SubmissionsTab · ui
+api.ts               API client; wire types re-exported from generated/api.ts (generated from OpenAPI)
+hooks/               useWorkspace (editor/run/submit state) · useAppStatus · useSplit · useQueryParams
+components/          layout (PageHeader, CardHeader, Stat, Meter, SearchInput) · ui (Segmented, badges, markdown)
+                     Header · ProblemTable · CompanyPicker · CodeEditor · EditorToolbar · ProblemDescription
+                     TestPanel · SolutionsTab · SubmissionsTab · QueryState · ErrorBoundary
 pages/               ProblemList · CompanyIndex · CompanyPage · Workspace (lazy, with Monaco) · Progress · Setup
-lib/                 icons · format · sources
+lib/                 draftSaver · markdown · filters · retry · icons · format · sources
+theme.css            design tokens and shared primitives; pages use co-located *.module.css
 ```
 
 Filters live in the URL, so every view can be linked. Server state goes through TanStack Query. Monaco is bundled locally and only loaded with the workspace.

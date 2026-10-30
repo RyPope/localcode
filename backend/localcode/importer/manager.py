@@ -3,11 +3,8 @@
 import threading
 import traceback
 
-from localcode import config, db
-from localcode.importer.build import build_content_db
-from localcode.importer.fetch import fetch_all
+from localcode.importer.pipeline import run_import
 
-STEPS = ["download", "problems", "solutions", "tests", "companies", "done"]
 _lock = threading.Lock()
 state = {"running": False, "step": None, "done": 0, "total": 0, "log": [], "error": None}
 
@@ -22,11 +19,7 @@ def _progress(step: str, done: int, total: int) -> None:
 
 def _work() -> None:
     try:
-        _progress("download", 0, 0)
-        used = fetch_all(config.SOURCES_DIR, _log)
-        _log("building database")
-        stats = build_content_db(config.SOURCES_DIR, db.CONTENT_DB, _progress, used)
-        _log(f"imported {stats['problems']} problems, {stats['with_tests']} with tests, {stats['companies']} companies")
+        run_import(_log, _progress)
     except Exception as e:  # surfaced on the setup screen
         state["error"] = f"{type(e).__name__}: {e}"
         _log(traceback.format_exc(limit=3))
