@@ -1,10 +1,9 @@
 """Request bodies."""
 
-from typing import Literal
-
 from pydantic import BaseModel, Field
 
-Lang = Literal["python", "java", "cpp", "kotlin"]
+from localcode.services.models import Lang
+
 MAX_CODE = 200_000
 
 

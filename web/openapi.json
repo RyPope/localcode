@@ -1,0 +1,1949 @@
+{
+  "components": {
+    "schemas": {
+      "AppStatus": {
+        "properties": {
+          "import": {
+            "$ref": "#/components/schemas/ImportState"
+          },
+          "imported": {
+            "title": "Imported",
+            "type": "boolean"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ContentMeta"
+          },
+          "toolchains": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Toolchains"
+          }
+        },
+        "required": [
+          "imported",
+          "import",
+          "meta",
+          "toolchains"
+        ],
+        "title": "AppStatus",
+        "type": "object"
+      },
+      "Company": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slug",
+          "name",
+          "count"
+        ],
+        "title": "Company",
+        "type": "object"
+      },
+      "CompanyProgress": {
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "solved": {
+            "title": "Solved",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "slug",
+          "name",
+          "solved",
+          "total"
+        ],
+        "title": "CompanyProgress",
+        "type": "object"
+      },
+      "CompanyRef": {
+        "properties": {
+          "frequency": {
+            "title": "Frequency",
+            "type": "number"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slug",
+          "name",
+          "frequency"
+        ],
+        "title": "CompanyRef",
+        "type": "object"
+      },
+      "CompanySummary": {
+        "properties": {
+          "attempted": {
+            "title": "Attempted",
+            "type": "integer"
+          },
+          "by_difficulty": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "By Difficulty",
+            "type": "object"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "next_unsolved": {
+            "items": {
+              "$ref": "#/components/schemas/ProblemRef"
+            },
+            "title": "Next Unsolved",
+            "type": "array"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "solved": {
+            "title": "Solved",
+            "type": "integer"
+          },
+          "top_topics": {
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            },
+            "title": "Top Topics",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          },
+          "updated": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated"
+          },
+          "window": {
+            "enum": [
+              "30d",
+              "3m",
+              "6m",
+              "older",
+              "all"
+            ],
+            "title": "Window",
+            "type": "string"
+          },
+          "windows": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Windows",
+            "type": "object"
+          }
+        },
+        "required": [
+          "slug",
+          "name",
+          "window",
+          "total",
+          "windows",
+          "by_difficulty",
+          "top_topics",
+          "solved",
+          "attempted",
+          "next_unsolved",
+          "updated"
+        ],
+        "title": "CompanySummary",
+        "type": "object"
+      },
+      "ContentMeta": {
+        "properties": {
+          "imported_at": {
+            "title": "Imported At",
+            "type": "string"
+          },
+          "sources": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Sources",
+            "type": "object"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/ImportStats"
+          }
+        },
+        "title": "ContentMeta",
+        "type": "object"
+      },
+      "DifficultyCounts": {
+        "description": "[solved, total] per difficulty.",
+        "properties": {
+          "easy": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Easy",
+            "type": "array"
+          },
+          "hard": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Hard",
+            "type": "array"
+          },
+          "medium": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Medium",
+            "type": "array"
+          }
+        },
+        "required": [
+          "easy",
+          "medium",
+          "hard"
+        ],
+        "title": "DifficultyCounts",
+        "type": "object"
+      },
+      "Draft": {
+        "properties": {
+          "code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Code"
+          }
+        },
+        "required": [
+          "code"
+        ],
+        "title": "Draft",
+        "type": "object"
+      },
+      "DraftRequest": {
+        "properties": {
+          "code": {
+            "maxLength": 200000,
+            "title": "Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code"
+        ],
+        "title": "DraftRequest",
+        "type": "object"
+      },
+      "FailingCase": {
+        "properties": {
+          "actual": {
+            "title": "Actual"
+          },
+          "args": {
+            "items": {},
+            "title": "Args",
+            "type": "array"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "expected": {
+            "title": "Expected"
+          },
+          "stdout": {
+            "title": "Stdout",
+            "type": "string"
+          }
+        },
+        "required": [
+          "args",
+          "expected",
+          "actual",
+          "stdout",
+          "error"
+        ],
+        "title": "FailingCase",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "ImportStarted": {
+        "properties": {
+          "started": {
+            "title": "Started",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "started"
+        ],
+        "title": "ImportStarted",
+        "type": "object"
+      },
+      "ImportState": {
+        "properties": {
+          "done": {
+            "title": "Done",
+            "type": "integer"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "log": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Log",
+            "type": "array"
+          },
+          "running": {
+            "title": "Running",
+            "type": "boolean"
+          },
+          "step": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Step"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "running",
+          "step",
+          "done",
+          "total",
+          "log",
+          "error"
+        ],
+        "title": "ImportState",
+        "type": "object"
+      },
+      "ImportStats": {
+        "properties": {
+          "cases": {
+            "title": "Cases",
+            "type": "integer"
+          },
+          "companies": {
+            "title": "Companies",
+            "type": "integer"
+          },
+          "problems": {
+            "title": "Problems",
+            "type": "integer"
+          },
+          "with_tests": {
+            "title": "With Tests",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "problems",
+          "with_tests",
+          "cases",
+          "companies"
+        ],
+        "title": "ImportStats",
+        "type": "object"
+      },
+      "Param": {
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "type"
+        ],
+        "title": "Param",
+        "type": "object"
+      },
+      "ProblemDetail": {
+        "properties": {
+          "acceptance": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Acceptance"
+          },
+          "companies": {
+            "items": {
+              "$ref": "#/components/schemas/CompanyRef"
+            },
+            "title": "Companies",
+            "type": "array"
+          },
+          "description_html": {
+            "title": "Description Html",
+            "type": "string"
+          },
+          "difficulty": {
+            "enum": [
+              "Easy",
+              "Medium",
+              "Hard"
+            ],
+            "title": "Difficulty",
+            "type": "string"
+          },
+          "examples": {
+            "items": {
+              "items": {},
+              "type": "array"
+            },
+            "title": "Examples",
+            "type": "array"
+          },
+          "has_tests": {
+            "title": "Has Tests",
+            "type": "boolean"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "langs": {
+            "items": {
+              "enum": [
+                "python",
+                "java",
+                "cpp",
+                "kotlin"
+              ],
+              "type": "string"
+            },
+            "title": "Langs",
+            "type": "array"
+          },
+          "next": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next"
+          },
+          "params": {
+            "items": {
+              "$ref": "#/components/schemas/Param"
+            },
+            "title": "Params",
+            "type": "array"
+          },
+          "prev": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prev"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "starters": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Starters",
+            "type": "object"
+          },
+          "status": {
+            "enum": [
+              "solved",
+              "attempted",
+              "todo"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
+          },
+          "test_count": {
+            "title": "Test Count",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slug",
+          "id",
+          "title",
+          "difficulty",
+          "tags",
+          "acceptance",
+          "description_html",
+          "params",
+          "examples",
+          "has_tests",
+          "test_count",
+          "langs",
+          "starters",
+          "companies",
+          "status",
+          "prev",
+          "next"
+        ],
+        "title": "ProblemDetail",
+        "type": "object"
+      },
+      "ProblemList": {
+        "properties": {
+          "counts": {
+            "$ref": "#/components/schemas/DifficultyCounts"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ProblemRow"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total",
+          "counts",
+          "items"
+        ],
+        "title": "ProblemList",
+        "type": "object"
+      },
+      "ProblemRef": {
+        "properties": {
+          "difficulty": {
+            "enum": [
+              "Easy",
+              "Medium",
+              "Hard"
+            ],
+            "title": "Difficulty",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slug",
+          "id",
+          "title",
+          "difficulty"
+        ],
+        "title": "ProblemRef",
+        "type": "object"
+      },
+      "ProblemRow": {
+        "properties": {
+          "acceptance": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Acceptance"
+          },
+          "difficulty": {
+            "enum": [
+              "Easy",
+              "Medium",
+              "Hard"
+            ],
+            "title": "Difficulty",
+            "type": "string"
+          },
+          "frequency": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Frequency"
+          },
+          "has_tests": {
+            "title": "Has Tests",
+            "type": "boolean"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "solved",
+              "attempted",
+              "todo"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slug",
+          "id",
+          "title",
+          "difficulty",
+          "acceptance",
+          "tags",
+          "frequency",
+          "status",
+          "has_tests"
+        ],
+        "title": "ProblemRow",
+        "type": "object"
+      },
+      "RunCase": {
+        "properties": {
+          "actual": {
+            "title": "Actual"
+          },
+          "args": {
+            "items": {},
+            "title": "Args",
+            "type": "array"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "expected": {
+            "title": "Expected"
+          },
+          "ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ms"
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "stdout": {
+            "title": "Stdout",
+            "type": "string"
+          }
+        },
+        "required": [
+          "args",
+          "expected",
+          "actual",
+          "stdout",
+          "ok",
+          "error",
+          "ms"
+        ],
+        "title": "RunCase",
+        "type": "object"
+      },
+      "RunRequest": {
+        "properties": {
+          "code": {
+            "maxLength": 200000,
+            "title": "Code",
+            "type": "string"
+          },
+          "custom": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20,
+            "title": "Custom",
+            "type": "array"
+          },
+          "lang": {
+            "enum": [
+              "python",
+              "java",
+              "cpp",
+              "kotlin"
+            ],
+            "title": "Lang",
+            "type": "string"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slug",
+          "lang",
+          "code"
+        ],
+        "title": "RunRequest",
+        "type": "object"
+      },
+      "RunResult": {
+        "properties": {
+          "cases": {
+            "items": {
+              "$ref": "#/components/schemas/RunCase"
+            },
+            "title": "Cases",
+            "type": "array"
+          },
+          "compile_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Compile Error"
+          },
+          "verdict": {
+            "title": "Verdict",
+            "type": "string"
+          }
+        },
+        "required": [
+          "verdict",
+          "compile_error",
+          "cases"
+        ],
+        "title": "RunResult",
+        "type": "object"
+      },
+      "Solution": {
+        "properties": {
+          "code": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Code",
+            "type": "object"
+          },
+          "explanation_md": {
+            "title": "Explanation Md",
+            "type": "string"
+          },
+          "notes": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Notes",
+            "type": "object"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "explanation_md",
+          "code",
+          "notes"
+        ],
+        "title": "Solution",
+        "type": "object"
+      },
+      "Stats": {
+        "properties": {
+          "by_company": {
+            "items": {
+              "$ref": "#/components/schemas/CompanyProgress"
+            },
+            "title": "By Company",
+            "type": "array"
+          },
+          "by_topic": {
+            "items": {
+              "$ref": "#/components/schemas/TopicProgress"
+            },
+            "title": "By Topic",
+            "type": "array"
+          },
+          "since": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Since"
+          },
+          "solved_by_week": {
+            "items": {
+              "$ref": "#/components/schemas/WeekCount"
+            },
+            "title": "Solved By Week",
+            "type": "array"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/DifficultyCounts"
+          }
+        },
+        "required": [
+          "since",
+          "totals",
+          "solved_by_week",
+          "by_topic",
+          "by_company"
+        ],
+        "title": "Stats",
+        "type": "object"
+      },
+      "Submission": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "failing": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FailingCase"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "lang": {
+            "enum": [
+              "python",
+              "java",
+              "cpp",
+              "kotlin"
+            ],
+            "title": "Lang",
+            "type": "string"
+          },
+          "memory_kb": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Memory Kb"
+          },
+          "passed": {
+            "title": "Passed",
+            "type": "integer"
+          },
+          "runtime_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Runtime Ms"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          },
+          "verdict": {
+            "title": "Verdict",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "lang",
+          "code",
+          "verdict",
+          "passed",
+          "total",
+          "runtime_ms",
+          "memory_kb",
+          "failing",
+          "created_at"
+        ],
+        "title": "Submission",
+        "type": "object"
+      },
+      "SubmitRequest": {
+        "properties": {
+          "code": {
+            "maxLength": 200000,
+            "title": "Code",
+            "type": "string"
+          },
+          "lang": {
+            "enum": [
+              "python",
+              "java",
+              "cpp",
+              "kotlin"
+            ],
+            "title": "Lang",
+            "type": "string"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slug",
+          "lang",
+          "code"
+        ],
+        "title": "SubmitRequest",
+        "type": "object"
+      },
+      "SubmitResult": {
+        "properties": {
+          "compile_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Compile Error"
+          },
+          "failing": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FailingCase"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "memory_kb": {
+            "title": "Memory Kb",
+            "type": "integer"
+          },
+          "passed": {
+            "title": "Passed",
+            "type": "integer"
+          },
+          "runtime_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Runtime Ms"
+          },
+          "submission_id": {
+            "title": "Submission Id",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          },
+          "verdict": {
+            "title": "Verdict",
+            "type": "string"
+          }
+        },
+        "required": [
+          "verdict",
+          "passed",
+          "total",
+          "runtime_ms",
+          "memory_kb",
+          "failing",
+          "compile_error",
+          "submission_id"
+        ],
+        "title": "SubmitResult",
+        "type": "object"
+      },
+      "Tag": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "count"
+        ],
+        "title": "Tag",
+        "type": "object"
+      },
+      "TopicProgress": {
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "solved": {
+            "title": "Solved",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "solved",
+          "total"
+        ],
+        "title": "TopicProgress",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      },
+      "WeekCount": {
+        "properties": {
+          "easy": {
+            "title": "Easy",
+            "type": "integer"
+          },
+          "hard": {
+            "title": "Hard",
+            "type": "integer"
+          },
+          "medium": {
+            "title": "Medium",
+            "type": "integer"
+          },
+          "week": {
+            "title": "Week",
+            "type": "string"
+          }
+        },
+        "required": [
+          "week",
+          "easy",
+          "medium",
+          "hard"
+        ],
+        "title": "WeekCount",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "localcode",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/companies": {
+      "get": {
+        "operationId": "list_companies_api_companies_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Q",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Company"
+                  },
+                  "title": "Response List Companies Api Companies Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Companies",
+        "tags": [
+          "companies"
+        ]
+      }
+    },
+    "/api/companies/{slug}": {
+      "get": {
+        "operationId": "company_api_companies__slug__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "title": "Slug",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "window",
+            "required": false,
+            "schema": {
+              "default": "6m",
+              "enum": [
+                "30d",
+                "3m",
+                "6m",
+                "older",
+                "all"
+              ],
+              "title": "Window",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanySummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Company",
+        "tags": [
+          "companies"
+        ]
+      }
+    },
+    "/api/drafts/{slug}/{lang}": {
+      "get": {
+        "operationId": "get_draft_api_drafts__slug___lang__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "title": "Slug",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "lang",
+            "required": true,
+            "schema": {
+              "enum": [
+                "python",
+                "java",
+                "cpp",
+                "kotlin"
+              ],
+              "title": "Lang",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Draft"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Draft",
+        "tags": [
+          "progress"
+        ]
+      },
+      "put": {
+        "operationId": "put_draft_api_drafts__slug___lang__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "title": "Slug",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "lang",
+            "required": true,
+            "schema": {
+              "enum": [
+                "python",
+                "java",
+                "cpp",
+                "kotlin"
+              ],
+              "title": "Lang",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DraftRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Put Draft",
+        "tags": [
+          "progress"
+        ]
+      }
+    },
+    "/api/export": {
+      "get": {
+        "operationId": "export_api_export_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Export",
+        "tags": [
+          "progress"
+        ]
+      }
+    },
+    "/api/import": {
+      "post": {
+        "operationId": "start_import_api_import_post",
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportStarted"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Start Import",
+        "tags": [
+          "system"
+        ]
+      }
+    },
+    "/api/problems": {
+      "get": {
+        "operationId": "list_problems_api_problems_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Q",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "difficulty",
+            "required": false,
+            "schema": {
+              "default": "",
+              "enum": [
+                "",
+                "Easy",
+                "Medium",
+                "Hard"
+              ],
+              "title": "Difficulty",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "default": "",
+              "enum": [
+                "",
+                "solved",
+                "attempted",
+                "todo",
+                "unsolved"
+              ],
+              "title": "Status",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Comma-separated topics; matches any",
+            "in": "query",
+            "name": "tags",
+            "required": false,
+            "schema": {
+              "default": "",
+              "description": "Comma-separated topics; matches any",
+              "title": "Tags",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "company",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Company",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "window",
+            "required": false,
+            "schema": {
+              "default": "6m",
+              "enum": [
+                "30d",
+                "3m",
+                "6m",
+                "older",
+                "all"
+              ],
+              "title": "Window",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "default": "",
+              "enum": [
+                "",
+                "id",
+                "frequency",
+                "acceptance",
+                "difficulty"
+              ],
+              "title": "Sort",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Problems",
+        "tags": [
+          "problems"
+        ]
+      }
+    },
+    "/api/problems/{slug}": {
+      "get": {
+        "operationId": "problem_api_problems__slug__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "title": "Slug",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Problem",
+        "tags": [
+          "problems"
+        ]
+      }
+    },
+    "/api/problems/{slug}/solutions": {
+      "get": {
+        "operationId": "solutions_api_problems__slug__solutions_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "title": "Slug",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Solution"
+                  },
+                  "title": "Response Solutions Api Problems  Slug  Solutions Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Solutions",
+        "tags": [
+          "problems"
+        ]
+      }
+    },
+    "/api/run": {
+      "post": {
+        "operationId": "run_api_run_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Run",
+        "tags": [
+          "judge"
+        ]
+      }
+    },
+    "/api/stats": {
+      "get": {
+        "operationId": "stats_api_stats_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Stats"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Stats",
+        "tags": [
+          "progress"
+        ]
+      }
+    },
+    "/api/status": {
+      "get": {
+        "operationId": "status_api_status_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppStatus"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Status",
+        "tags": [
+          "system"
+        ]
+      }
+    },
+    "/api/submissions/{slug}": {
+      "get": {
+        "operationId": "submissions_api_submissions__slug__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "title": "Slug",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Submission"
+                  },
+                  "title": "Response Submissions Api Submissions  Slug  Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Submissions",
+        "tags": [
+          "progress"
+        ]
+      }
+    },
+    "/api/submit": {
+      "post": {
+        "operationId": "submit_api_submit_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmitResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Submit",
+        "tags": [
+          "judge"
+        ]
+      }
+    },
+    "/api/tags": {
+      "get": {
+        "operationId": "tags_api_tags_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Tag"
+                  },
+                  "title": "Response Tags Api Tags Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Tags",
+        "tags": [
+          "problems"
+        ]
+      }
+    }
+  }
+}

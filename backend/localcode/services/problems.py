@@ -5,6 +5,7 @@ import sqlite3
 
 from localcode.db import content_session
 from localcode.services.errors import bad_request, not_found
+from localcode.services.models import DifficultyCounts, ProblemDetail, ProblemList, Solution, Tag
 from localcode.services.sql import DIFFICULTIES, STATUS, WINDOWS, contains
 
 KOTLIN_FALLBACK_NOTE = "No Kotlin reference yet — showing Java."
@@ -35,7 +36,7 @@ def content_version(con: sqlite3.Connection) -> str:
     return row[0] if row else ""
 
 
-def _difficulty_counts(con: sqlite3.Connection) -> dict[str, list[int]]:
+def _difficulty_counts(con: sqlite3.Connection) -> DifficultyCounts:
     counts = {d.lower(): [0, 0] for d in DIFFICULTIES}
     for diff, solved, n in con.execute(
         f"select difficulty, {STATUS} = 'solved', count(*) from problems p group by 1, 2"
@@ -57,7 +58,7 @@ def list_problems(
     sort: str = "",
     page: int = 1,
     page_size: int = 50,
-) -> dict:
+) -> ProblemList:
     where: list[str] = []
     args: list = []
     join, freq = "", "null"
@@ -120,13 +121,13 @@ def list_problems(
     }
 
 
-def all_tags() -> list[dict]:
+def all_tags() -> list[Tag]:
     with content_session() as con:
         rows = con.execute("select value, count(*) from problems, json_each(problems.tags) group by 1 order by 2 desc")
         return [{"name": name, "count": n} for name, n in rows]
 
 
-def problem_detail(slug: str) -> dict:
+def problem_detail(slug: str) -> ProblemDetail:
     with content_session() as con:
         p = load_problem(con, slug)
         starters = dict(con.execute("select lang, code from starters where slug = ?", (slug,)).fetchall())
@@ -167,7 +168,7 @@ def problem_detail(slug: str) -> dict:
     }
 
 
-def solutions(slug: str) -> list[dict]:
+def solutions(slug: str) -> list[Solution]:
     """Reference solutions; Kotlin falls back to Java (doocs has few Kotlin solutions)."""
     with content_session() as con:
         load_problem(con, slug)

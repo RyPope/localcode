@@ -2,7 +2,8 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { ICONS } from "../lib/icons";
 import { Link } from "react-router-dom";
 import { useQueryParams } from "../hooks/useQueryParams";
-import { api, type Window } from "../api";
+import { DIFFICULTY_FILTERS, oneOf, STATUS_FILTERS, WINDOWS } from "../lib/filters";
+import { api } from "../api";
 import CompanyPicker from "../components/CompanyPicker";
 import ProblemTable from "../components/ProblemTable";
 import { CompanyBadge, Icon, Pager, WindowToggle } from "../components/ui";
@@ -12,14 +13,14 @@ const PAGE = 50;
 export default function ProblemList() {
   const { get, set } = useQueryParams();
   const company = get("company");
-  const window = get("window", "6m") as Window;
+  const window = oneOf(get("window"), WINDOWS, "6m");
   const page = Number(get("page", "1"));
   const tags = get("tags").split(",").filter(Boolean);
 
   const params = {
     q: get("q"),
-    difficulty: get("difficulty"),
-    status: get("status"),
+    difficulty: oneOf(get("difficulty"), DIFFICULTY_FILTERS, ""),
+    status: oneOf(get("status"), STATUS_FILTERS, ""),
     tags: get("tags"),
     company,
     window,

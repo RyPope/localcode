@@ -1,7 +1,28 @@
-export type Lang = "python" | "java" | "cpp" | "kotlin";
-export type Difficulty = "Easy" | "Medium" | "Hard";
-export type Status = "solved" | "attempted" | "todo";
-export type Window = "30d" | "3m" | "6m" | "older" | "all";
+import type { components, operations } from "./generated/api";
+
+// Wire types are generated from the backend's OpenAPI document (`make api-types`); never edit them by hand.
+type Schemas = components["schemas"];
+export type ProblemRow = Schemas["ProblemRow"];
+export type ProblemList = Schemas["ProblemList"];
+export type Param = Schemas["Param"];
+export type ProblemDetail = Schemas["ProblemDetail"];
+export type Solution = Schemas["Solution"];
+export type RunCase = Schemas["RunCase"];
+export type RunResult = Schemas["RunResult"];
+export type FailingCase = Schemas["FailingCase"];
+export type SubmitResult = Schemas["SubmitResult"];
+export type Submission = Schemas["Submission"];
+export type Company = Schemas["Company"];
+export type CompanySummary = Schemas["CompanySummary"];
+export type Stats = Schemas["Stats"];
+export type AppStatus = Schemas["AppStatus"];
+export type Tag = Schemas["Tag"];
+export type ProblemQuery = NonNullable<operations["list_problems_api_problems_get"]["parameters"]["query"]>;
+
+export type Lang = Schemas["SubmitRequest"]["lang"];
+export type Difficulty = ProblemRow["difficulty"];
+export type Status = ProblemRow["status"];
+export type Window = CompanySummary["window"];
 
 export const LANG_LABEL: Record<Lang, string> = { python: "Python 3", java: "Java", cpp: "C++", kotlin: "Kotlin" };
 export const WINDOW_LABEL: Record<Window, string> = {
@@ -11,131 +32,6 @@ export const WINDOW_LABEL: Record<Window, string> = {
   older: "Older",
   all: "All time",
 };
-
-export interface ProblemRow {
-  slug: string;
-  id: number;
-  title: string;
-  difficulty: Difficulty;
-  acceptance: number | null;
-  tags: string[];
-  frequency: number | null;
-  status: Status;
-  has_tests: boolean;
-}
-export interface ProblemList {
-  total: number;
-  items: ProblemRow[];
-  counts: Record<"easy" | "medium" | "hard", [number, number]>;
-}
-export interface Param {
-  name: string;
-  type: string;
-}
-export interface ProblemDetail {
-  slug: string;
-  id: number;
-  title: string;
-  difficulty: Difficulty;
-  tags: string[];
-  acceptance: number | null;
-  description_html: string;
-  params: Param[];
-  examples: unknown[][];
-  has_tests: boolean;
-  langs: Lang[];
-  starters: Partial<Record<Lang, string>>;
-  companies: { slug: string; name: string; frequency: number }[];
-  status: Status;
-  prev: string | null;
-  next: string | null;
-  test_count: number;
-}
-export interface Solution {
-  title: string;
-  explanation_md: string;
-  code: Partial<Record<Lang, string>>;
-  notes: Partial<Record<Lang, string>>;
-}
-export interface RunCase {
-  args: unknown[];
-  expected: unknown;
-  actual: unknown;
-  stdout: string;
-  ok: boolean;
-  error: string | null;
-  ms: number | null;
-}
-export interface RunResult {
-  verdict: string;
-  compile_error: string | null;
-  cases: RunCase[];
-}
-export interface Failing {
-  args: unknown[];
-  expected: unknown;
-  actual: unknown;
-  stdout: string;
-  error: string | null;
-}
-export interface SubmitResult {
-  verdict: string;
-  passed: number;
-  total: number;
-  runtime_ms: number | null;
-  memory_kb: number;
-  failing: Failing | null;
-  compile_error: string | null;
-  submission_id: number;
-}
-export interface Submission {
-  id: number;
-  slug: string;
-  lang: Lang;
-  code: string;
-  verdict: string;
-  passed: number;
-  total: number;
-  runtime_ms: number | null;
-  memory_kb: number;
-  failing: Failing | null;
-  created_at: string;
-}
-export interface Company {
-  slug: string;
-  name: string;
-  count: number;
-}
-export interface CompanySummary {
-  slug: string;
-  name: string;
-  window: Window;
-  total: number;
-  windows: Record<Window, number>;
-  by_difficulty: Record<Difficulty, number>;
-  top_topics: { name: string; count: number }[];
-  solved: number;
-  attempted: number;
-  next_unsolved: { slug: string; id: number; title: string; difficulty: Difficulty }[];
-  updated: string | null;
-}
-export interface Stats {
-  since: string | null;
-  totals: Record<"easy" | "medium" | "hard", [number, number]>;
-  solved_by_week: { week: string; easy: number; medium: number; hard: number }[];
-  by_topic: { name: string; solved: number; total: number }[];
-  by_company: { slug: string; name: string; solved: number; total: number }[];
-}
-export interface AppStatus {
-  imported: boolean;
-  import: { running: boolean; step: string | null; done: number; total: number; log: string[]; error: string | null };
-  meta: {
-    imported_at?: string;
-    stats?: { problems: number; with_tests: number; cases: number; companies: number };
-    sources?: Record<string, string>;
-  };
-  toolchains: Partial<Record<Lang, string>> | null;
-}
 
 export class ApiError extends Error {}
 
@@ -153,7 +49,7 @@ async function req<T>(path: string, init?: RequestInit): Promise<T> {
   return r.status === 204 ? (undefined as T) : r.json();
 }
 
-const qs = (o: Record<string, string | number | undefined>) =>
+const qs = (o: Record<string, string | number | undefined>): string =>
   new URLSearchParams(
     Object.entries(o)
       .filter(([, v]) => v !== undefined && v !== "")
@@ -162,12 +58,12 @@ const qs = (o: Record<string, string | number | undefined>) =>
 
 export const api = {
   status: () => req<AppStatus>("/api/status"),
-  startImport: () => req<{ started: boolean }>("/api/import", { method: "POST" }),
-  problems: (p: Record<string, string | number | undefined>) => req<ProblemList>(`/api/problems?${qs(p)}`),
-  tags: () => req<{ name: string; count: number }[]>("/api/tags"),
+  startImport: () => req<Schemas["ImportStarted"]>("/api/import", { method: "POST" }),
+  problems: (query: ProblemQuery) => req<ProblemList>(`/api/problems?${qs(query)}`),
+  tags: () => req<Tag[]>("/api/tags"),
   problem: (slug: string) => req<ProblemDetail>(`/api/problems/${slug}`),
   solutions: (slug: string) => req<Solution[]>(`/api/problems/${slug}/solutions`),
-  draft: (slug: string, lang: Lang) => req<{ code: string | null }>(`/api/drafts/${slug}/${lang}`),
+  draft: (slug: string, lang: Lang) => req<Schemas["Draft"]>(`/api/drafts/${slug}/${lang}`),
   saveDraft: (slug: string, lang: Lang, code: string, opts?: { keepalive?: boolean }) =>
     req<void>(`/api/drafts/${slug}/${lang}`, {
       method: "PUT",

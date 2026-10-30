@@ -1,7 +1,8 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useQueryParams } from "../hooks/useQueryParams";
-import { api, WINDOW_LABEL, type Difficulty, type Window } from "../api";
+import { DIFFICULTY_FILTERS, oneOf, STATUS_FILTERS, WINDOWS } from "../lib/filters";
+import { api, WINDOW_LABEL, type Difficulty } from "../api";
 import ProblemTable from "../components/ProblemTable";
 import { CompanyBadge, DiffText, Pager, WindowToggle } from "../components/ui";
 
@@ -12,9 +13,9 @@ export default function CompanyPage() {
   const { slug = "" } = useParams();
   const nav = useNavigate();
   const { get, set } = useQueryParams();
-  const window = get("window", "6m") as Window;
-  const status = get("status");
-  const difficulty = get("difficulty");
+  const window = oneOf(get("window"), WINDOWS, "6m");
+  const status = oneOf(get("status"), STATUS_FILTERS, "");
+  const difficulty = oneOf(get("difficulty"), DIFFICULTY_FILTERS, "");
   const page = Number(get("page", "1"));
 
   const summary = useQuery({

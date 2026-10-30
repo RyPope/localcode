@@ -15,6 +15,7 @@ from localcode.judging.types import RunnerRequest, RunnerResult
 from localcode.judging.verdicts import grade_run, grade_submission
 from localcode.services import progress
 from localcode.services.errors import ServiceError, bad_request
+from localcode.services.models import RunResult, SubmitResult
 from localcode.services.problems import content_version, load_problem
 
 Runner = Callable[[RunnerRequest], RunnerResult]
@@ -119,7 +120,7 @@ def parse_custom_cases(p: sqlite3.Row, custom: list[str]) -> list[list[Any]]:
     return out
 
 
-def run(runner: Runner, slug: str, lang: str, code: str, custom: list[str] | None = None) -> dict:
+def run(runner: Runner, slug: str, lang: str, code: str, custom: list[str] | None = None) -> RunResult:
     with content_session() as con:
         p = load_problem(con, slug)
         _check_runnable(p, lang)
@@ -131,7 +132,7 @@ def run(runner: Runner, slug: str, lang: str, code: str, custom: list[str] | Non
     return grade_run(arg_lists, expected, res, p["compare_mode"]).to_dict()
 
 
-def submit(runner: Runner, slug: str, lang: str, code: str) -> dict:
+def submit(runner: Runner, slug: str, lang: str, code: str) -> SubmitResult:
     with content_session() as con:
         p = load_problem(con, slug)
         _check_runnable(p, lang)

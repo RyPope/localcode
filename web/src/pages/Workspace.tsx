@@ -3,7 +3,7 @@ import { pct } from "../lib/format";
 import { ICONS } from "../lib/icons";
 import { useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { api, LANG_LABEL, type Lang, type Window } from "../api";
+import { api, LANG_LABEL, type Lang } from "../api";
 import CodeEditor from "../components/CodeEditor";
 import SolutionsTab from "../components/SolutionsTab";
 import SubmissionsTab from "../components/SubmissionsTab";
@@ -11,6 +11,7 @@ import TestPanel from "../components/TestPanel";
 import { CompanyBadge, Html, Icon } from "../components/ui";
 import { useSplit } from "../hooks/useSplit";
 import { useWorkspace, type SaveState } from "../hooks/useWorkspace";
+import { oneOf, WINDOWS } from "../lib/filters";
 import { pref, setPref } from "../theme";
 
 type LeftTab = "description" | "solutions" | "submissions";
@@ -26,7 +27,7 @@ export default function Workspace() {
   const { slug = "" } = useParams();
   const [sp] = useSearchParams();
   const company = sp.get("company");
-  const window_ = (sp.get("window") ?? "6m") as Window;
+  const window_ = oneOf(sp.get("window"), WINDOWS, "6m");
   const ws = useWorkspace(slug);
   const [left, setLeft] = useState<LeftTab>("description");
   const [fontSize, setFontSize] = useState<number>(() => pref("fontSize", 14));

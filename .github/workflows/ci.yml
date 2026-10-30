@@ -22,6 +22,8 @@ jobs:
       - run: ruff check backend runner
       - run: ruff format --check backend runner
       - run: pytest -q backend
+      - name: OpenAPI document is up to date
+        run: python -m localcode.tools.openapi web/openapi.json && git diff --exit-code web/openapi.json
 
   web:
     runs-on: ubuntu-24.04
@@ -38,6 +40,8 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run format:check
+      - name: Generated API types are up to date
+        run: npm run api-types && git diff --exit-code src/generated
       - run: npm run typecheck
       - run: npm test
       - run: npm run build

@@ -46,6 +46,10 @@ format: ## Auto-format everything
 dev-web: ## Vite dev server on :5173 (proxies /api to a running stack)
 	npm --prefix web run dev
 
+api-types: ## Regenerate web/openapi.json and the web client's TypeScript types from the API
+	$(PY)/python -m localcode.tools.openapi web/openapi.json
+	npm --prefix web run api-types
+
 smoke: ## End-to-end smoke test against the running stack
 	python3 scripts/smoke.py
 
@@ -55,4 +59,4 @@ validate-cases: ## Maintainers: regenerate the excluded test-case list (slow)
 		--runners http://localcode-runner-1:8080 http://localcode-runner-2:8080 http://localcode-runner-3:8080
 	docker compose cp app:/data/excluded_cases.json backend/localcode/data/excluded_cases.json
 
-.PHONY: help up down logs setup test test-backend test-runner test-web lint format dev-web smoke validate-cases
+.PHONY: help up down logs setup test test-backend test-runner test-web lint format dev-web api-types smoke validate-cases

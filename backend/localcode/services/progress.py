@@ -6,6 +6,7 @@ from datetime import UTC, date, datetime, timedelta
 
 from localcode.db import content_session, user_session
 from localcode.services.errors import bad_request
+from localcode.services.models import Export, Stats, Submission
 from localcode.services.sql import DIFFICULTIES, LANGS
 
 STATS_WEEKS = 26
@@ -56,7 +57,7 @@ def record_submission(slug: str, lang: str, code: str, grade: dict) -> int:
         return int(cur.lastrowid)
 
 
-def list_submissions(slug: str) -> list[dict]:
+def list_submissions(slug: str) -> list[Submission]:
     with user_session() as u:
         rows = u.execute("select * from submissions where slug = ? order by id desc", (slug,)).fetchall()
     return [{**dict(r), "failing": json.loads(r["failing"]) if r["failing"] else None} for r in rows]
@@ -66,7 +67,7 @@ def _week_start(d: date) -> date:
     return d - timedelta(days=d.weekday())
 
 
-def stats() -> dict:
+def stats() -> Stats:
     """Totals by difficulty, first-accepted problems per week, and coverage by topic and company."""
     with content_session() as con:
         firsts = con.execute(
@@ -116,7 +117,7 @@ def stats() -> dict:
     }
 
 
-def export() -> dict:
+def export() -> Export:
     with user_session() as u:
         return {
             "exported_at": now_iso(),

@@ -5,10 +5,11 @@ from collections import Counter
 
 from localcode.db import content_session
 from localcode.services.errors import bad_request, not_found
+from localcode.services.models import Company, CompanySummary
 from localcode.services.sql import DIFFICULTIES, STATUS, WINDOWS, contains
 
 
-def list_companies(q: str = "") -> list[dict]:
+def list_companies(q: str = "") -> list[Company]:
     with content_session() as con:
         rows = con.execute(
             "select c.slug, c.name, count(cp.slug) from companies c left join company_problems cp "
@@ -19,7 +20,7 @@ def list_companies(q: str = "") -> list[dict]:
         return [{"slug": slug, "name": name, "count": n} for slug, name, n in rows]
 
 
-def company_summary(slug: str, window: str = "6m") -> dict:
+def company_summary(slug: str, window: str = "6m") -> CompanySummary:
     if window not in WINDOWS:
         raise bad_request(f"window must be one of {', '.join(WINDOWS)}")
     with content_session() as con:
