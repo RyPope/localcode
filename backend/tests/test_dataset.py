@@ -68,3 +68,15 @@ def test_none_return_has_no_tests():
 def test_ref_python_includes_header_and_completion():
     ref = rows()["pair-sum"].ref_python
     assert "class ListNode" in ref and "def pairSum" in ref
+
+
+def test_params_skip_commented_node_definition():
+    starter = (
+        "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n"
+        "#         self.val = val\nclass Solution:\n"
+        "    def addTwoNumbers(self, l1: Optional[ListNode], l2: Optional[ListNode]) -> Optional[ListNode]:\n        "
+    )
+    method, params, ret = params_from_starter(starter)
+    assert method == "addTwoNumbers"
+    assert [p["name"] for p in params] == ["l1", "l2"]
+    assert ret == "ListNode"

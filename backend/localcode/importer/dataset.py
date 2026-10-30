@@ -57,7 +57,10 @@ def _split_params(s: str) -> list[str]:
 
 
 def params_from_starter(starter: str) -> tuple[str, list[dict], str]:
-    m = _DEF_RE.search(starter)
+    """Method name, typed params and return type of `class Solution`'s method (comments ignored)."""
+    code = "\n".join(line for line in starter.splitlines() if not line.lstrip().startswith("#"))
+    body = code[code.find("class Solution"):] if "class Solution" in code else code
+    m = _DEF_RE.search(body)
     if not m:
         raise ValueError("no method in starter code")
     params = []
