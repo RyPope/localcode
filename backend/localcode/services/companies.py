@@ -5,15 +5,16 @@ from collections import Counter
 
 from localcode.db import content_session
 from localcode.services.errors import bad_request, not_found
-from localcode.services.sql import DIFFICULTIES, STATUS, WINDOWS
+from localcode.services.sql import DIFFICULTIES, STATUS, WINDOWS, contains
 
 
 def list_companies(q: str = "") -> list[dict]:
     with content_session() as con:
         rows = con.execute(
             "select c.slug, c.name, count(cp.slug) from companies c left join company_problems cp "
-            "on cp.company = c.slug and cp.window = 'all' where c.name like ? group by c.slug order by 3 desc, c.name",
-            (f"%{q}%",),
+            "on cp.company = c.slug and cp.window = 'all' where c.name like ? escape '\\' "
+            "group by c.slug order by 3 desc, c.name",
+            (contains(q),),
         )
         return [{"slug": slug, "name": name, "count": n} for slug, name, n in rows]
 

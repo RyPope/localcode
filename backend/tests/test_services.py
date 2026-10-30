@@ -204,3 +204,12 @@ def test_runner_requests_carry_the_configured_limits(data_dir, runner):
     req = runner.calls[-1]
     assert req["timeout_ms"] == config.LIMITS.submit_total_ms
     assert req["memory_mb"] == config.LIMITS.memory_mb
+
+
+@pytest.mark.parametrize("q", ["%", "_", "pair%"])
+def test_search_treats_wildcards_literally(data_dir, q):
+    assert problems.list_problems(q=q)["total"] == 0
+
+
+def test_company_search_treats_wildcards_literally(data_dir):
+    assert companies.list_companies("%") == []

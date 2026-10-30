@@ -10,3 +10,9 @@ STATUS = """case
   when exists(select 1 from u.submissions s where s.slug = p.slug)
     or exists(select 1 from u.drafts d where d.slug = p.slug) then 'attempted'
   else 'todo' end"""
+
+
+def contains(text: str) -> str:
+    """LIKE pattern matching `text` literally anywhere; use with `like ? escape '\\'`."""
+    escaped = text.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    return f"%{escaped}%"

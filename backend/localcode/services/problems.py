@@ -5,7 +5,7 @@ import sqlite3
 
 from localcode.db import content_session
 from localcode.services.errors import bad_request, not_found
-from localcode.services.sql import DIFFICULTIES, STATUS, WINDOWS
+from localcode.services.sql import DIFFICULTIES, STATUS, WINDOWS, contains
 
 KOTLIN_FALLBACK_NOTE = "No Kotlin reference yet — showing Java."
 STATUS_FILTERS = {
@@ -72,8 +72,8 @@ def list_problems(
             where.append("p.frontend_id = ?")
             args.append(int(q))
         else:
-            where.append("p.title like ?")
-            args.append(f"%{q.strip()}%")
+            where.append("p.title like ? escape '\\'")
+            args.append(contains(q.strip()))
     if difficulty:
         where.append("p.difficulty = ?")
         args.append(difficulty)

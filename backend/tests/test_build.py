@@ -3,6 +3,8 @@ import shutil
 import sqlite3
 from pathlib import Path
 
+import pytest
+
 from localcode import db
 from localcode.importer.build import build_content_db
 
@@ -83,3 +85,21 @@ def test_build_filters_invalid_cases_and_applies_exclusions(tmp_path):
     build_content_db(src, out, progress=lambda *a: None, excluded={"pair-sum": {case_key([[0, 1], 1])}})
     cases = json.loads(sqlite3.connect(out).execute("select cases from tests where slug='pair-sum'").fetchone()[0])
     assert [c["args"] for c in cases] == [[[1, 4, 6], 10], [[5, 5], 10], [[2, 8, 3], 5]]
+
+
+def test_failed_build_leaves_previous_db_and_no_temp_file(tmp_path, monkeypatch):
+    from localcode.importer import build as build_module
+
+    src = make_src(tmp_path)
+    out = tmp_path / "content.db"
+    build_content_db(src, out, progress=lambda *a: None)
+    before = out.read_bytes()
+
+    def boom(*args, **kwargs):
+        raise RuntimeError("corrupt source")
+
+    monkeypatch.setattr(build_module, "_problem_rows", boom)
+    with pytest.raises(RuntimeError):
+        build_content_db(src, out, progress=lambda *a: None)
+    assert out.read_bytes() == before
+    assert not out.with_suffix(".tmp").exists()

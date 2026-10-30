@@ -2,6 +2,7 @@
 
 import html
 import json
+import sqlite3
 from collections.abc import Callable
 from contextlib import suppress
 from datetime import UTC, datetime
@@ -93,38 +94,17 @@ def _problem_rows(ds: DatasetProblem | None, dc: DoocsProblem | None, acceptance
     return problem, starters, solutions, tests
 
 
-def build_content_db(
-    src: Path,
-    out: Path,
+def _write_content(
+    con: sqlite3.Connection,
+    dataset: dict[str, DatasetProblem],
+    doocs: dict[str, DoocsProblem],
+    company_rows: list[tuple],
+    excluded: dict[str, set[str]],
+    sources_used: dict,
     progress: Progress,
-    sources_used: dict | None = None,
-    excluded: dict[str, set[str]] | None = None,
 ) -> dict:
-    excluded = load_excluded() if excluded is None else excluded
-    progress("problems", 0, 0)
-    dataset: dict[str, DatasetProblem] = {}
-    for f in config.DATASET_FILES:
-        if (src / "dataset" / f).exists():
-            for p in load_rows(src / "dataset" / f):
-                dataset[p.slug] = p
-    progress("problems", len(dataset), len(dataset))
-
-    dirs = list(iter_problem_dirs(src / "doocs"))
-    doocs: dict[str, DoocsProblem] = {}
-    for i, d in enumerate(dirs):
-        p = parse_problem_dir(d)
-        if p:
-            doocs[p.slug] = p
-        if i % 250 == 0:
-            progress("solutions", i, len(dirs))
-    progress("solutions", len(dirs), len(dirs))
-
-    company_rows = list(load_companies(src / "companies")) if (src / "companies").exists() else []
+    """Insert every problem, its starters, solutions, tests and company rows; returns import stats."""
     acceptance = {r[3]: r[5] for r in company_rows if r[5] is not None}
-
-    tmp = out.with_suffix(".tmp")
-    tmp.unlink(missing_ok=True)
-    con = db.connect_content(tmp)
     slugs = sorted(set(dataset) | set(doocs))
     for i, slug in enumerate(slugs):
         problem, starters, solutions, tests = _problem_rows(
@@ -157,10 +137,50 @@ def build_content_db(
     meta = {
         "imported_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "stats": json.dumps(stats),
-        "sources": json.dumps(sources_used or {}),
+        "sources": json.dumps(sources_used),
     }
     con.executemany("insert into meta values (?,?)", meta.items())
-    con.commit()
+    return stats
+
+
+def build_content_db(
+    src: Path,
+    out: Path,
+    progress: Progress,
+    sources_used: dict | None = None,
+    excluded: dict[str, set[str]] | None = None,
+) -> dict:
+    excluded = load_excluded() if excluded is None else excluded
+    progress("problems", 0, 0)
+    dataset: dict[str, DatasetProblem] = {}
+    for f in config.DATASET_FILES:
+        if (src / "dataset" / f).exists():
+            for p in load_rows(src / "dataset" / f):
+                dataset[p.slug] = p
+    progress("problems", len(dataset), len(dataset))
+
+    dirs = list(iter_problem_dirs(src / "doocs"))
+    doocs: dict[str, DoocsProblem] = {}
+    for i, d in enumerate(dirs):
+        p = parse_problem_dir(d)
+        if p:
+            doocs[p.slug] = p
+        if i % 250 == 0:
+            progress("solutions", i, len(dirs))
+    progress("solutions", len(dirs), len(dirs))
+
+    company_rows = list(load_companies(src / "companies")) if (src / "companies").exists() else []
+
+    tmp = out.with_suffix(".tmp")
+    tmp.unlink(missing_ok=True)
+    con = db.connect_content(tmp)
+    try:
+        stats = _write_content(con, dataset, doocs, company_rows, excluded, sources_used or {}, progress)
+        con.commit()
+    except BaseException:
+        con.close()
+        tmp.unlink(missing_ok=True)  # the previous content.db stays in place
+        raise
     con.close()
     tmp.replace(out)
     progress("done", 1, 1)
