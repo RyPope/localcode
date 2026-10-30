@@ -4,8 +4,8 @@
 
 | Service | Image | Network | Responsibility |
 |---|---|---|---|
-| `app` | `backend/Dockerfile` (Python 3.12 + built web UI) | default + `sandbox` | HTTP API, static UI, content import, judging, user data |
-| `runner` | `runner/Dockerfile` (pinned toolchains) | `sandbox` only (`internal: true`) | Compile and execute submissions; return raw per-case results |
+| `app` | `backend/Dockerfile` (Python 3.12 + built web UI) | default (for downloads); reaches the runner via `/run/localcode/runner-*.sock` | HTTP API, static UI, content import, judging, user data |
+| `runner` | `runner/Dockerfile` (pinned toolchains) | none (`network_mode: none`); serves on a Unix socket in the `runner-socket` volume | Compile and execute submissions; return raw per-case results |
 
 Data lives in the `localcode-data` volume mounted at `/data`:
 
@@ -44,7 +44,7 @@ Run computes expected values by executing the dataset's Python reference solutio
 
 ## Runner protocol
 
-`POST /execute` with `{lang, code, method, params, ret, cases, timeout_ms, cpp_sig}` returns
+Each runner replica serves HTTP on `/run/localcode/runner-<host>.sock` (mode 0660, app group); the app discovers sockets and skips stale ones. `POST /execute` with `{lang, code, method, params, ret, cases, timeout_ms, cpp_sig}` returns
 `{compile_error, results: [{ok, value | error, stdout, ms}], timed_out, memory_kb, exit_code, stderr}`.
 
 `runner/languages.py` describes each language (source layout, compile and run commands); `runner/sandbox.py` drops privileges, applies limits and cleans up after every run; `runner/execute.py` orchestrates. Each language's harness reads `cases.json` and writes one JSON line per case, flushing after each line, so partial results survive a timeout or crash:

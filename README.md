@@ -86,6 +86,7 @@ Then pick a company or a problem and start solving.
 | Update problem data | **Progress → Check for updates**, or `make update` |
 | Update localcode itself | `git pull && docker compose up -d --build` |
 | Use a different port | `LOCALCODE_PORT=8080 docker compose up -d` |
+| Reach it by another host name | `LOCALCODE_ALLOWED_HOSTS=localhost,mybox.lan docker compose up -d` (and change the port binding in `docker-compose.yml`) |
 
 ## How it works
 
@@ -94,9 +95,9 @@ flowchart LR
     B["Browser<br/>localhost:4173"] --> A
     subgraph Docker["Docker Compose"]
         A["app<br/>FastAPI + React UI"]
-        R["runner<br/>Python 3.12 · JDK 21 · Clang 19 · Kotlin 2.0<br/>no network access"]
+        R["runner<br/>Python 3.12 · JDK 21 · Clang 19 · Kotlin 2.0<br/>no network"]
         D[("localcode-data volume<br/>content.db · user.db")]
-        A -- "code + test inputs" --> R
+        A -- "code + test inputs<br/>(Unix socket)" --> R
         R -- "raw outputs" --> A
         A --- D
     end
@@ -104,7 +105,7 @@ flowchart LR
 ```
 
 - The **app** serves the UI, imports content, and judges results.
-- The **runner** compiles and executes submissions. It sits on an internal Docker network with no internet access, and runs each submission as an unprivileged user with time, memory and process limits. It cleans up after every run.
+- The **runner** compiles and executes submissions. It has no network at all (the app reaches it through a Unix socket), and runs each submission as an unprivileged user with time, memory and process limits. It cleans up after every run. See [SECURITY.md](SECURITY.md) for the full model.
 - **Tests are language-neutral.** Every case is stored as JSON arguments and an expected value. Small per-language harnesses turn those into real typed calls: Python through type hints, Java and Kotlin by reflection, C++ through a generated `main`. Outputs are compared in the app, never in your code.
 - **Your progress lives in `user.db`**, separate from the problem data, so updating content never touches your drafts or submissions.
 

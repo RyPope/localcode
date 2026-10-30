@@ -10,3 +10,9 @@ All notable changes are documented here. The format follows [Keep a Changelog](h
 - Judging in Python 3.12, Java 21, C++23 (Clang 19, as LeetCode uses) and Kotlin 2.0 in a sandboxed runner with no network access.
 - Problem list, company pages, workspace with Run/Submit and custom cases, submission history, progress dashboard and export.
 - One-command setup with Docker Compose; content imported from open datasets at first run, with mirror fallbacks.
+
+### Security
+
+- The runner has no network; the app reaches it over a group-restricted Unix socket.
+- Both containers run without root privileges or unneeded capabilities, under `no-new-privileges`.
+- Host-header and Origin checks, a content security policy and other security headers.
