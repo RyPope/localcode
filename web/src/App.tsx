@@ -31,7 +31,7 @@ export default function App() {
   if (status.isLoading) return null;
   if (!status.data?.imported) return <Setup />;
   return (
-    <div style={{ minHeight: "100%", display: "flex", flexDirection: "column" }}>
+    <div className="app-shell">
       <Header />
       <Routes>
         <Route path="/" element={<ProblemList />} />

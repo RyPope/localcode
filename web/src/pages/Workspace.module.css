@@ -1,0 +1,35 @@
+.workspace {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  height: calc(100vh - 49px);
+}
+.left {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+}
+.right {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.scroll {
+  flex: 1;
+  overflow: auto;
+}
+.navButton {
+  align-self: center;
+}
+.editorPane {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--code);
+}
+.fill {
+  flex: 1;
+  min-height: 0;
+}

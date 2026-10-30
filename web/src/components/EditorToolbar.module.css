@@ -1,0 +1,13 @@
+.toolbar {
+  align-items: center;
+  gap: 8px;
+}
+.statusBar {
+  display: flex;
+  gap: 14px;
+  padding: 4px 12px;
+  font-size: 11px;
+  color: var(--fg3);
+  border-top: 1px solid var(--line);
+  background: var(--panel);
+}

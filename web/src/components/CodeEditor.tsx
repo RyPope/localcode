@@ -1,10 +1,8 @@
 import Editor, { type OnMount } from "@monaco-editor/react";
 import { useEffect, useRef } from "react";
 import type { Lang } from "../api";
-import { monaco } from "../monaco";
+import { MONACO_LANG, monaco } from "../monaco";
 import { useTheme } from "../useTheme";
-
-const MONACO_LANG: Record<Lang, string> = { python: "python", java: "java", cpp: "cpp", kotlin: "kotlin" };
 
 export default function CodeEditor({
   lang,

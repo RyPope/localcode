@@ -1,0 +1,40 @@
+.hero {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.heroText {
+  flex: 1;
+  min-width: 220px;
+}
+.split {
+  display: flex;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+  background: var(--line);
+}
+.line {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12.5px;
+}
+.link {
+  composes: line;
+  color: var(--fg);
+}
+.topicRow {
+  display: grid;
+  grid-template-columns: 130px 1fr 36px;
+  gap: 10px;
+  align-items: center;
+  font-size: 12.5px;
+}
+.solved {
+  font-size: 26px;
+  font-weight: 600;
+}
+.cards {
+  --grid-min: 300px;
+}

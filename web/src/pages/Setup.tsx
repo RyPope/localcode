@@ -1,8 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ICONS } from "../lib/icons";
 import { api } from "../api";
-import { SOURCES } from "../lib/sources";
+import { Meter } from "../components/layout";
 import { Icon } from "../components/ui";
+import { ICONS } from "../lib/icons";
+import { SOURCES } from "../lib/sources";
+import styles from "./Setup.module.css";
 
 const STEPS = [
   { key: "download", title: "Download sources", detail: "Problem dataset, statements and solutions, company lists" },
@@ -19,6 +21,9 @@ const STEPS = [
   { key: "tests", title: "Build the local database", detail: "Merge everything by problem" },
   { key: "companies", title: "Company lists", detail: "Frequency by window: 30 days, 3 months, 6 months, all time" },
 ];
+const LOG_LINES = 8;
+
+type StepState = "done" | "run" | "wait";
 
 export default function Setup() {
   const qc = useQueryClient();
@@ -29,89 +34,47 @@ export default function Setup() {
   });
   const imp = status.data?.import;
   const current = STEPS.findIndex((s) => s.key === imp?.step);
-  const doneAll = imp?.step === "done" || (!!status.data?.imported && !imp?.running);
+  const finished = imp?.step === "done" || (!!status.data?.imported && !imp?.running);
+  const stateOf = (i: number): StepState => (finished || i < current ? "done" : i === current ? "run" : "wait");
 
   return (
-    <div style={{ minHeight: "100%", display: "flex", justifyContent: "center", padding: "56px 24px" }}>
-      <div style={{ width: "100%", maxWidth: 1080, display: "flex", flexDirection: "column", gap: 28 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <span className="logo-mark" style={{ width: 36, height: 36, borderRadius: 9 }}>
+    <div className={styles.screen}>
+      <div className={styles.content}>
+        <div className="row">
+          <span className={`logo-mark ${styles.brand}`}>
             <Icon d={ICONS.logo} size={20} stroke={2.6} />
           </span>
           <div>
-            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 600 }}>Setting up localcode</h1>
-            <p className="muted" style={{ margin: 0 }}>
+            <h1 className="title-1">Setting up localcode</h1>
+            <p className={styles.lede}>
               One-time import from open-source datasets into a local database. No account needed.
             </p>
           </div>
         </div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 20, alignItems: "flex-start" }}>
-          <section
-            className="card"
-            style={{ flex: "999 1 560px", padding: 0, gap: 0, overflow: "hidden" }}
-            aria-label="Import progress"
-          >
-            <div style={{ padding: "18px 20px" }}>
-              <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600 }}>
-                {doneAll ? "Ready" : imp?.error ? "Import failed" : "Importing"}
-              </h2>
-              {imp?.error && (
-                <p className="bad" style={{ margin: "6px 0 0" }}>
-                  {imp.error}
-                </p>
-              )}
+        <div className={styles.columns}>
+          <section className={`card ${styles.progress}`} aria-label="Import progress">
+            <div className={styles.progressHead}>
+              <h2 className="title-2">{finished ? "Ready" : imp?.error ? "Import failed" : "Importing"}</h2>
+              {imp?.error && <p className={`bad ${styles.error}`}>{imp.error}</p>}
             </div>
-            <ol style={{ listStyle: "none", margin: 0, padding: 0 }}>
+            <ol className={styles.steps}>
               {STEPS.map((s, i) => {
-                const state = doneAll || i < current ? "done" : i === current ? "run" : "wait";
+                const state = stateOf(i);
                 return (
-                  <li
-                    key={s.key}
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "28px minmax(0,1fr) auto",
-                      gap: 12,
-                      padding: "14px 20px",
-                      borderTop: "1px solid var(--line)",
-                      background: state === "run" ? "var(--acc-bg)" : undefined,
-                    }}
-                  >
-                    <span
-                      style={{
-                        width: 22,
-                        height: 22,
-                        borderRadius: 11,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: 11,
-                        fontWeight: 600,
-                        background: state === "done" ? "var(--easy-bg)" : undefined,
-                        color: state === "done" ? "var(--easy)" : state === "run" ? "var(--acc)" : "var(--fg3)",
-                        border:
-                          state === "run"
-                            ? "2px solid var(--acc)"
-                            : state === "wait"
-                              ? "1px solid var(--line2)"
-                              : undefined,
-                      }}
-                    >
+                  <li key={s.key} className={`${styles.step} ${styles[state]}`}>
+                    <span className={styles.marker}>
                       {state === "done" ? <Icon d={ICONS.check} size={12} stroke={3} /> : i + 1}
                     </span>
                     <div>
-                      <div style={{ fontWeight: 500, color: state === "wait" ? "var(--fg2)" : undefined }}>
-                        {s.title}
-                      </div>
-                      <div className="muted" style={{ fontSize: 12 }}>
-                        {s.detail}
-                      </div>
+                      <div className={styles.stepTitle}>{s.title}</div>
+                      <div className="note">{s.detail}</div>
                       {state === "run" && imp && imp.total > 0 && (
-                        <div className="bar" style={{ marginTop: 8 }}>
-                          <span style={{ width: `${(imp.done / imp.total) * 100}%` }} />
+                        <div className={styles.stepBar}>
+                          <Meter ratio={imp.done / imp.total} />
                         </div>
                       )}
                     </div>
-                    <span className="mono muted" style={{ fontSize: 12 }}>
+                    <span className="mono note">
                       {state === "run" && imp?.total
                         ? `${imp.done.toLocaleString()} / ${imp.total.toLocaleString()}`
                         : ""}
@@ -120,58 +83,33 @@ export default function Setup() {
                 );
               })}
             </ol>
-            <pre
-              className="mono"
-              aria-label="Import log"
-              style={{
-                margin: "0 20px",
-                padding: "10px 12px",
-                borderRadius: 8,
-                background: "var(--bg)",
-                border: "1px solid var(--line)",
-                fontSize: 11.5,
-                lineHeight: 1.7,
-                color: "var(--fg3)",
-                whiteSpace: "pre-wrap",
-                maxHeight: 160,
-                overflow: "auto",
-              }}
-            >
-              {(imp?.log ?? []).slice(-8).join("\n") || "starting…"}
+            <pre className={`mono ${styles.log}`} aria-label="Import log">
+              {(imp?.log ?? []).slice(-LOG_LINES).join("\n") || "starting…"}
             </pre>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "16px 20px", flexWrap: "wrap" }}>
-              <span className="muted" style={{ fontSize: 12 }}>
-                The first import downloads about 200 MB and takes a few minutes.
-              </span>
-              <div style={{ flex: 1 }} />
+            <div className={`row tight ${styles.footer}`}>
+              <span className="note">The first import downloads about 200 MB and takes a few minutes.</span>
+              <div className="spacer" />
               {imp?.error && (
                 <button className="btn" onClick={() => retry.mutate()}>
                   Retry
                 </button>
               )}
-              <a
-                className={`btn primary lg`}
-                href="/"
-                aria-disabled={!doneAll}
-                style={{ pointerEvents: doneAll ? undefined : "none", opacity: doneAll ? 1 : 0.5 }}
-              >
+              <a className={`btn primary lg ${finished ? "" : styles.disabled}`} href="/" aria-disabled={!finished}>
                 Start practising
               </a>
             </div>
           </section>
-          <aside className="card" style={{ flex: "1 1 320px" }}>
+          <aside className={`card ${styles.sources}`}>
             <h2 className="lbl">Sources &amp; licenses</h2>
-            <p className="muted" style={{ margin: 0, fontSize: 12.5 }}>
+            <p className="note text-sm">
               Content is downloaded from these public repositories at setup time; localcode itself ships no problem
               content.
             </p>
             {SOURCES.map((s) => (
-              <div key={s.repo} style={{ borderTop: "1px solid var(--line)", paddingTop: 10, fontSize: 12.5 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
-                  <span style={{ fontWeight: 500 }}>{s.name}</span>
-                  <span className="mono muted" style={{ fontSize: 11.5 }}>
-                    {s.license}
-                  </span>
+              <div key={s.repo} className={styles.source}>
+                <div className="row spread">
+                  <span className="strong">{s.name}</span>
+                  <span className="mono muted text-xs">{s.license}</span>
                 </div>
                 <a href={s.url} target="_blank" rel="noreferrer">
                   {s.repo}

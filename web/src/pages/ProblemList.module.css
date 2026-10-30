@@ -1,0 +1,53 @@
+.layout {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-wrap: wrap;
+}
+.rail {
+  width: 260px;
+  flex: 0 0 260px;
+  border-right: 1px solid var(--line);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: var(--panel);
+}
+.main {
+  flex: 1 1 600px;
+  min-width: 0;
+  padding: 20px 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.summary {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.solved {
+  font-size: 18px;
+  font-weight: 600;
+}
+.topics {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.topicName {
+  flex: 1;
+}
+.companyBar {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  flex-wrap: wrap;
+}
+.companyText {
+  flex: 1;
+  min-width: 160px;
+}

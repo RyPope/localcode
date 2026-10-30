@@ -27,7 +27,7 @@ export default function ProblemTable({
           <span role="cell">
             <StatusIcon status={r.status} />
           </span>
-          <span role="cell" style={{ minWidth: 0, display: "flex", alignItems: "center", gap: 8 }}>
+          <span role="cell" className="titleCell">
             <Link className="ttl" to={`/problems/${r.slug}${linkSuffix}`}>
               {r.id}. {r.title}
             </Link>
@@ -40,29 +40,21 @@ export default function ProblemTable({
           <span role="cell">
             <DiffText d={r.difficulty} />
           </span>
-          <span role="cell" className="mono" style={{ fontSize: 12, color: "var(--fg2)" }}>
+          <span role="cell" className="accCell">
             {pct(r.acceptance)}
           </span>
-          <span role="cell" style={{ display: "flex", gap: 4, overflow: "hidden" }}>
+          <span role="cell" className="tagsCell">
             {r.tags.slice(0, 2).map((t) => (
               <span key={t} className="tag">
                 {t}
               </span>
             ))}
-            {r.tags.length > 2 && (
-              <span className="muted" style={{ fontSize: 11.5 }}>
-                +{r.tags.length - 2}
-              </span>
-            )}
+            {r.tags.length > 2 && <span className="muted text-xs">+{r.tags.length - 2}</span>}
           </span>
           <span role="cell">{showFreq && <FreqBar value={r.frequency} />}</span>
         </div>
       ))}
-      {rows.length === 0 && (
-        <div style={{ padding: 24, textAlign: "center" }} className="muted">
-          No problems match these filters.
-        </div>
-      )}
+      {rows.length === 0 && <div className="empty">No problems match these filters.</div>}
     </div>
   );
 }

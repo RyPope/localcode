@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ICONS } from "../lib/icons";
 import { useState } from "react";
 import { api, LANG_LABEL, type Lang } from "../api";
+import styles from "./SubmissionsTab.module.css";
 import { Icon } from "./ui";
 
 function ago(iso: string) {
@@ -17,22 +18,15 @@ export default function SubmissionsTab({ slug, onLoad }: { slug: string; onLoad:
   const [sel, setSel] = useState<number | null>(null);
   const list = subs.data ?? [];
   const cur = list.find((s) => s.id === sel) ?? list[0];
-  if (!list.length)
-    return (
-      <div style={{ padding: 20 }} className="muted">
-        No submissions yet. They're stored locally on this machine.
-      </div>
-    );
+  if (!list.length) return <div className="empty">No submissions yet. They're stored locally on this machine.</div>;
   return (
-    <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600 }}>Your submissions</h2>
-        <span className="muted" style={{ fontSize: 12 }}>
-          Stored locally
-        </span>
+    <div className="pane">
+      <div className="row spread">
+        <h2 className="title-2">Your submissions</h2>
+        <span className="note">Stored locally</span>
       </div>
       <div className="ptable">
-        <div className="prow head" style={{ gridTemplateColumns: "1.4fr 1fr 0.8fr 0.9fr 1fr", minWidth: 0 }}>
+        <div className={`prow head ${styles.row}`}>
           <span>Status</span>
           <span>Language</span>
           <span>Passed</span>
@@ -42,21 +36,10 @@ export default function SubmissionsTab({ slug, onLoad }: { slug: string; onLoad:
         {list.map((s) => (
           <button
             key={s.id}
-            className="prow"
+            className={`prow ${styles.row} ${styles.item} ${cur?.id === s.id ? styles.selected : ""}`}
             onClick={() => setSel(s.id)}
-            style={{
-              gridTemplateColumns: "1.4fr 1fr 0.8fr 0.9fr 1fr",
-              minWidth: 0,
-              width: "100%",
-              border: 0,
-              borderBottom: "1px solid var(--line)",
-              background: cur?.id === s.id ? "var(--sel)" : "transparent",
-              textAlign: "left",
-            }}
           >
-            <span style={{ color: s.verdict === "Accepted" ? "var(--easy)" : "var(--hard)", fontWeight: 500 }}>
-              {s.verdict}
-            </span>
+            <span className={s.verdict === "Accepted" ? styles.accepted : styles.rejected}>{s.verdict}</span>
             <span>{LANG_LABEL[s.lang]}</span>
             <span className="mono">
               {s.passed}/{s.total}
@@ -68,12 +51,12 @@ export default function SubmissionsTab({ slug, onLoad }: { slug: string; onLoad:
       </div>
       {cur && (
         <>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontWeight: 600 }}>{cur.verdict}</span>
+          <div className="row tight">
+            <span className="strong">{cur.verdict}</span>
             <span className="muted">
               {LANG_LABEL[cur.lang]} · {ago(cur.created_at)}
             </span>
-            <div style={{ flex: 1 }} />
+            <div className="spacer" />
             <button className="btn" onClick={() => navigator.clipboard.writeText(cur.code)}>
               <Icon d={ICONS.copy} /> Copy
             </button>
@@ -81,9 +64,7 @@ export default function SubmissionsTab({ slug, onLoad }: { slug: string; onLoad:
               Load into editor
             </button>
           </div>
-          <pre className="pre" style={{ maxHeight: 360, overflow: "auto" }}>
-            {cur.code}
-          </pre>
+          <pre className={`pre ${styles.code}`}>{cur.code}</pre>
         </>
       )}
     </div>

@@ -1,7 +1,7 @@
 import DOMPurify from "dompurify";
 import katex from "katex";
 import { marked } from "marked";
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
 import type { Difficulty, Status, Window } from "../api";
 import { WINDOW_LABEL } from "../api";
 import { ICONS } from "../lib/icons";
@@ -33,8 +33,7 @@ export function StatusIcon({ status }: { status: Status }) {
         <Icon d={ICONS.check} stroke={2.6} />
       </span>
     );
-  if (status === "attempted")
-    return <span title="Attempted" aria-label="Attempted" className="dot" style={{ background: "var(--med)" }} />;
+  if (status === "attempted") return <span title="Attempted" aria-label="Attempted" className="dot attempted" />;
   return <span aria-label="Not started" />;
 }
 
@@ -75,6 +74,39 @@ export function CompanyBadge({ name, size = 20 }: { name: string; size?: number 
   );
 }
 
+export interface SegmentOption<T extends string> {
+  value: T;
+  label: ReactNode;
+}
+
+/** Single-choice segmented control. */
+export function Segmented<T extends string>({
+  label,
+  options,
+  value,
+  onChange,
+}: {
+  label: string;
+  options: readonly SegmentOption<T>[];
+  value: T;
+  onChange: (value: T) => void;
+}) {
+  return (
+    <div className="seg" role="group" aria-label={label}>
+      {options.map((o) => (
+        <button
+          key={o.value}
+          className={o.value === value ? "on" : ""}
+          aria-pressed={o.value === value}
+          onClick={() => onChange(o.value)}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function WindowToggle({
   value,
   onChange,
@@ -83,22 +115,24 @@ export function WindowToggle({
 }: {
   value: Window;
   onChange: (w: Window) => void;
-  counts?: Partial<Record<Window, number>>;
+  counts?: Partial<Record<string, number>>;
   options?: Window[];
 }) {
   return (
-    <div className="seg" role="group" aria-label="Time window">
-      {options.map((w) => (
-        <button key={w} className={w === value ? "on" : ""} aria-pressed={w === value} onClick={() => onChange(w)}>
-          {WINDOW_LABEL[w]}
-          {counts && counts[w] !== undefined && (
-            <span className="muted" style={{ marginLeft: 6 }}>
-              {counts[w]}
-            </span>
-          )}
-        </button>
-      ))}
-    </div>
+    <Segmented
+      label="Time window"
+      value={value}
+      onChange={onChange}
+      options={options.map((w) => ({
+        value: w,
+        label: (
+          <>
+            {WINDOW_LABEL[w]}
+            {counts?.[w] !== undefined && <span className="seg-count">{counts[w]}</span>}
+          </>
+        ),
+      }))}
+    />
   );
 }
 
@@ -109,9 +143,7 @@ export function FreqBar({ value }: { value: number | null }) {
       <div className="bar">
         <span style={{ width: `${Math.max(2, Math.min(100, value))}%` }} />
       </div>
-      <span className="mono muted" style={{ fontSize: 11.5, width: 32, textAlign: "right" }}>
-        {value.toFixed(0)}
-      </span>
+      <span className="mono freq-value">{value.toFixed(0)}</span>
     </div>
   );
 }
@@ -153,11 +185,11 @@ export function Pager({
   const last = Math.max(1, Math.ceil(total / size));
   const from = total === 0 ? 0 : (page - 1) * size + 1;
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 4px" }}>
-      <span className="muted" style={{ fontSize: 12 }}>
+    <div className="pager">
+      <span className="note">
         Showing {from.toLocaleString()}–{Math.min(page * size, total).toLocaleString()} of {total.toLocaleString()}
       </span>
-      <div style={{ flex: 1 }} />
+      <div className="spacer" />
       <button className="btn" disabled={page <= 1} onClick={() => onPage(page - 1)}>
         Previous
       </button>

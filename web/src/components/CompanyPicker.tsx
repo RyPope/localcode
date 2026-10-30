@@ -1,41 +1,26 @@
 import { useQuery } from "@tanstack/react-query";
-import { ICONS } from "../lib/icons";
 import { useState } from "react";
 import { api } from "../api";
-import { CompanyBadge, Icon } from "./ui";
+import { SearchInput } from "./layout";
+import { CompanyBadge } from "./ui";
+
+const SHOWN_COLLAPSED = 10;
 
 export default function CompanyPicker({ value, onChange }: { value: string; onChange: (slug: string) => void }) {
   const [q, setQ] = useState("");
-  const [all, setAll] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const companies = useQuery({ queryKey: ["companies"], queryFn: () => api.companies() });
-  const list = (companies.data ?? []).filter((c) => c.name.toLowerCase().includes(q.toLowerCase()));
-  const shown = all || q ? list : list.slice(0, 10);
+  const matches = (companies.data ?? []).filter((c) => c.name.toLowerCase().includes(q.toLowerCase()));
+  const open = expanded || q !== "";
+  const shown = open ? matches : matches.slice(0, SHOWN_COLLAPSED);
   return (
-    <section style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
+    <section className="stack">
+      <div className="row spread">
         <h2 className="lbl">Company</h2>
-        <span className="muted mono" style={{ fontSize: 11 }}>
-          {companies.data?.length ?? ""}
-        </span>
+        <span className="mono note">{companies.data?.length ?? ""}</span>
       </div>
-      <div style={{ position: "relative" }}>
-        <label className="sr" htmlFor="co-search">
-          Search companies
-        </label>
-        <span style={{ position: "absolute", left: 10, top: 8, color: "var(--fg3)" }}>
-          <Icon d={ICONS.search} />
-        </span>
-        <input
-          id="co-search"
-          className="inp icon"
-          placeholder="Search companies"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-        />
-      </div>
-      <div
-        style={{ display: "flex", flexDirection: "column", maxHeight: all || q ? 320 : undefined, overflowY: "auto" }}
-      >
+      <SearchInput id="co-search" label="Search companies" value={q} onChange={setQ} />
+      <div className={open ? "picker-list open" : "picker-list"}>
         {shown.map((c) => (
           <button
             key={c.slug}
@@ -44,18 +29,14 @@ export default function CompanyPicker({ value, onChange }: { value: string; onCh
             onClick={() => onChange(c.slug === value ? "" : c.slug)}
           >
             <CompanyBadge name={c.name} />
-            <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {c.name}
-            </span>
-            <span className="mono muted" style={{ fontSize: 11 }}>
-              {c.count}
-            </span>
+            <span className="ellipsis">{c.name}</span>
+            <span className="mono note">{c.count}</span>
           </button>
         ))}
       </div>
-      {!q && list.length > 10 && (
-        <button className="btn ghost" style={{ alignSelf: "flex-start" }} onClick={() => setAll(!all)}>
-          {all ? "Show fewer" : `Show all ${list.length} companies`}
+      {!q && matches.length > SHOWN_COLLAPSED && (
+        <button className="btn ghost picker-toggle" onClick={() => setExpanded(!expanded)}>
+          {expanded ? "Show fewer" : `Show all ${matches.length} companies`}
         </button>
       )}
     </section>

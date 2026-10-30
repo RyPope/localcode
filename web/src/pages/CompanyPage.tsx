@@ -1,20 +1,29 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { useQueryParams } from "../hooks/useQueryParams";
-import { DIFFICULTY_FILTERS, oneOf, STATUS_FILTERS, WINDOWS } from "../lib/filters";
 import { api, WINDOW_LABEL, type Difficulty } from "../api";
+import { Meter } from "../components/layout";
 import ProblemTable from "../components/ProblemTable";
-import { CompanyBadge, DiffText, Pager, WindowToggle } from "../components/ui";
+import { CompanyBadge, DiffText, Pager, Segmented, WindowToggle } from "../components/ui";
+import { useQueryParams } from "../hooks/useQueryParams";
+import { DIFFICULTY_FILTERS, DIFFICULTY_OPTIONS, oneOf, WINDOWS } from "../lib/filters";
+import styles from "./CompanyPage.module.css";
 
 const PAGE = 25;
-const DIFF_VAR: Record<Difficulty, string> = { Easy: "var(--easy)", Medium: "var(--med)", Hard: "var(--hard)" };
+const DIFFICULTIES: Difficulty[] = ["Easy", "Medium", "Hard"];
+const DIFF_COLOR: Record<Difficulty, string> = { Easy: "var(--easy)", Medium: "var(--med)", Hard: "var(--hard)" };
+const STATUS_OPTIONS = [
+  { value: "", label: "All" },
+  { value: "unsolved", label: "Unsolved" },
+  { value: "solved", label: "Solved" },
+] as const;
+type CompanyStatus = (typeof STATUS_OPTIONS)[number]["value"];
 
 export default function CompanyPage() {
   const { slug = "" } = useParams();
   const nav = useNavigate();
   const { get, set } = useQueryParams();
   const window = oneOf(get("window"), WINDOWS, "6m");
-  const status = oneOf(get("status"), STATUS_FILTERS, "");
+  const status = oneOf<CompanyStatus>(get("status"), ["", "unsolved", "solved"], "");
   const difficulty = oneOf(get("difficulty"), DIFFICULTY_FILTERS, "");
   const page = Number(get("page", "1"));
 
@@ -31,28 +40,19 @@ export default function CompanyPage() {
   });
   const s = summary.data;
   const suffix = `?company=${slug}&window=${window}`;
+  const share = (n: number) => (s?.total ? n / s.total : 0);
 
-  if (summary.isError) return <main style={{ padding: 24 }}>Unknown company.</main>;
+  if (summary.isError) return <main className="page">Unknown company.</main>;
   return (
-    <main
-      style={{
-        width: "100%",
-        maxWidth: 1280,
-        margin: "0 auto",
-        padding: "24px 24px 40px",
-        display: "flex",
-        flexDirection: "column",
-        gap: 16,
-      }}
-    >
-      <nav className="muted" style={{ fontSize: 12.5 }}>
+    <main className="page">
+      <nav className="note text-sm">
         <Link to="/companies">Companies</Link> / {s?.name}
       </nav>
-      <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
+      <div className={styles.hero}>
         {s && <CompanyBadge name={s.name} size={40} />}
-        <div style={{ flex: 1, minWidth: 220 }}>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 600 }}>{s?.name}</h1>
-          <div className="muted" style={{ fontSize: 12.5 }}>
+        <div className={styles.heroText}>
+          <h1 className="title-1">{s?.name}</h1>
+          <div className="note text-sm">
             {s?.total ?? "…"} problems asked{" "}
             {window === "all" ? "overall" : `in the last ${WINDOW_LABEL[window].toLowerCase()}`}
             {s && ` · ${s.windows.all} all time`}
@@ -70,92 +70,56 @@ export default function CompanyPage() {
       </div>
 
       {s && (
-        <section
-          style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(300px, 100%), 1fr))", gap: 12 }}
-        >
+        <section className={`grid ${styles.cards}`}>
           <div className="card">
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <div className="row spread">
               <h2 className="lbl">By difficulty</h2>
-              <span className="muted" style={{ fontSize: 12 }}>
-                {s.total} problems
-              </span>
+              <span className="note">{s.total} problems</span>
             </div>
-            <div
-              style={{ display: "flex", height: 10, borderRadius: 5, overflow: "hidden", background: "var(--line)" }}
-            >
-              {(["Easy", "Medium", "Hard"] as Difficulty[]).map((d) => (
-                <span
-                  key={d}
-                  style={{ width: `${s.total ? (s.by_difficulty[d] / s.total) * 100 : 0}%`, background: DIFF_VAR[d] }}
-                />
+            <div className={styles.split}>
+              {DIFFICULTIES.map((d) => (
+                <span key={d} style={{ width: `${share(s.by_difficulty[d]) * 100}%`, background: DIFF_COLOR[d] }} />
               ))}
             </div>
-            {(["Easy", "Medium", "Hard"] as Difficulty[]).map((d) => (
-              <div key={d} style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5 }}>
+            {DIFFICULTIES.map((d) => (
+              <div key={d} className={styles.line}>
                 <DiffText d={d} />
-                <span className="mono" style={{ color: "var(--fg2)" }}>
-                  {s.by_difficulty[d]}{" "}
-                  <span className="muted">{s.total ? Math.round((s.by_difficulty[d] / s.total) * 100) : 0}%</span>
+                <span className="mono fg2">
+                  {s.by_difficulty[d]} <span className="muted">{Math.round(share(s.by_difficulty[d]) * 100)}%</span>
                 </span>
               </div>
             ))}
           </div>
           <div className="card">
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <div className="row spread">
               <h2 className="lbl">Top topics</h2>
-              <span className="muted" style={{ fontSize: 12 }}>
-                problems tagged
-              </span>
+              <span className="note">problems tagged</span>
             </div>
             {s.top_topics.map((t) => (
-              <div
-                key={t.name}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "130px 1fr 36px",
-                  gap: 10,
-                  alignItems: "center",
-                  fontSize: 12.5,
-                }}
-              >
+              <div key={t.name} className={styles.topicRow}>
                 <span>{t.name}</span>
-                <div className="bar">
-                  <span style={{ width: `${(t.count / (s.top_topics[0]?.count || 1)) * 100}%` }} />
-                </div>
-                <span className="mono muted" style={{ textAlign: "right" }}>
-                  {t.count}
-                </span>
+                <Meter ratio={t.count / (s.top_topics[0]?.count || 1)} />
+                <span className="mono muted num">{t.count}</span>
               </div>
             ))}
           </div>
           <div className="card">
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <div className="row spread">
               <h2 className="lbl">Your progress</h2>
-              <Link to="/progress" style={{ fontSize: 12 }}>
+              <Link className="note" to="/progress">
                 All companies →
               </Link>
             </div>
-            <div style={{ fontSize: 26, fontWeight: 600 }}>
-              {s.solved}{" "}
-              <span className="muted" style={{ fontSize: 14, fontWeight: 400 }}>
-                / {s.total} solved
-              </span>
+            <div className={styles.solved}>
+              {s.solved} <span className="stat-of">/ {s.total} solved</span>
             </div>
-            <div className="bar">
-              <span style={{ width: `${s.total ? (s.solved / s.total) * 100 : 0}%`, background: "var(--easy)" }} />
-            </div>
-            <div className="muted" style={{ fontSize: 12 }}>
+            <Meter ratio={share(s.solved)} color="var(--easy)" />
+            <div className="note">
               {s.attempted} attempted · {s.total - s.solved} left
             </div>
-            <h3 className="lbl" style={{ marginTop: 4 }}>
-              Next unsolved, by frequency
-            </h3>
+            <h3 className="lbl">Next unsolved, by frequency</h3>
             {s.next_unsolved.map((p) => (
-              <Link
-                key={p.slug}
-                to={`/problems/${p.slug}${suffix}`}
-                style={{ display: "flex", justifyContent: "space-between", color: "var(--fg)", fontSize: 12.5 }}
-              >
+              <Link key={p.slug} className={styles.link} to={`/problems/${p.slug}${suffix}`}>
                 <span>
                   {p.id}. {p.title}
                 </span>
@@ -167,30 +131,19 @@ export default function CompanyPage() {
         </section>
       )}
 
-      <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginTop: 4 }}>
-        <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600 }}>Most asked</h2>
-        <span className="muted" style={{ fontSize: 12 }}>
+      <div className="row">
+        <h2 className="title-2">Most asked</h2>
+        <span className="note">
           {list.data?.total ?? ""} problems · {WINDOW_LABEL[window]} · sorted by frequency
         </span>
-        <div style={{ flex: 1 }} />
-        <div className="seg" role="group" aria-label="Status">
-          {[
-            ["", "All"],
-            ["unsolved", "Unsolved"],
-            ["solved", "Solved"],
-          ].map(([v, l]) => (
-            <button key={v} className={status === v ? "on" : ""} onClick={() => set({ status: v })}>
-              {l}
-            </button>
-          ))}
-        </div>
-        <div className="seg" role="group" aria-label="Difficulty">
-          {["", "Easy", "Medium", "Hard"].map((d) => (
-            <button key={d} className={difficulty === d ? "on" : ""} onClick={() => set({ difficulty: d })}>
-              {d || "All"}
-            </button>
-          ))}
-        </div>
+        <div className="spacer" />
+        <Segmented label="Status" options={STATUS_OPTIONS} value={status} onChange={(v) => set({ status: v })} />
+        <Segmented
+          label="Difficulty"
+          options={DIFFICULTY_OPTIONS}
+          value={difficulty}
+          onChange={(v) => set({ difficulty: v })}
+        />
       </div>
       <ProblemTable rows={list.data?.items ?? []} showFreq linkSuffix={suffix} />
       {list.data && <Pager page={page} total={list.data.total} size={PAGE} onPage={(p) => set({ page: String(p) })} />}

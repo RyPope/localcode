@@ -1,32 +1,38 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { ICONS } from "../lib/icons";
 import { Link } from "react-router-dom";
-import { useQueryParams } from "../hooks/useQueryParams";
-import { DIFFICULTY_FILTERS, oneOf, STATUS_FILTERS, WINDOWS } from "../lib/filters";
 import { api } from "../api";
 import CompanyPicker from "../components/CompanyPicker";
+import { SearchInput } from "../components/layout";
 import ProblemTable from "../components/ProblemTable";
-import { CompanyBadge, Icon, Pager, WindowToggle } from "../components/ui";
+import { CompanyBadge, Pager, Segmented, WindowToggle } from "../components/ui";
+import { useQueryParams } from "../hooks/useQueryParams";
+import { DIFFICULTY_FILTERS, DIFFICULTY_OPTIONS, oneOf, STATUS_FILTERS, WINDOWS } from "../lib/filters";
+import styles from "./ProblemList.module.css";
 
 const PAGE = 50;
+const TOPICS_SHOWN = 18;
+const STATUS_OPTIONS = [
+  { value: "", label: "All" },
+  { value: "solved", label: "Solved" },
+  { value: "attempted", label: "Attempted" },
+  { value: "todo", label: "Todo" },
+] as const;
+const DIFFICULTY_KEYS = [
+  ["easy", "Easy"],
+  ["medium", "Medium"],
+  ["hard", "Hard"],
+] as const;
 
 export default function ProblemList() {
   const { get, set } = useQueryParams();
   const company = get("company");
   const window = oneOf(get("window"), WINDOWS, "6m");
+  const difficulty = oneOf(get("difficulty"), DIFFICULTY_FILTERS, "");
+  const status = oneOf(get("status"), STATUS_FILTERS, "");
   const page = Number(get("page", "1"));
   const tags = get("tags").split(",").filter(Boolean);
 
-  const params = {
-    q: get("q"),
-    difficulty: oneOf(get("difficulty"), DIFFICULTY_FILTERS, ""),
-    status: oneOf(get("status"), STATUS_FILTERS, ""),
-    tags: get("tags"),
-    company,
-    window,
-    page,
-    page_size: PAGE,
-  };
+  const params = { q: get("q"), difficulty, status, tags: get("tags"), company, window, page, page_size: PAGE };
   const list = useQuery({
     queryKey: ["problems", params],
     queryFn: () => api.problems(params),
@@ -38,108 +44,63 @@ export default function ProblemList() {
   const counts = list.data?.counts;
   const solved = counts ? counts.easy[0] + counts.medium[0] + counts.hard[0] : 0;
   const total = counts ? counts.easy[1] + counts.medium[1] + counts.hard[1] : 0;
+  const toggleTag = (name: string, on: boolean) =>
+    set({ tags: (on ? [...tags, name] : tags.filter((t) => t !== name)).join(",") });
 
   return (
-    <div style={{ display: "flex", flex: 1, minHeight: 0, flexWrap: "wrap" }}>
-      <aside
-        style={{
-          width: 260,
-          flex: "0 0 260px",
-          borderRight: "1px solid var(--line)",
-          padding: 16,
-          display: "flex",
-          flexDirection: "column",
-          gap: 20,
-          background: "var(--panel)",
-        }}
-      >
-        <div style={{ position: "relative" }}>
-          <label className="sr" htmlFor="search">
-            Search problems
-          </label>
-          <span style={{ position: "absolute", left: 10, top: 8, color: "var(--fg3)" }}>
-            <Icon d={ICONS.search} />
-          </span>
-          <input
-            id="search"
-            className="inp icon"
-            placeholder="Search problems"
-            defaultValue={get("q")}
-            onChange={(e) => set({ q: e.target.value })}
-          />
-        </div>
+    <div className={styles.layout}>
+      <aside className={styles.rail}>
+        <SearchInput id="search" label="Search problems" defaultValue={get("q")} onChange={(q) => set({ q })} />
         <CompanyPicker value={company} onChange={(c) => set({ company: c })} />
-        <section style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        <section className="stack">
           <h2 className="lbl">Difficulty</h2>
-          <div className="seg" role="group" aria-label="Difficulty">
-            {["", "Easy", "Medium", "Hard"].map((d) => (
-              <button key={d} className={get("difficulty") === d ? "on" : ""} onClick={() => set({ difficulty: d })}>
-                {d || "All"}
-              </button>
-            ))}
-          </div>
+          <Segmented
+            label="Difficulty"
+            options={DIFFICULTY_OPTIONS}
+            value={difficulty}
+            onChange={(v) => set({ difficulty: v })}
+          />
         </section>
-        <section style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        <section className="stack">
           <h2 className="lbl">Status</h2>
-          <div className="seg" role="group" aria-label="Status">
-            {[
-              ["", "All"],
-              ["solved", "Solved"],
-              ["attempted", "Attempted"],
-              ["todo", "Todo"],
-            ].map(([v, l]) => (
-              <button key={v} className={get("status") === v ? "on" : ""} onClick={() => set({ status: v })}>
-                {l}
-              </button>
-            ))}
-          </div>
+          <Segmented
+            label="Status"
+            options={STATUS_OPTIONS}
+            value={oneOf(status, ["", "solved", "attempted", "todo"], "")}
+            onChange={(v) => set({ status: v })}
+          />
         </section>
-        <section style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <section className={styles.topics}>
+          <div className="row spread">
             <h2 className="lbl">Topics</h2>
-            <span className="muted" style={{ fontSize: 11 }}>
-              match any
-            </span>
+            <span className="note">match any</span>
           </div>
-          {(allTags.data ?? []).slice(0, 18).map((t) => (
+          {(allTags.data ?? []).slice(0, TOPICS_SHOWN).map((t) => (
             <label key={t.name} className="chk">
               <input
                 type="checkbox"
                 checked={tags.includes(t.name)}
-                onChange={(e) =>
-                  set({ tags: (e.target.checked ? [...tags, t.name] : tags.filter((x) => x !== t.name)).join(",") })
-                }
+                onChange={(e) => toggleTag(t.name, e.target.checked)}
               />
-              <span style={{ flex: 1 }}>{t.name}</span>
-              <span className="mono muted" style={{ fontSize: 11 }}>
-                {t.count}
-              </span>
+              <span className={styles.topicName}>{t.name}</span>
+              <span className="mono muted text-xs">{t.count}</span>
             </label>
           ))}
         </section>
       </aside>
 
-      <main
-        style={{
-          flex: "1 1 600px",
-          minWidth: 0,
-          padding: "20px 24px 32px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 14,
-        }}
-      >
+      <main className={styles.main}>
         {counts && (
-          <div style={{ display: "flex", alignItems: "center", gap: 18, flexWrap: "wrap" }}>
+          <div className={styles.summary}>
             <div>
-              <span style={{ fontSize: 18, fontWeight: 600 }}>{solved.toLocaleString()}</span>
+              <span className={styles.solved}>{solved.toLocaleString()}</span>
               <span className="muted"> / {total.toLocaleString()} solved</span>
             </div>
-            {(["easy", "medium", "hard"] as const).map((k) => (
-              <span key={k} style={{ fontSize: 12.5 }}>
-                <span className={`diff ${k[0].toUpperCase() + k.slice(1)}`}>{k[0].toUpperCase() + k.slice(1)}</span>{" "}
-                <span className="mono" style={{ color: "var(--fg2)" }}>
-                  {counts[k][0]} / {counts[k][1].toLocaleString()}
+            {DIFFICULTY_KEYS.map(([key, label]) => (
+              <span key={key} className="text-sm">
+                <span className={`diff ${label}`}>{label}</span>{" "}
+                <span className="mono fg2">
+                  {counts[key][0]} / {counts[key][1].toLocaleString()}
                 </span>
               </span>
             ))}
@@ -147,16 +108,11 @@ export default function ProblemList() {
         )}
 
         {company && (
-          <div
-            className="card"
-            style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: "12px 14px", flexWrap: "wrap" }}
-          >
+          <div className={`card ${styles.companyBar}`}>
             <CompanyBadge name={companyName} size={28} />
-            <div style={{ flex: 1, minWidth: 160 }}>
-              <div style={{ fontWeight: 600, fontSize: 14 }}>{companyName}</div>
-              <div className="muted" style={{ fontSize: 12 }}>
-                {list.data?.total ?? "…"} problems · sorted by frequency
-              </div>
+            <div className={styles.companyText}>
+              <div className="title-3">{companyName}</div>
+              <div className="note">{list.data?.total ?? "…"} problems · sorted by frequency</div>
             </div>
             <WindowToggle value={window} onChange={(w) => set({ window: w })} />
             <Link className="btn" to={`/companies/${company}?window=${window}`}>

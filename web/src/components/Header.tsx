@@ -3,6 +3,7 @@ import { ICONS } from "../lib/icons";
 import { NavLink, useNavigate } from "react-router-dom";
 import { api } from "../api";
 import { applyTheme, getTheme } from "../theme";
+import { SearchInput } from "./layout";
 import { Icon } from "./ui";
 
 export default function Header() {
@@ -44,7 +45,7 @@ export default function Header() {
         </span>
         localcode
       </NavLink>
-      <nav aria-label="Primary" style={{ display: "flex", gap: 2 }}>
+      <nav aria-label="Primary">
         <NavLink className="navlink" to="/" end>
           Problems
         </NavLink>
@@ -55,29 +56,21 @@ export default function Header() {
           Progress
         </NavLink>
       </nav>
-      <div style={{ flex: 1 }} />
-      <form onSubmit={jump} style={{ position: "relative", width: 280 }}>
-        <label className="sr" htmlFor="jump">
-          Jump to problem
-        </label>
-        <span style={{ position: "absolute", left: 10, top: 8, color: "var(--fg3)" }}>
-          <Icon d={ICONS.search} />
-        </span>
-        <input
+      <div className="spacer" />
+      <form onSubmit={jump}>
+        <SearchInput
           id="jump"
-          ref={input}
-          className="inp icon"
+          label="Jump to problem"
           placeholder="Jump to problem…"
           value={q}
-          onChange={(e) => setQ(e.target.value)}
-          autoComplete="off"
+          onChange={setQ}
+          inputRef={input}
+          width={280}
+          trailing={<span className="kbd">⌘K</span>}
         />
-        <span className="kbd" style={{ position: "absolute", right: 8, top: 7 }}>
-          ⌘K
-        </span>
       </form>
-      <span className="mono muted" style={{ fontSize: 11.5, display: "flex", alignItems: "center", gap: 6 }}>
-        <span className="dot" style={{ background: "var(--easy)", width: 6, height: 6 }} />
+      <span className="mono hdr-host">
+        <span className="dot" />
         {window.location.host}
       </span>
       <button
