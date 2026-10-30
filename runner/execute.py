@@ -7,6 +7,7 @@ import resource
 import shutil
 import signal
 import subprocess
+import sys
 import tempfile
 import time
 from pathlib import Path
@@ -17,6 +18,8 @@ MEMORY_BYTES = 1024 * 1024 * 1024
 COMPILE_TIMEOUT_S = 60
 STARTUP_GRACE_MS = {"python": 1000, "cpp": 500, "java": 2000, "kotlin": 2500}
 MAX_LOG = 8000
+MAX_PROCESSES = 256  # per sandbox user; JVM threads count towards it
+TMP_ROOT = Path(os.environ.get("RUNNER_TMP", "/tmp"))
 
 
 def _limits(memory: bool):
@@ -27,6 +30,8 @@ def _limits(memory: bool):
         resource.setrlimit(resource.RLIMIT_FSIZE, (32 * 1024 * 1024, 32 * 1024 * 1024))
         resource.setrlimit(resource.RLIMIT_STACK, (resource.RLIM_INFINITY, resource.RLIM_INFINITY))
         if os.getuid() == 0:
+            resource.setrlimit(resource.RLIMIT_NPROC, (MAX_PROCESSES, MAX_PROCESSES))
+            os.setgroups([])
             os.setgid(SANDBOX_UID)
             os.setuid(SANDBOX_UID)
 
@@ -57,6 +62,52 @@ def _spawn(cmd: list[str], cwd: Path, timeout_s: float, memory: bool) -> tuple[i
             _, _, usage = os.wait4(proc.pid, 0)
             return None, int(usage.ru_maxrss), True
         time.sleep(0.005)
+
+
+def _sandboxed() -> bool:
+    return os.getuid() == 0
+
+
+def _make_workdir() -> Path:
+    workdir = Path(tempfile.mkdtemp(prefix="run-", dir=TMP_ROOT))
+    if _sandboxed():
+        os.chown(workdir, SANDBOX_UID, SANDBOX_UID)
+    os.chmod(workdir, 0o700)
+    return workdir
+
+
+_KILL_ALL = """
+import contextlib, os, signal
+for _ in range(3):
+    with contextlib.suppress(ProcessLookupError):
+        os.kill(-1, signal.SIGKILL)
+"""
+
+
+def _reap_sandbox() -> None:
+    """Kill every process the sandbox user still owns and delete its files in TMP_ROOT.
+
+    Executions are serialised, so anything left belongs to a finished run (background children,
+    setsid'd daemons, fork bombs) and must not leak into the next one.
+    """
+    if not _sandboxed():
+        return
+    # As the sandbox user, kill(-1) reaches exactly its processes; repeat in case a fork bomb respawns.
+    subprocess.run(
+        [sys.executable, "-I", "-c", _KILL_ALL],
+        user=SANDBOX_UID,
+        group=SANDBOX_UID,
+        extra_groups=[],
+        check=False,
+        timeout=10,
+    )
+    for entry in TMP_ROOT.iterdir():
+        with contextlib.suppress(OSError):
+            if entry.lstat().st_uid == SANDBOX_UID:
+                if entry.is_dir() and not entry.is_symlink():
+                    shutil.rmtree(entry, ignore_errors=True)
+                else:
+                    entry.unlink()
 
 
 def _log(path: Path, workdir: Path) -> str:
@@ -148,9 +199,8 @@ KOTLIN_IMPORTS = "import java.util.*; import kotlin.math.*; "
 def execute(req: dict) -> dict:
     lang = req["lang"]
     result = {"compile_error": None, "results": [], "timed_out": False, "memory_kb": 0, "stderr": "", "exit_code": 0}
-    workdir = Path(tempfile.mkdtemp(prefix="run-", dir=os.environ.get("RUNNER_TMP", "/tmp")))
+    workdir = _make_workdir()
     try:
-        os.chmod(workdir, 0o777)
         (workdir / "cases.json").write_text(
             json.dumps({"method": req["method"], "params": req["params"], "ret": req.get("ret"), "cases": req["cases"]})
         )
@@ -182,4 +232,5 @@ def execute(req: dict) -> dict:
         )
         return result
     finally:
+        _reap_sandbox()
         shutil.rmtree(workdir, ignore_errors=True)
