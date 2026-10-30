@@ -805,6 +805,7 @@
           },
           "custom": {
             "items": {
+              "maxLength": 1000000,
               "type": "string"
             },
             "maxItems": 20,

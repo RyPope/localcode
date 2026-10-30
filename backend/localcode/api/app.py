@@ -6,8 +6,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-from localcode import db
-from localcode.api import static
+from localcode import config, db
+from localcode.api import security, static
 from localcode.api.routes import companies, judge, problems, progress, system
 from localcode.db import ContentNotImported
 from localcode.importer import manager
@@ -24,6 +24,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 
 def create_app() -> FastAPI:
     app = FastAPI(title="localcode", lifespan=lifespan)
+    security.install(app, config.ALLOWED_HOSTS)
 
     @app.exception_handler(ServiceError)
     def _service_error(_: Request, e: ServiceError) -> JSONResponse:

@@ -149,7 +149,7 @@ export function FreqBar({ value }: { value: number | null }) {
 
 /** Sanitised HTML from imported content (problem statements). */
 export function Html({ html, className = "prose" }: { html: string; className?: string }) {
-  const clean = useMemo(() => DOMPurify.sanitize(html, { ADD_ATTR: ["target"] }), [html]);
+  const clean = useMemo(() => DOMPurify.sanitize(html), [html]);
   return <div className={className} dangerouslySetInnerHTML={{ __html: clean }} />;
 }
 

@@ -38,7 +38,7 @@ def client(data_dir, runner, monkeypatch):
     runner.ref_values = {"[[1, 4, 6], 10]": [1, 2], "[[5, 5], 10]": [0, 1]}
     app = create_app()
     app.dependency_overrides[get_runner] = lambda: runner
-    with TestClient(app) as c:
+    with TestClient(app, base_url="http://localhost:4173") as c:
         c.put("/api/drafts/pair-sum/python", json={"code": "x"})
         assert c.post("/api/submit", json={"slug": "pair-sum", "lang": "python", "code": "x"}).status_code == 200
         yield c

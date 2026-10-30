@@ -8,7 +8,7 @@ from localcode.api.deps import get_runner
 def client(runner):
     app = create_app()
     app.dependency_overrides[get_runner] = lambda: runner
-    return TestClient(app)
+    return TestClient(app, base_url="http://localhost:4173")
 
 
 def test_problems_endpoint(data_dir, runner):
@@ -78,3 +78,15 @@ def test_problems_before_import_is_503_and_status_not_imported(tmp_path, monkeyp
     with client(runner) as c:
         assert c.get("/api/problems").status_code == 503
         assert c.get("/api/status").json()["imported"] is False
+
+
+def test_oversized_custom_case_is_rejected(data_dir, runner):
+    big = "nums = [" + "1," * 600_000 + "1], goal = 2"
+    r = client(runner).post("/api/run", json={"slug": "pair-sum", "lang": "python", "code": "x", "custom": [big]})
+    assert r.status_code == 422
+
+
+def test_deeply_nested_custom_case_is_a_400(data_dir, runner):
+    deep = "nums = " + "[" * 5000 + "]" * 5000 + ", goal = 1"
+    r = client(runner).post("/api/run", json={"slug": "pair-sum", "lang": "python", "code": "x", "custom": [deep]})
+    assert r.status_code == 400

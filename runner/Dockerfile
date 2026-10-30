@@ -7,12 +7,19 @@ RUN apt-get update \
 
 COPY --from=eclipse-temurin:21.0.5_11-jdk /opt/java/openjdk /opt/java
 
+# Downloads are verified against pinned SHA-256 checksums (Kotlin's matches JetBrains' published
+# .sha256; Gson's was computed from the jar matching Maven Central's published SHA-1).
 ARG KOTLIN_VERSION=2.0.21
+ARG KOTLIN_SHA256=0352c0a45bd22f80f6b26e485cd04da8047baa5de54865281fb9f89a4a7bcf2a
 RUN curl -fsSL -o /tmp/k.zip https://github.com/JetBrains/kotlin/releases/download/v${KOTLIN_VERSION}/kotlin-compiler-${KOTLIN_VERSION}.zip \
+ && echo "${KOTLIN_SHA256}  /tmp/k.zip" | sha256sum -c - \
  && unzip -q /tmp/k.zip -d /opt && rm /tmp/k.zip
 
+ARG GSON_VERSION=2.11.0
+ARG GSON_SHA256=57928d6e5a6edeb2abd3770a8f95ba44dce45f3b23b7a9dc2b309c581552a78b
 RUN mkdir -p /opt/lib \
- && curl -fsSL -o /opt/lib/gson.jar https://repo1.maven.org/maven2/com/google/code/gson/gson/2.11.0/gson-2.11.0.jar
+ && curl -fsSL -o /opt/lib/gson.jar https://repo1.maven.org/maven2/com/google/code/gson/gson/${GSON_VERSION}/gson-${GSON_VERSION}.jar \
+ && echo "${GSON_SHA256}  /opt/lib/gson.jar" | sha256sum -c -
 
 ENV JAVA_HOME=/opt/java PATH=/opt/java/bin:/opt/kotlinc/bin:$PATH
 RUN useradd -u 10001 -M -s /usr/sbin/nologin sandbox
