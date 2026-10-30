@@ -46,8 +46,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - run: docker compose build runner
-      - run: docker compose run --rm --no-deps runner pytest -q tests/
+      - run: docker build --target test -t localcode-runner-test runner
+      - run: docker run --rm --init localcode-runner-test
 
   images:
     runs-on: ubuntu-24.04

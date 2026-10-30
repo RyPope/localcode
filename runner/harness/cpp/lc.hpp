@@ -2,6 +2,7 @@
 #pragma once
 #include <bits/stdc++.h>
 #include <cxxabi.h>
+#include <unistd.h>
 #include <nlohmann/json.hpp>
 using namespace std;
 using json = nlohmann::json;
@@ -91,6 +92,51 @@ template <> struct conv<TreeNode*> {
 // Defined in lc_io.cpp, compiled once into lc_io.o so each submission skips these instantiations.
 json read_spec(const char* path);
 string dump_line(const json& line);
+
+/** Redirects file descriptor 1 for one case, capturing printf/puts as well as cout. */
+class StdoutCapture {
+   public:
+    static constexpr size_t kLimit = 65536;
+
+    StdoutCapture() {
+        flush_all();
+        tmp_ = tmpfile();
+        saved_ = dup(STDOUT_FILENO);
+        if (tmp_ && saved_ >= 0) dup2(fileno(tmp_), STDOUT_FILENO);
+    }
+    StdoutCapture(const StdoutCapture&) = delete;
+    StdoutCapture& operator=(const StdoutCapture&) = delete;
+    ~StdoutCapture() { restore(); }
+
+    /** Restores stdout and returns what was written (truncated to kLimit bytes). */
+    string finish() {
+        restore();
+        string out;
+        if (!tmp_) return out;
+        rewind(tmp_);
+        out.resize(kLimit);
+        out.resize(fread(out.data(), 1, kLimit, tmp_));
+        fclose(tmp_);
+        tmp_ = nullptr;
+        return out;
+    }
+
+   private:
+    static void flush_all() {
+        cout.flush();
+        fflush(stdout);
+    }
+    void restore() {
+        if (saved_ < 0) return;
+        flush_all();
+        dup2(saved_, STDOUT_FILENO);
+        close(saved_);
+        saved_ = -1;
+    }
+
+    FILE* tmp_ = nullptr;
+    int saved_ = -1;
+};
 
 inline string demangle(const char* name) {
     int status = 0;

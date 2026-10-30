@@ -179,3 +179,9 @@ def test_python_has_a_gigabyte(run):
     code = "class Solution:\n    def f(self, x: int) -> int:\n        a = bytearray(700 * 1024 * 1024)\n        return len(a) // (1024 * 1024)\n"
     r = run("python", code, "f", [{"name": "x", "type": "int"}], [[1]])
     assert r["results"][0]["value"] == 700
+
+
+def test_java_null_for_primitive_is_a_clear_error(run):
+    r = run("java", "class Solution { public int f(int x) { return x; } }", "f", [{"name": "x", "type": "int"}], [[None]])
+    assert r["results"][0]["ok"] is False
+    assert "null is not a valid int" in r["results"][0]["error"]

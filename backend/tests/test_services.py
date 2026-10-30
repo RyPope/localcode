@@ -194,3 +194,13 @@ def test_queries_before_import_are_503_and_create_nothing(tmp_path, monkeypatch)
     with pytest.raises(db.ContentNotImported):
         problems.list_problems()
     assert not (tmp_path / "content.db").exists()
+
+
+def test_runner_requests_carry_the_configured_limits(data_dir, runner):
+    from localcode import config
+
+    runner.user = ok([[1, 2], [0, 1], [0, 2], [0, 1]])
+    judge.submit(runner, "pair-sum", "python", "code")
+    req = runner.calls[-1]
+    assert req["timeout_ms"] == config.LIMITS.submit_total_ms
+    assert req["memory_mb"] == config.LIMITS.memory_mb

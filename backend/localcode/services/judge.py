@@ -35,7 +35,7 @@ class ExpectedCache:
             res = _execute(
                 runner,
                 _request(
-                    problem, "python", problem["ref_python"], missing, config.LIMITS["run_per_case_ms"] * len(missing)
+                    problem, "python", problem["ref_python"], missing, config.LIMITS.run_per_case_ms * len(missing)
                 ),
             )
             for args, r in zip(missing, res["results"], strict=False):
@@ -68,6 +68,7 @@ def _request(
         "ret": p["ret"],
         "cases": cases,
         "timeout_ms": timeout_ms,
+        "memory_mb": config.LIMITS.memory_mb,
         "cpp_sig": cpp_sig,
     }
 
@@ -109,9 +110,7 @@ def run(runner: Runner, slug: str, lang: str, code: str, custom: list[str] | Non
         cpp_sig = _cpp_sig(con, slug, lang)
     arg_lists = json.loads(p["examples"]) + parse_custom_cases(p, custom or [])
     expected = expected_cache.resolve(runner, p, arg_lists)
-    res = _execute(
-        runner, _request(p, lang, code, arg_lists, config.LIMITS["run_per_case_ms"] * len(arg_lists), cpp_sig)
-    )
+    res = _execute(runner, _request(p, lang, code, arg_lists, config.LIMITS.run_per_case_ms * len(arg_lists), cpp_sig))
     return grade_run(arg_lists, expected, res, p["compare_mode"]).to_dict()
 
 
@@ -121,9 +120,7 @@ def submit(runner: Runner, slug: str, lang: str, code: str) -> dict:
         _check_runnable(p, lang)
         cpp_sig = _cpp_sig(con, slug, lang)
         cases = json.loads(con.execute("select cases from tests where slug = ?", (slug,)).fetchone()[0])
-    res = _execute(
-        runner, _request(p, lang, code, [c["args"] for c in cases], config.LIMITS["submit_total_ms"], cpp_sig)
-    )
+    res = _execute(runner, _request(p, lang, code, [c["args"] for c in cases], config.LIMITS.submit_total_ms, cpp_sig))
     grade = grade_submission(cases, res, p["compare_mode"]).to_dict()
     grade["submission_id"] = progress.record_submission(slug, lang, code, grade)
     return grade

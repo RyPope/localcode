@@ -1,5 +1,5 @@
 # Pinned toolchains: every localcode user judges against exactly these versions.
-FROM python:3.12.12-slim-trixie
+FROM python:3.12.12-slim-trixie AS runtime
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends g++ nlohmann-json3-dev curl unzip ca-certificates \
@@ -15,20 +15,28 @@ RUN mkdir -p /opt/lib \
  && curl -fsSL -o /opt/lib/gson.jar https://repo1.maven.org/maven2/com/google/code/gson/gson/2.11.0/gson-2.11.0.jar
 
 ENV JAVA_HOME=/opt/java PATH=/opt/java/bin:/opt/kotlinc/bin:$PATH
-
-RUN pip install --no-cache-dir pytest==8.3.4 \
- && useradd -u 10001 -M -s /usr/sbin/nologin sandbox
+RUN useradd -u 10001 -M -s /usr/sbin/nologin sandbox
 
 WORKDIR /srv
-COPY . /srv
-RUN if [ -f harness/jvm/Driver.java ]; then \
-      mkdir -p /tmp/drv && javac -cp /opt/lib/gson.jar -d /tmp/drv harness/jvm/Driver.java harness/jvm/javafx/util/Pair.java \
-      && jar cf /opt/lib/driver.jar -C /tmp/drv . && rm -rf /tmp/drv; fi
+COPY harness/ harness/
 
-# Precompiled C++ prelude (flags must match execute.py's g++ invocation).
+RUN mkdir -p /tmp/drv \
+ && javac -cp /opt/lib/gson.jar -d /tmp/drv harness/jvm/Driver.java harness/jvm/javafx/util/Pair.java \
+ && jar cf /opt/lib/driver.jar -C /tmp/drv . && rm -rf /tmp/drv
+
+# Precompiled C++ prelude; flags must match the g++ command in languages.py.
 RUN mkdir -p /opt/lc && cp harness/cpp/lc.hpp harness/cpp/lc_io.cpp /opt/lc/ \
  && g++ -std=c++20 -O2 -w -x c++-header /opt/lc/lc.hpp -o /opt/lc/lc.hpp.gch \
  && g++ -std=c++20 -O2 -w -I /opt/lc -c /opt/lc/lc_io.cpp -o /opt/lc/lc_io.o
 
+COPY server.py execute.py sandbox.py languages.py ./
+
 EXPOSE 8080
 CMD ["python", "-u", "server.py"]
+
+# Test image: the runtime plus pytest and the test suite (never shipped).
+FROM runtime AS test
+RUN pip install --no-cache-dir pytest==8.3.4
+COPY pytest.ini ./
+COPY tests/ tests/
+CMD ["pytest", "-q", "tests/"]

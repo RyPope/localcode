@@ -67,3 +67,26 @@ return n
     started = value(run("python", bomb, "f", INT, [[1]]))
     assert started < 512
     assert value(run("python", py("return x + 1"), "f", INT, [[41]])) == 42
+
+
+def test_memory_limit_comes_from_the_request(url):
+    import json
+    import urllib.request
+
+    code = py("a = bytearray(400 * 1024 * 1024)\nreturn 1")
+    body = {
+        "lang": "python",
+        "code": code,
+        "method": "f",
+        "params": INT,
+        "ret": "int",
+        "cases": [[1]],
+        "timeout_ms": 5000,
+        "cpp_sig": None,
+        "memory_mb": 256,
+    }
+    req = urllib.request.Request(url + "/execute", json.dumps(body).encode(), {"Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=60) as r:
+        res = json.load(r)
+    assert res["results"][0]["ok"] is False
+    assert "MemoryError" in res["results"][0]["error"]

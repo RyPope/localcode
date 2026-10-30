@@ -19,7 +19,9 @@ services:
 
   # Executes user code. No internet access: it sits only on the internal sandbox network.
   runner:
-    build: ./runner
+    build:
+      context: ./runner
+      target: runtime
     init: true  # reaps orphaned processes left by submissions
     networks: [sandbox]
     read_only: true

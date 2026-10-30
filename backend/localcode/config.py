@@ -1,6 +1,7 @@
 """Paths, upstream sources and execution limits."""
 
 import os
+from dataclasses import dataclass
 from pathlib import Path
 
 DATA_DIR = Path(os.environ.get("LOCALCODE_DATA", "/data"))
@@ -10,7 +11,17 @@ SOURCES_DIR = DATA_DIR / "sources"
 RUNNER_URL = os.environ.get("LOCALCODE_RUNNER", "http://runner:8080")
 WEB_DIST = Path(os.environ.get("LOCALCODE_WEB", Path(__file__).resolve().parent.parent / "web_dist"))
 
-LIMITS = {"run_per_case_ms": 2000, "submit_total_ms": 10000, "memory_mb": 512}
+
+@dataclass(frozen=True)
+class Limits:
+    """Execution limits; sent with every runner request so the app is their single source of truth."""
+
+    run_per_case_ms: int = 2000
+    submit_total_ms: int = 10_000
+    memory_mb: int = 1024
+
+
+LIMITS = Limits()
 
 
 # Each source is tried in order; extra mirrors can be appended via env (comma-separated).

@@ -203,3 +203,9 @@ def test_cpp_segfault_is_runtime_error(run):
 def test_fresh_solution_per_case(run, lang, code, cpp):
     r = run(lang, code, "f", [{"name": "x", "type": "int"}], [[1], [1]], cpp_sig=cpp)
     assert [x["value"] for x in r["results"]] == [1, 1]
+
+
+def test_cpp_printf_is_captured_per_case(run):
+    code = 'class Solution {\npublic:\n    int f(int x) { printf("p%d\\n", x); puts("q"); cout << "c" << x << "\\n"; return x; }\n};'
+    r = run("cpp", code, "f", [{"name": "x", "type": "int"}], [[1], [2]], cpp_sig=sig("f", "int", ("int", "x")))
+    assert [x["stdout"] for x in r["results"]] == ["p1\nq\nc1\n", "p2\nq\nc2\n"]

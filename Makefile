@@ -24,8 +24,8 @@ test-backend: ## Backend unit tests
 	$(PY)/pytest -q backend
 
 test-runner: ## Runner tests (inside the pinned toolchain image)
-	docker compose build runner
-	docker compose run --rm --no-deps runner pytest -q tests/
+	docker build --target test -t localcode-runner-test runner
+	docker run --rm --init localcode-runner-test
 
 test-web: ## Web typecheck, unit tests and production build
 	npm --prefix web run typecheck

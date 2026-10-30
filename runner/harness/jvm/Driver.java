@@ -98,7 +98,10 @@ public class Driver {
         }
         if (t instanceof GenericArrayType g) return array(e, g.getGenericComponentType(), raw(g.getGenericComponentType()));
         Class<?> c = (Class<?>) t;
-        if (e == null || e.isJsonNull()) return c.isPrimitive() ? null : null;
+        if (e == null || e.isJsonNull()) {
+            if (c.isPrimitive()) throw new IllegalArgumentException("null is not a valid " + c.getName());
+            return null;
+        }
         if (c == int.class || c == Integer.class) return e.getAsInt();
         if (c == long.class || c == Long.class) return e.getAsLong();
         if (c == double.class || c == Double.class) return e.getAsDouble();

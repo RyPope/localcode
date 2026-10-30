@@ -19,6 +19,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
+from localcode import config
 from localcode.db import content_session
 from localcode.importer.case_filter import case_key
 from localcode.judging import runner_client
@@ -54,6 +55,7 @@ def _outcomes(
                 "ret": problem["ret"],
                 "cases": [cases[i]["args"] for i in chunk],
                 "timeout_ms": TIMEOUT_MS,
+                "memory_mb": config.LIMITS.memory_mb,
                 "cpp_sig": cpp_sig,
             },
             runner_url,

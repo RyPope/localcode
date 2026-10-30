@@ -29,6 +29,7 @@ class RunnerRequest(TypedDict):
     ret: str | None
     cases: list[list[Any]]
     timeout_ms: int
+    memory_mb: int
     cpp_sig: dict | None
 
 

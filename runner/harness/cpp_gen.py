@@ -22,11 +22,9 @@ def gen_main(user_code: str, sig: dict) -> str:
 int main(int argc, char** argv) {{
     json spec = lc::read_spec(argv[1]);
     ofstream out(argv[2]);
-    auto* real = cout.rdbuf();
     for (auto& c : spec["cases"]) {{
         json line;
-        stringstream buf;
-        cout.rdbuf(buf.rdbuf());
+        lc::StdoutCapture capture;
         try {{
 {decls}
             Solution sol;
@@ -45,9 +43,7 @@ int main(int argc, char** argv) {{
             line["error"] = "unknown exception";
             line["ms"] = 0;
         }}
-        cout.flush();
-        cout.rdbuf(real);
-        line["stdout"] = buf.str().substr(0, 65536);
+        line["stdout"] = capture.finish();
         out << lc::dump_line(line) << "\\n";
         out.flush();
     }}
