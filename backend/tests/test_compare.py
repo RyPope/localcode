@@ -1,4 +1,4 @@
-from localcode.compare import judge
+from localcode.judging.compare import judge
 
 
 def test_exact_lists():

@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Iterator
 
-from localcode.kwargs import parse_kwargs
+from localcode.judging.kwargs import parse_kwargs
 
 _DEF_RE = re.compile(r"def (\w+)\(self,?(.*?)\)\s*(?:->\s*(.*?))?:", re.S)
 _INPUT_RE = re.compile(r"^\s*Input:\s*(.+)$", re.M)

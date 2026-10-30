@@ -1,11 +1,14 @@
 from fastapi.testclient import TestClient
 
-from localcode import api
+from localcode import config
+from localcode.api.app import create_app
+from localcode.api.deps import get_runner
 
 
 def client(runner):
-    api.app.dependency_overrides[api.get_runner] = lambda: runner
-    return TestClient(api.app)
+    app = create_app()
+    app.dependency_overrides[get_runner] = lambda: runner
+    return TestClient(app)
 
 
 def test_problems_endpoint(data_dir, runner):
@@ -43,8 +46,13 @@ def test_spa_fallback_serves_index(data_dir, runner, tmp_path, monkeypatch):
     (dist / "assets").mkdir(parents=True)
     (dist / "index.html").write_text("<html>app</html>")
     (dist / "assets" / "a.js").write_text("js")
-    monkeypatch.setattr(api.config, "WEB_DIST", dist)
+    monkeypatch.setattr(config, "WEB_DIST", dist)
     c = client(runner)
     assert c.get("/problems/two-sum").text == "<html>app</html>"
     assert c.get("/assets/a.js").text == "js"
     assert c.get("/api/nope").status_code == 404
+
+
+def test_unknown_language_is_422(data_dir, runner):
+    r = client(runner).post("/api/submit", json={"slug": "pair-sum", "lang": "ruby", "code": "x"})
+    assert r.status_code == 422

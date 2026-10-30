@@ -1,5 +1,11 @@
-"""SQLite schemas and connections. content.db is rebuilt by imports; user.db never is."""
+"""SQLite schemas and connection sessions.
+
+content.db is rebuilt from upstream sources on every import and swapped in atomically.
+user.db holds drafts and submissions and is never touched by an import.
+"""
 import sqlite3
+from collections.abc import Iterator
+from contextlib import contextmanager
 from pathlib import Path
 
 from localcode.config import CONTENT_DB, USER_DB
@@ -29,6 +35,7 @@ create table if not exists settings(key text primary key, value text);
 
 
 def connect(path: Path, schema: str) -> sqlite3.Connection:
+    """Open a connection and ensure the schema exists. Callers own closing it."""
     path.parent.mkdir(parents=True, exist_ok=True)
     con = sqlite3.connect(path, check_same_thread=False)
     con.row_factory = sqlite3.Row
@@ -42,3 +49,30 @@ def connect_content(path: Path | None = None) -> sqlite3.Connection:
 
 def connect_user(path: Path | None = None) -> sqlite3.Connection:
     return connect(path or USER_DB, USER_SCHEMA)
+
+
+@contextmanager
+def _session(con: sqlite3.Connection) -> Iterator[sqlite3.Connection]:
+    try:
+        with con:  # commit on success, roll back on error
+            yield con
+    finally:
+        con.close()
+
+
+def user_session() -> Iterator[sqlite3.Connection]:
+    """Read/write access to user.db."""
+    return _session(connect_user())
+
+
+@contextmanager
+def content_session() -> Iterator[sqlite3.Connection]:
+    """content.db with user.db attached as schema `u` (for per-user status in queries).
+
+    Opened per call because imports replace content.db on disk.
+    """
+    connect_user().close()  # make sure user.db and its schema exist before attaching
+    con = connect_content()
+    con.execute("attach database ? as u", (str(USER_DB),))
+    with _session(con) as c:
+        yield c

@@ -9,6 +9,12 @@ from localcode.importer.build import build_content_db
 FIX = Path(__file__).parent / "fixtures"
 
 
+@pytest.fixture(autouse=True)
+def _fresh_expected_cache():
+    from localcode.services.judge import expected_cache
+    expected_cache.clear()
+
+
 @pytest.fixture
 def data_dir(tmp_path, monkeypatch):
     src = tmp_path / "sources"

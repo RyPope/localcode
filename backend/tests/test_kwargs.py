@@ -1,6 +1,6 @@
 import pytest
 
-from localcode.kwargs import parse_kwargs
+from localcode.judging.kwargs import parse_kwargs
 
 
 def test_parse_kwargs():
