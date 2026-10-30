@@ -11,7 +11,7 @@ from pathlib import Path
 
 HARNESS = Path(__file__).resolve().parent / "harness"
 SANDBOX_UID = 10001
-MEMORY_BYTES = 512 * 1024 * 1024
+MEMORY_BYTES = 1024 * 1024 * 1024
 COMPILE_TIMEOUT_S = 60
 STARTUP_GRACE_MS = {"python": 1000, "cpp": 500, "java": 2000, "kotlin": 2500}
 MAX_LOG = 8000
@@ -79,14 +79,14 @@ def _prepare(lang: str, req: dict, workdir: Path) -> tuple[list[str] | None, lis
             shutil.copy(HARNESS / "jvm" / f, workdir)
         cp = ".:/opt/lib/gson.jar:/opt/lib/driver.jar"
         return (["javac", "-nowarn", "-encoding", "UTF-8", "-cp", cp, "-d", ".", "Solution.java", "ListNode.java", "TreeNode.java"],
-                ["java", "-Xmx384m", "-Xss256m", "-XX:+UseSerialGC", "-XX:TieredStopAtLevel=1", "-cp", cp, "Driver", cases, results], False)
+                ["java", "-Xmx768m", "-Xss256m", "-XX:+UseSerialGC", "-XX:TieredStopAtLevel=1", "-cp", cp, "Driver", cases, results], False)
     if lang == "kotlin":
         (workdir / "Solution.kt").write_text(KOTLIN_IMPORTS + req["code"])
         for f in ("ListNode.kt", "TreeNode.kt"):
             shutil.copy(HARNESS / "jvm" / f, workdir)
         cp = ".:/opt/lib/gson.jar:/opt/lib/driver.jar:/opt/kotlinc/lib/kotlin-stdlib.jar"
         return (["kotlinc", "-nowarn", "-d", ".", "Solution.kt", "ListNode.kt", "TreeNode.kt"],
-                ["java", "-Xmx384m", "-Xss256m", "-XX:+UseSerialGC", "-cp", cp, "Driver", cases, results], False)
+                ["java", "-Xmx768m", "-Xss256m", "-XX:+UseSerialGC", "-cp", cp, "Driver", cases, results], False)
     if lang == "cpp":
         from harness.cpp_gen import gen_main
         (workdir / "main.cpp").write_text(gen_main(req["code"], req["cpp_sig"]))
@@ -96,7 +96,8 @@ def _prepare(lang: str, req: dict, workdir: Path) -> tuple[list[str] | None, lis
 
 
 # Imports share the user's first line so reported line numbers match the editor.
-JAVA_IMPORTS = "import java.util.*; import java.util.function.*; import java.util.stream.*; import java.math.*; "
+JAVA_IMPORTS = ("import java.util.*; import java.util.function.*; import java.util.stream.*; import java.math.*; "
+                "import javafx.util.Pair; ")
 KOTLIN_IMPORTS = "import java.util.*; import kotlin.math.*; "
 
 

@@ -22,7 +22,7 @@ RUN pip install --no-cache-dir pytest==8.3.4 \
 WORKDIR /srv
 COPY . /srv
 RUN if [ -f harness/jvm/Driver.java ]; then \
-      mkdir -p /tmp/drv && javac -cp /opt/lib/gson.jar -d /tmp/drv harness/jvm/Driver.java \
+      mkdir -p /tmp/drv && javac -cp /opt/lib/gson.jar -d /tmp/drv harness/jvm/Driver.java harness/jvm/javafx/util/Pair.java \
       && jar cf /opt/lib/driver.jar -C /tmp/drv . && rm -rf /tmp/drv; fi
 
 # Precompiled C++ prelude (flags must match execute.py's g++ invocation).

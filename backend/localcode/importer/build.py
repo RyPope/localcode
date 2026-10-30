@@ -6,12 +6,22 @@ from pathlib import Path
 from typing import Callable
 
 from localcode import config, db
+from localcode.importer.case_filter import filter_cases
 from localcode.importer.companies import load_companies
 from localcode.importer.dataset import DatasetProblem, load_rows
 from localcode.importer.doocs import DoocsProblem, iter_problem_dirs, parse_problem_dir
 from localcode.importer.signatures import cpp_starter, java_starter, kotlin_starter, parse_cpp_sig, parse_java_sig
 
 Progress = Callable[[str, int, int], None]
+EXCLUDED_CASES = Path(__file__).resolve().parent.parent / "data" / "excluded_cases.json"
+MIN_CASES = 3
+
+
+def load_excluded(path: Path = EXCLUDED_CASES) -> dict[str, set[str]]:
+    """Known-bad case keys per problem, produced by `python -m localcode.tools.validate_cases`."""
+    if not path.exists():
+        return {}
+    return {slug: set(keys) for slug, keys in json.loads(path.read_text()).items()}
 
 
 def _title_from_slug(slug: str) -> str:
@@ -30,7 +40,8 @@ def _sig(parse, code: str | None, method: str | None, nparams: int | None) -> di
     return sig
 
 
-def _problem_rows(ds: DatasetProblem | None, dc: DoocsProblem | None, acceptance: float | None):
+def _problem_rows(ds: DatasetProblem | None, dc: DoocsProblem | None, acceptance: float | None,
+                  excluded: set[str]):
     slug = (ds or dc).slug
     method = ds.method if ds else None
     nparams = len(ds.params) if ds else None
@@ -49,9 +60,10 @@ def _problem_rows(ds: DatasetProblem | None, dc: DoocsProblem | None, acceptance
     if cpp:
         starters.append((slug, "cpp", cpp_starter(cpp), json.dumps(cpp)))
 
-    has_tests = bool(ds and ds.has_tests)
+    cases = filter_cases(ds.cases, ds.ret, java, excluded) if ds else []
+    has_tests = bool(ds and ds.has_tests and len(cases) >= MIN_CASES)
     langs = [lang for lang in ("python", "java", "cpp", "kotlin") if has_tests and any(s[1] == lang for s in starters)]
-    examples = (ds.examples or [c["args"] for c in ds.cases[:3]]) if ds else []
+    examples = (ds.examples or [c["args"] for c in cases[:MIN_CASES]]) if ds else []
     description = dc.description_html if dc and dc.description_html else (
         f'<pre class="plain">{html.escape(ds.description)}</pre>' if ds else ""
     )
@@ -75,11 +87,13 @@ def _problem_rows(ds: DatasetProblem | None, dc: DoocsProblem | None, acceptance
     solutions = [
         (slug, i, s["title"], s["explanation_md"], json.dumps(s["code"])) for i, s in enumerate(dc.solutions if dc else [])
     ]
-    tests = (slug, json.dumps(ds.cases)) if has_tests else None
+    tests = (slug, json.dumps(cases)) if has_tests else None
     return problem, starters, solutions, tests
 
 
-def build_content_db(src: Path, out: Path, progress: Progress, sources_used: dict | None = None) -> dict:
+def build_content_db(src: Path, out: Path, progress: Progress, sources_used: dict | None = None,
+                     excluded: dict[str, set[str]] | None = None) -> dict:
+    excluded = load_excluded() if excluded is None else excluded
     progress("problems", 0, 0)
     dataset: dict[str, DatasetProblem] = {}
     for f in config.DATASET_FILES:
@@ -106,7 +120,8 @@ def build_content_db(src: Path, out: Path, progress: Progress, sources_used: dic
     con = db.connect_content(tmp)
     slugs = sorted(set(dataset) | set(doocs))
     for i, slug in enumerate(slugs):
-        problem, starters, solutions, tests = _problem_rows(dataset.get(slug), doocs.get(slug), acceptance.get(slug))
+        problem, starters, solutions, tests = _problem_rows(
+            dataset.get(slug), doocs.get(slug), acceptance.get(slug), excluded.get(slug, set()))
         con.execute("insert into problems values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", problem)
         con.executemany("insert into starters values (?,?,?,?)", starters)
         con.executemany("insert into solutions values (?,?,?,?,?)", solutions)
@@ -128,7 +143,7 @@ def build_content_db(src: Path, out: Path, progress: Progress, sources_used: dic
     stats = {
         "problems": len(slugs),
         "with_tests": con.execute("select count(*) from problems where has_tests=1").fetchone()[0],
-        "cases": sum(len(p.cases) for p in dataset.values() if p.has_tests),
+        "cases": con.execute("select coalesce(sum(json_array_length(cases)), 0) from tests").fetchone()[0],
         "companies": len(names),
     }
     meta = {

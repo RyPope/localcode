@@ -63,3 +63,16 @@ def test_reimport_preserves_user_db(tmp_path, monkeypatch):
         assert u.execute("select code from drafts").fetchone()[0] == "x = 1"
     with db.connect_content() as c:
         assert c.execute("select count(*) from problems").fetchone()[0] == 4
+
+
+def test_build_filters_invalid_cases_and_applies_exclusions(tmp_path):
+    from localcode.importer.case_filter import case_key
+
+    src = make_src(tmp_path)
+    rows = [json.loads(line) for line in (src / "dataset" / "LeetCodeDataset-train.jsonl").read_text().splitlines()]
+    rows[0]["test"] += "    assert candidate(nums = [1, 2],goal = 4294967296) == [0, 1]\n    assert candidate(nums = [1],goal = 7) == None\n"
+    (src / "dataset" / "LeetCodeDataset-train.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows))
+    out = tmp_path / "content.db"
+    build_content_db(src, out, progress=lambda *a: None, excluded={"pair-sum": {case_key([[0, 1], 1])}})
+    cases = json.loads(sqlite3.connect(out).execute("select cases from tests where slug='pair-sum'").fetchone()[0])
+    assert [c["args"] for c in cases] == [[[1, 4, 6], 10], [[5, 5], 10], [[2, 8, 3], 5]]

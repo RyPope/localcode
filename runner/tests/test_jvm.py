@@ -138,3 +138,22 @@ def test_kotlin_tree_and_list(run):
 def test_kotlin_compile_error(run):
     r = run("kotlin", "class Solution { fun f(x: Int): Int = y }", "f", [{"name": "x", "type": "int"}], [[1]])
     assert "error" in r["compile_error"]
+
+
+def test_java_pair_is_available_without_import(run):
+    code = """class Solution {
+    public int f(int x) {
+        Pair<Integer, String>[] t = new Pair[1];
+        t[0] = new Pair<>(x, "a");
+        return t[0].getKey() + t[0].getValue().length();
+    }
+}"""
+    r = run("java", code, "f", [{"name": "x", "type": "int"}], [[41]])
+    assert r["compile_error"] is None, r
+    assert r["results"][0]["value"] == 42
+
+
+def test_python_has_a_gigabyte(run):
+    code = "class Solution:\n    def f(self, x: int) -> int:\n        a = bytearray(700 * 1024 * 1024)\n        return len(a) // (1024 * 1024)\n"
+    r = run("python", code, "f", [{"name": "x", "type": "int"}], [[1]])
+    assert r["results"][0]["value"] == 700
