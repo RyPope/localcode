@@ -124,7 +124,7 @@ def main(sol_path, cases_path, out_path):
     try:
         exec(compile(PRELUDE, "prelude", "exec"), ns)
         exec(compile(open(sol_path).read(), "solution.py", "exec"), ns)
-        method = getattr(ns["Solution"](), spec["method"])
+        getattr(ns["Solution"], spec["method"])
     except SyntaxError as e:
         emit({"compile_error": f"SyntaxError: {e.msg} (line {e.lineno})"})
         return
@@ -140,6 +140,7 @@ def main(sol_path, cases_path, out_path):
         sys.stdout = buf
         try:
             conv = [convert_in(ns, a, t) for a, t in zip(args, types)]
+            method = getattr(ns["Solution"](), spec["method"])
             t0 = time.perf_counter()
             result = method(*conv)
             ms = (time.perf_counter() - t0) * 1000

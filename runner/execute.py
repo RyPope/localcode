@@ -90,8 +90,8 @@ def _prepare(lang: str, req: dict, workdir: Path) -> tuple[list[str] | None, lis
     if lang == "cpp":
         from harness.cpp_gen import gen_main
         (workdir / "main.cpp").write_text(gen_main(req["code"], req["cpp_sig"]))
-        shutil.copy(HARNESS / "cpp" / "lc.hpp", workdir)
-        return (["g++", "-std=c++20", "-O2", "-w", "-o", "sol", "main.cpp"], ["./sol", cases, results], True)
+        return (["g++", "-std=c++20", "-O2", "-w", "-I", "/opt/lc", "-o", "sol", "main.cpp", "/opt/lc/lc_io.o"],
+                ["./sol", cases, results], True)
     raise ValueError(f"unknown language {lang!r}")
 
 

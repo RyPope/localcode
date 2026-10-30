@@ -19,7 +19,7 @@ public class Driver {
         treeNode = load("TreeNode");
         String name = spec.get("method").getAsString();
         int arity = spec.getAsJsonArray("params").size();
-        Object solution;
+        Constructor<?> ctor;
         Method method = null;
         try {
             Class<?> cls = Class.forName("Solution");
@@ -28,9 +28,8 @@ public class Driver {
             }
             if (method == null) throw new NoSuchMethodException();
             method.setAccessible(true);
-            Constructor<?> ctor = cls.getDeclaredConstructor();
+            ctor = cls.getDeclaredConstructor();
             ctor.setAccessible(true);
-            solution = ctor.newInstance();
         } catch (ReflectiveOperationException e) {
             JsonObject err = new JsonObject();
             err.addProperty("compile_error", "class Solution with method " + name + " (" + arity + " parameters) not found");
@@ -48,6 +47,7 @@ public class Driver {
             try {
                 Object[] callArgs = new Object[types.length];
                 for (int i = 0; i < types.length; i++) callArgs[i] = fromJson(a.get(i), types[i]);
+                Object solution = ctor.newInstance();
                 long t0 = System.nanoTime();
                 Object result = method.invoke(solution, callArgs);
                 double ms = (System.nanoTime() - t0) / 1e6;
