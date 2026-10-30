@@ -48,6 +48,8 @@ class Handler(BaseHTTPRequestHandler):
                 self._send(200, execute(req))
         except (ValueError, KeyError) as e:
             self._send(400, {"error": str(e)})
+        except Exception as e:  # keep the service alive whatever a request does
+            self._send(500, {"error": f"{type(e).__name__}: {e}"})
 
     def log_message(self, fmt, *args):
         pass

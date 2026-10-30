@@ -95,8 +95,9 @@ def _prepare(lang: str, req: dict, workdir: Path) -> tuple[list[str] | None, lis
     raise ValueError(f"unknown language {lang!r}")
 
 
-JAVA_IMPORTS = "import java.util.*;\nimport java.util.function.*;\nimport java.util.stream.*;\nimport java.math.*;\n"
-KOTLIN_IMPORTS = "import java.util.*\nimport kotlin.math.*\n"
+# Imports share the user's first line so reported line numbers match the editor.
+JAVA_IMPORTS = "import java.util.*; import java.util.function.*; import java.util.stream.*; import java.math.*; "
+KOTLIN_IMPORTS = "import java.util.*; import kotlin.math.*; "
 
 
 def execute(req: dict) -> dict:
