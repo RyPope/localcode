@@ -50,6 +50,9 @@ api-types: ## Regenerate web/openapi.json and the web client's TypeScript types 
 	$(PY)/python -m localcode.tools.openapi web/openapi.json
 	npm --prefix web run api-types
 
+screenshots: ## Regenerate the README images from the running stack
+	npm --prefix web run screenshots
+
 smoke: ## End-to-end smoke test against the running stack
 	$(PY)/python -m localcode.tools.smoke
 
@@ -63,4 +66,4 @@ validate-cases: ## Maintainers: regenerate the excluded test-case list (slow)
 	docker compose cp app:/data/excluded_cases.json backend/localcode/data/excluded_cases.json
 	docker compose up -d --scale runner=1
 
-.PHONY: help up down logs setup test test-backend test-runner test-web lint format dev-web api-types smoke update validate-cases
+.PHONY: help up down logs setup test test-backend test-runner test-web lint format dev-web api-types screenshots smoke update validate-cases

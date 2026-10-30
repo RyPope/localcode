@@ -1,0 +1,38 @@
+name: Bug report
+description: Something doesn't work as expected
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for reporting! Please search existing issues first. For security problems, use a private security advisory instead (see SECURITY.md).
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: input
+    id: problem
+    attributes:
+      label: Problem and language
+      description: If this is about judging, which problem (slug or number) and language?
+      placeholder: two-sum, Java
+  - type: textarea
+    id: code
+    attributes:
+      label: Code or steps to reproduce
+      render: text
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Output of `docker compose logs --tail=100 app runner`, if relevant.
+      render: text
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: macOS 15 (Apple Silicon), Docker Desktop 4.x, localcode commit abc1234
+    validations:
+      required: true

@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: backend/Dockerfile
     ports:
-      - "127.0.0.1:4173:4173"
+      - "127.0.0.1:${LOCALCODE_PORT:-4173}:4173"
     volumes:
       - localcode-data:/data
     environment:

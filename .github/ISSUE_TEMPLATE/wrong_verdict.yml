@@ -1,0 +1,36 @@
+name: Wrong verdict
+description: A correct solution was rejected (or a wrong one accepted)
+labels: [judging]
+body:
+  - type: markdown
+    attributes:
+      value: Test cases come from an upstream dataset and a few may be invalid. Reports like this let us add them to the exclusion list.
+  - type: input
+    id: problem
+    attributes:
+      label: Problem
+      placeholder: merge-intervals
+    validations:
+      required: true
+  - type: dropdown
+    id: lang
+    attributes:
+      label: Language
+      options: [Python, Java, C++, Kotlin]
+    validations:
+      required: true
+  - type: textarea
+    id: code
+    attributes:
+      label: Your solution
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: failing
+    attributes:
+      label: Failing case shown by localcode
+      description: Copy the input, expected and actual output from the Submission panel.
+      render: text
+    validations:
+      required: true

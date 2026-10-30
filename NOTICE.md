@@ -10,6 +10,8 @@ localcode does **not** include or redistribute problem statements, test cases or
 
 Problem statements in those sources originate from LeetCode. localcode is not affiliated with or endorsed by LeetCode.
 
+The screenshots in `docs/images/` show localcode displaying content downloaded from these sources.
+
 `backend/localcode/data/excluded_cases.json` is original data produced by localcode's validation tool. It contains only hashes of test inputs, not the inputs themselves.
 
 Bundled third-party software is listed in `web/package.json`, `backend/pyproject.toml` and `runner/Dockerfile` under the respective licenses.
