@@ -42,7 +42,13 @@ export default function CompanyPage() {
   const suffix = `?company=${slug}&window=${window}`;
   const share = (n: number) => (s?.total ? n / s.total : 0);
 
-  if (summary.isError) return <main className="page">Unknown company.</main>;
+  if (summary.isError) {
+    return (
+      <main className="page" role="alert">
+        {summary.error.message} <Link to="/companies">Back to companies</Link>
+      </main>
+    );
+  }
   return (
     <main className="page">
       <nav className="note text-sm">

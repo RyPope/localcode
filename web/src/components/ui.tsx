@@ -1,10 +1,9 @@
 import DOMPurify from "dompurify";
-import katex from "katex";
-import { marked } from "marked";
 import { useMemo, type ReactNode } from "react";
 import type { Difficulty, Status, Window } from "../api";
 import { WINDOW_LABEL } from "../api";
 import { ICONS } from "../lib/icons";
+import { renderMarkdown } from "../lib/markdown";
 
 export function Icon({ d, size = 14, stroke = 2 }: { d: string | string[]; size?: number; stroke?: number }) {
   return (
@@ -154,20 +153,9 @@ export function Html({ html, className = "prose" }: { html: string; className?: 
   return <div className={className} dangerouslySetInnerHTML={{ __html: clean }} />;
 }
 
-function renderMath(src: string): string {
-  const parts: string[] = [];
-  const stash = (html: string) => `@@KATEX${parts.push(html) - 1}@@`;
-  const tex = (s: string, display: boolean) => katex.renderToString(s, { throwOnError: false, displayMode: display });
-  const withMath = src
-    .replace(/\$\$([\s\S]+?)\$\$/g, (_, s) => stash(tex(s, true)))
-    .replace(/\$([^$\n]+?)\$/g, (_, s) => stash(tex(s, false)));
-  const html = marked.parse(withMath, { async: false }) as string;
-  return html.replace(/@@KATEX(\d+)@@/g, (_, i) => parts[Number(i)]);
-}
-
 /** Markdown with $math$ (KaTeX), for reference-solution explanations. */
 export function Markdown({ src }: { src: string }) {
-  const clean = useMemo(() => DOMPurify.sanitize(renderMath(src)), [src]);
+  const clean = useMemo(() => DOMPurify.sanitize(renderMarkdown(src)), [src]);
   return <div className="prose" dangerouslySetInnerHTML={{ __html: clean }} />;
 }
 

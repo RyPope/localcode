@@ -11,11 +11,12 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
+import { shouldRetry } from "./lib/retry";
 import { applyTheme, getTheme } from "./theme";
 
 applyTheme(getTheme());
 const queryClient = new QueryClient({
-  defaultOptions: { queries: { staleTime: 30_000, refetchOnWindowFocus: false } },
+  defaultOptions: { queries: { staleTime: 30_000, refetchOnWindowFocus: false, retry: shouldRetry } },
 });
 
 createRoot(document.getElementById("root")!).render(

@@ -33,7 +33,15 @@ export const WINDOW_LABEL: Record<Window, string> = {
   all: "All time",
 };
 
-export class ApiError extends Error {}
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
 
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
   const r = await fetch(path, { headers: { "Content-Type": "application/json" }, ...init });
@@ -44,7 +52,7 @@ async function req<T>(path: string, init?: RequestInit): Promise<T> {
     } catch {
       /* not JSON */
     }
-    throw new ApiError(msg);
+    throw new ApiError(msg, r.status);
   }
   return r.status === 204 ? (undefined as T) : r.json();
 }

@@ -1,7 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { api } from "../api";
+import { api, type Stats } from "../api";
 import { CardHeader, Meter, PageHeader, Stat } from "../components/layout";
+import QueryState from "../components/QueryState";
+import { useAppStatus } from "../hooks/useAppStatus";
 import { CompanyBadge, Icon } from "../components/ui";
 import { ICONS } from "../lib/icons";
 import styles from "./Progress.module.css";
@@ -14,18 +16,16 @@ const DIFFS = [
 
 export default function Progress() {
   const stats = useQuery({ queryKey: ["stats"], queryFn: api.stats });
-  const status = useQuery({
-    queryKey: ["status"],
-    queryFn: api.status,
-    refetchInterval: (q) => (q.state.data?.import.running ? 1500 : false),
-  });
+  return <QueryState query={stats}>{(s) => <ProgressView stats={s} />}</QueryState>;
+}
+
+function ProgressView({ stats: s }: { stats: Stats }) {
+  const status = useAppStatus();
   const qc = useQueryClient();
   const update = useMutation({
     mutationFn: api.startImport,
     onSuccess: () => qc.invalidateQueries({ queryKey: ["status"] }),
   });
-  const s = stats.data;
-  if (!s) return null;
   const solved = s.totals.easy[0] + s.totals.medium[0] + s.totals.hard[0];
   const total = s.totals.easy[1] + s.totals.medium[1] + s.totals.hard[1];
   const weekMax = Math.max(5, ...s.solved_by_week.map((w) => w.easy + w.medium + w.hard));

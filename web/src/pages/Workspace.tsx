@@ -50,7 +50,7 @@ export default function Workspace() {
         Problem not found. <Link to="/">Back to problems</Link>
       </main>
     );
-  if (!p) return null;
+  if (!p) return <div className="empty">Loading…</div>;
 
   const suffix = company ? `?company=${company}&window=${window}` : "";
   const nextInList = companyCtx.data?.next_unsolved.find((x) => x.slug !== slug);
