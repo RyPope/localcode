@@ -1,0 +1,34 @@
+"""Parse LeetCode-style argument strings: `nums = [2,7], target = 9`."""
+import ast
+import io
+import tokenize
+from typing import Any
+
+_JSON_NAMES = {"null": "None", "true": "True", "false": "False"}
+
+
+def _pythonize(s: str) -> str:
+    out = []
+    for tok in tokenize.generate_tokens(io.StringIO(s).readline):
+        if tok.type == tokenize.NAME and tok.string in _JSON_NAMES:
+            tok = tok._replace(string=_JSON_NAMES[tok.string])
+        out.append(tok)
+    return tokenize.untokenize(out)
+
+
+def parse_kwargs(s: str) -> dict[str, Any]:
+    try:
+        call = ast.parse("f(" + _pythonize(s.strip()) + ")", mode="eval").body
+    except (SyntaxError, tokenize.TokenError) as e:
+        raise ValueError(f"Could not parse input: {s!r}") from e
+    if not isinstance(call, ast.Call) or call.args:
+        raise ValueError("Input must be written as name = value pairs")
+    result = {}
+    for kw in call.keywords:
+        if kw.arg is None:
+            raise ValueError("Input must be written as name = value pairs")
+        try:
+            result[kw.arg] = ast.literal_eval(kw.value)
+        except ValueError as e:
+            raise ValueError(f"Value for {kw.arg!r} is not a literal") from e
+    return result
