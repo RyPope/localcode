@@ -10,10 +10,17 @@ import SubmissionsTab from "../components/SubmissionsTab";
 import TestPanel from "../components/TestPanel";
 import { CompanyBadge, Html, Icon } from "../components/ui";
 import { useSplit } from "../hooks/useSplit";
-import { useWorkspace } from "../hooks/useWorkspace";
+import { useWorkspace, type SaveState } from "../hooks/useWorkspace";
 import { pref, setPref } from "../theme";
 
 type LeftTab = "description" | "solutions" | "submissions";
+
+const SAVE_LABEL: Record<SaveState, string> = {
+  saved: "Saved locally",
+  saving: "Saving…",
+  dirty: "Unsaved",
+  error: "Couldn't save — retrying",
+};
 
 export default function Workspace() {
   const { slug = "" } = useParams();
@@ -209,7 +216,7 @@ export default function Workspace() {
               A+
             </button>
             <span className="muted" style={{ fontSize: 12 }}>
-              {ws.save === "saved" ? "Saved locally" : ws.save === "saving" ? "Saving…" : "Unsaved"}
+              {SAVE_LABEL[ws.save]}
             </span>
             <div style={{ flex: 1 }} />
             <button className="btn" disabled={!runnable || ws.busy} onClick={ws.run} title="Run (⌘↵)">

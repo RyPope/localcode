@@ -168,8 +168,12 @@ export const api = {
   problem: (slug: string) => req<ProblemDetail>(`/api/problems/${slug}`),
   solutions: (slug: string) => req<Solution[]>(`/api/problems/${slug}/solutions`),
   draft: (slug: string, lang: Lang) => req<{ code: string | null }>(`/api/drafts/${slug}/${lang}`),
-  saveDraft: (slug: string, lang: Lang, code: string) =>
-    req<void>(`/api/drafts/${slug}/${lang}`, { method: "PUT", body: JSON.stringify({ code }) }),
+  saveDraft: (slug: string, lang: Lang, code: string, opts?: { keepalive?: boolean }) =>
+    req<void>(`/api/drafts/${slug}/${lang}`, {
+      method: "PUT",
+      body: JSON.stringify({ code }),
+      keepalive: opts?.keepalive,
+    }),
   run: (slug: string, lang: Lang, code: string, custom: string[]) =>
     req<RunResult>("/api/run", { method: "POST", body: JSON.stringify({ slug, lang, code, custom }) }),
   submit: (slug: string, lang: Lang, code: string) =>

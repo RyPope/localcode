@@ -27,8 +27,9 @@ test-runner: ## Runner tests (inside the pinned toolchain image)
 	docker compose build runner
 	docker compose run --rm --no-deps runner pytest -q tests/
 
-test-web: ## Web typecheck and production build
+test-web: ## Web typecheck, unit tests and production build
 	npm --prefix web run typecheck
+	npm --prefix web test
 	npm --prefix web run build
 
 lint: ## Lint and format-check everything

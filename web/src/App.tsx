@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { lazy, Suspense } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useParams } from "react-router-dom";
 import { api } from "./api";
 import Header from "./components/Header";
 import CompanyIndex from "./pages/CompanyIndex";
@@ -11,6 +11,16 @@ import Setup from "./pages/Setup";
 
 // The workspace pulls in Monaco (~4 MB); load it only when a problem is opened.
 const Workspace = lazy(() => import("./pages/Workspace"));
+
+/** One Workspace instance per problem, so editor state can never carry over between problems. */
+function WorkspaceRoute() {
+  const { slug = "" } = useParams();
+  return (
+    <Suspense fallback={null}>
+      <Workspace key={slug} />
+    </Suspense>
+  );
+}
 
 export default function App() {
   const status = useQuery({
@@ -25,14 +35,7 @@ export default function App() {
       <Header />
       <Routes>
         <Route path="/" element={<ProblemList />} />
-        <Route
-          path="/problems/:slug"
-          element={
-            <Suspense fallback={null}>
-              <Workspace />
-            </Suspense>
-          }
-        />
+        <Route path="/problems/:slug" element={<WorkspaceRoute />} />
         <Route path="/companies" element={<CompanyIndex />} />
         <Route path="/companies/:slug" element={<CompanyPage />} />
         <Route path="/progress" element={<Progress />} />
