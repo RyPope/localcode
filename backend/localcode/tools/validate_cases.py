@@ -82,7 +82,7 @@ def _load(slug: str) -> tuple[dict, list[dict], dict[str, str], dict | None]:
     return p, cases, codes, json.loads(cpp_row[0]) if cpp_row else None
 
 
-def _validate_one(slug: str, runner_url: str | None) -> tuple[list[str], dict[str, str]]:
+def _validate_one(slug: str, runner_url: str) -> tuple[list[str], dict[str, str]]:
     p, cases, codes, cpp_sig = _load(slug)
     outcomes = {
         lang: _outcomes(p, lang, codes[lang], cases, cpp_sig if lang == "cpp" else None, runner_url)
@@ -94,15 +94,16 @@ def _validate_one(slug: str, runner_url: str | None) -> tuple[list[str], dict[st
 
 
 def validate(out: Path, only: list[str] | None = None, runners: list[str] | None = None) -> dict[str, list[str]]:
-    """Validate every runnable problem, one worker per runner URL (default: the configured runner)."""
+    """Validate every runnable problem, one worker per runner (default: every runner the app can reach)."""
     with content_session() as con:
         slugs = [r[0] for r in con.execute("select slug from problems where has_tests = 1 order by frontend_id")]
     result: dict[str, list[str]] = json.loads(out.read_text()) if out.exists() else {}
     todo = [s for s in slugs if s in only] if only else [s for s in slugs if s not in result]
     lock = threading.Lock()
     done = 0
-    pool_urls: queue.Queue[str | None] = queue.Queue()
-    for url in runners or [None]:
+    targets = runners or runner_client.endpoints()
+    pool_urls: queue.Queue[str] = queue.Queue()
+    for url in targets:
         pool_urls.put(url)
 
     def work(slug: str) -> None:
@@ -118,7 +119,7 @@ def validate(out: Path, only: list[str] | None = None, runners: list[str] | None
             out.write_text(json.dumps(result, indent=0, sort_keys=True))
             print(f"[{done}/{len(todo)}] {slug}: {summary} exclude {len(keys)}", flush=True)
 
-    with ThreadPoolExecutor(max_workers=len(runners or [None])) as pool:
+    with ThreadPoolExecutor(max_workers=max(1, len(targets))) as pool:
         for f in [pool.submit(work, s) for s in todo]:
             f.result()
     return result
@@ -131,7 +132,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument(
         "--runners",
         nargs="*",
-        help="runner base URLs to spread work across, e.g. http://localcode-runner-1:8080 (default: LOCALCODE_RUNNER)",
+        help="runner endpoints to spread work across (default: every runner socket the app can see)",
     )
     args = ap.parse_args(argv)
     t0 = time.time()

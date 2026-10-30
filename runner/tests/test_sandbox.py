@@ -90,3 +90,8 @@ def test_memory_limit_comes_from_the_request(url):
         res = json.load(r)
     assert res["results"][0]["ok"] is False
     assert "MemoryError" in res["results"][0]["error"]
+
+
+def test_shared_memory_does_not_survive_a_run(run):
+    assert value(run("python", py("open('/dev/shm/leftover', 'w').write('x')\nreturn 1"), "f", INT, [[1]])) == 1
+    assert value(run("python", py("return int(os.path.exists('/dev/shm/leftover'))"), "f", INT, [[1]])) == 0

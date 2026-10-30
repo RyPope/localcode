@@ -1,9 +1,19 @@
-"""HTTP front for execute(): POST /execute, GET /health. One execution at a time."""
+"""HTTP front for execute(): POST /execute, GET /health. One execution at a time.
+
+In Docker the runner has no network: it serves on a Unix socket in RUNNER_SOCKET_DIR that only the
+app's group can open (the sandbox user cannot). Without RUNNER_SOCKET_DIR it listens on TCP :8080.
+"""
 
 import json
+import os
+import signal
+import socket
+import socketserver
 import subprocess
+import sys
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
 
 from execute import execute
 
@@ -66,6 +76,40 @@ def make_server(port: int) -> ThreadingHTTPServer:
     return ThreadingHTTPServer(("0.0.0.0", port), Handler)
 
 
+class UnixHTTPServer(socketserver.ThreadingUnixStreamServer):
+    daemon_threads = True
+
+
+def make_unix_server(path: Path, gid: int) -> UnixHTTPServer:
+    """Serve on a Unix socket readable and writable only by root and group `gid` (mode 0660)."""
+    path.unlink(missing_ok=True)
+    old_umask = os.umask(0o177)  # never expose the socket, even briefly, before chmod
+    try:
+        httpd = UnixHTTPServer(str(path), Handler)
+    finally:
+        os.umask(old_umask)
+    os.chown(path, 0, gid)
+    os.chmod(path, 0o660)
+    return httpd
+
+
+def main() -> None:
+    socket_dir = os.environ.get("RUNNER_SOCKET_DIR")
+    if not socket_dir:
+        print("runner listening on :8080", flush=True)
+        make_server(8080).serve_forever()
+        return
+    path = Path(socket_dir) / f"runner-{socket.gethostname()}.sock"
+    httpd = make_unix_server(path, int(os.environ.get("RUNNER_SOCKET_GID", "1000")))
+
+    def stop(*_: object) -> None:
+        path.unlink(missing_ok=True)  # don't leave a stale socket for the app to try
+        sys.exit(0)
+
+    signal.signal(signal.SIGTERM, stop)
+    print(f"runner listening on {path}", flush=True)
+    httpd.serve_forever()
+
+
 if __name__ == "__main__":
-    print("runner listening on :8080", flush=True)
-    make_server(8080).serve_forever()
+    main()

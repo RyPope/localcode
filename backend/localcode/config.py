@@ -8,7 +8,7 @@ DATA_DIR = Path(os.environ.get("LOCALCODE_DATA", "/data"))
 CONTENT_DB = DATA_DIR / "content.db"
 USER_DB = DATA_DIR / "user.db"
 SOURCES_DIR = DATA_DIR / "sources"
-RUNNER_URL = os.environ.get("LOCALCODE_RUNNER", "http://runner:8080")
+RUNNER_URL = os.environ.get("LOCALCODE_RUNNER", "unix:/run/localcode")
 WEB_DIST = Path(os.environ.get("LOCALCODE_WEB", Path(__file__).resolve().parent.parent / "web_dist"))
 
 

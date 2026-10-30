@@ -7,33 +7,47 @@ services:
       - "127.0.0.1:${LOCALCODE_PORT:-4173}:4173"
     volumes:
       - localcode-data:/data
+      - runner-socket:/run/localcode:ro
     environment:
-      LOCALCODE_RUNNER: http://runner:8080
+      LOCALCODE_RUNNER: unix:/run/localcode
       # Optional fallbacks if an upstream disappears (comma-separated):
       LOCALCODE_DATASET_MIRRORS: ${LOCALCODE_DATASET_MIRRORS:-}
       LOCALCODE_DOOCS_MIRRORS: ${LOCALCODE_DOOCS_MIRRORS:-}
       LOCALCODE_COMPANIES_MIRRORS: ${LOCALCODE_COMPANIES_MIRRORS:-}
-    networks: [default, sandbox]
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt: [no-new-privileges:true]
+    # Only the entrypoint uses these, to hand /data to the app user before dropping root.
+    cap_drop: [ALL]
+    cap_add: [CHOWN, SETUID, SETGID]
     depends_on: [runner]
     restart: unless-stopped
 
-  # Executes user code. No internet access: it sits only on the internal sandbox network.
+  # Executes user code. It has no network at all; the app talks to it over a Unix socket.
   runner:
     build:
       context: ./runner
       target: runtime
+    network_mode: none
     init: true  # reaps orphaned processes left by submissions
-    networks: [sandbox]
+    volumes:
+      - runner-socket:/run/localcode
+    environment:
+      RUNNER_SOCKET_DIR: /run/localcode
+      RUNNER_SOCKET_GID: "1000"  # the app user's group
     read_only: true
     tmpfs:
       - /tmp:exec,size=512m
+    shm_size: 16m
+    security_opt: [no-new-privileges:true]
+    # The root server needs these to prepare each sandbox, drop to the sandbox user, and clean up.
+    cap_drop: [ALL]
+    cap_add: [CHOWN, DAC_OVERRIDE, FOWNER, SETUID, SETGID, KILL]
     mem_limit: 2g
     pids_limit: 512
     restart: unless-stopped
 
-networks:
-  sandbox:
-    internal: true
-
 volumes:
   localcode-data:
+  runner-socket:

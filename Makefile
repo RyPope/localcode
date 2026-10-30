@@ -61,8 +61,7 @@ update: ## Re-download sources and rebuild problem data (your progress is kept)
 
 validate-cases: ## Maintainers: regenerate the excluded test-case list (slow)
 	docker compose up -d --scale runner=3
-	docker compose exec -T app python -m localcode.tools.validate_cases /data/excluded_cases.json \
-		--runners $$(docker compose ps --format '{{.Name}}' runner | sed 's#.*#http://&:8080#')
+	docker compose exec -T app python -m localcode.tools.validate_cases /data/excluded_cases.json
 	docker compose cp app:/data/excluded_cases.json backend/localcode/data/excluded_cases.json
 	docker compose up -d --scale runner=1
 

@@ -16,6 +16,8 @@ SANDBOX_UID = 10001
 MAX_PROCESSES = 256  # per sandbox user; JVM threads count towards it
 MAX_FILE_BYTES = 32 * 1024 * 1024
 TMP_ROOT = Path(os.environ.get("RUNNER_TMP", "/tmp"))
+# Every location the sandbox user can write to; all are emptied of its files after each run.
+WRITABLE_DIRS = (TMP_ROOT, Path("/dev/shm"))
 
 
 @dataclass(frozen=True)
@@ -89,7 +91,7 @@ for _ in range(3):
 
 
 def reap() -> None:
-    """Kill every process the sandbox user still owns and delete its files in TMP_ROOT.
+    """Kill every process the sandbox user still owns and delete its files in WRITABLE_DIRS.
 
     Executions are serialised, so anything left belongs to a finished run (background children,
     setsid'd daemons, fork bombs) and must not leak into the next one.
@@ -105,10 +107,11 @@ def reap() -> None:
         check=False,
         timeout=10,
     )
-    for entry in TMP_ROOT.iterdir():
-        with contextlib.suppress(OSError):
-            if entry.lstat().st_uid == SANDBOX_UID:
-                if entry.is_dir() and not entry.is_symlink():
-                    shutil.rmtree(entry, ignore_errors=True)
-                else:
-                    entry.unlink()
+    for directory in WRITABLE_DIRS:
+        for entry in directory.iterdir() if directory.is_dir() else ():
+            with contextlib.suppress(OSError):
+                if entry.lstat().st_uid == SANDBOX_UID:
+                    if entry.is_dir() and not entry.is_symlink():
+                        shutil.rmtree(entry, ignore_errors=True)
+                    else:
+                        entry.unlink()
