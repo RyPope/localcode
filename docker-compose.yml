@@ -1,12 +1,36 @@
 services:
+  app:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "127.0.0.1:4173:4173"
+    volumes:
+      - localcode-data:/data
+    environment:
+      LOCALCODE_RUNNER: http://runner:8080
+      # Optional fallbacks if an upstream disappears (comma-separated):
+      LOCALCODE_DATASET_MIRRORS: ${LOCALCODE_DATASET_MIRRORS:-}
+      LOCALCODE_DOOCS_MIRRORS: ${LOCALCODE_DOOCS_MIRRORS:-}
+      LOCALCODE_COMPANIES_MIRRORS: ${LOCALCODE_COMPANIES_MIRRORS:-}
+    networks: [default, sandbox]
+    depends_on: [runner]
+    restart: unless-stopped
+
+  # Executes user code. No internet access: it sits only on the internal sandbox network.
   runner:
     build: ./runner
     networks: [sandbox]
-    mem_limit: 1g
-    pids_limit: 512
+    read_only: true
     tmpfs:
       - /tmp:exec,size=512m
+    mem_limit: 2g
+    pids_limit: 512
+    restart: unless-stopped
 
 networks:
   sandbox:
     internal: true
+
+volumes:
+  localcode-data:
