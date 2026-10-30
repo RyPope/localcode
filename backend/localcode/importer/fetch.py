@@ -19,33 +19,49 @@ def _git(*args: str, cwd: Path | None = None) -> None:
     subprocess.run(["git", *args], cwd=cwd, check=True, capture_output=True, text=True, timeout=1800)
 
 
+def _clone(url: str, dest: Path, sparse: list[str] | None) -> None:
+    shutil.rmtree(dest, ignore_errors=True)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        if sparse:
+            _git("clone", "-q", "--depth", "1", "--filter=blob:none", "--no-checkout", url, str(dest))
+            _git("sparse-checkout", "set", "--no-cone", *sparse, cwd=dest)
+            _git("checkout", "-q", cwd=dest)
+        else:
+            _git("clone", "-q", "--depth", "1", url, str(dest))
+    except BaseException:
+        shutil.rmtree(dest, ignore_errors=True)  # never leave a half-cloned checkout behind
+        raise
+
+
+def _update(url: str, dest: Path) -> None:
+    _git("remote", "set-url", "origin", url, cwd=dest)
+    _git("fetch", "--depth", "1", "origin", cwd=dest)
+    _git("reset", "--hard", "FETCH_HEAD", cwd=dest)
+
+
 def fetch_git(urls: list[str], dest: Path, log: Log, sparse: list[str] | None = None) -> str:
-    """Clone (or update) the first reachable URL into dest. Returns the URL used."""
-    errors = []
+    """Clone or update dest from the first reachable URL and return the URL used.
+
+    If every URL fails but an earlier checkout exists, keep it and return "cache (...)".
+    """
+    cached = (dest / ".git").exists()
     for url in urls:
         try:
-            if (dest / ".git").exists():
+            if cached:
                 log(f"updating {dest.name} from {url}")
-                _git("remote", "set-url", "origin", url, cwd=dest)
-                _git("fetch", "--depth", "1", "origin", cwd=dest)
-                _git("reset", "--hard", "FETCH_HEAD", cwd=dest)
+                _update(url, dest)
             else:
                 log(f"cloning {url}")
-                shutil.rmtree(dest, ignore_errors=True)
-                dest.parent.mkdir(parents=True, exist_ok=True)
-                if sparse:
-                    _git("clone", "-q", "--depth", "1", "--filter=blob:none", "--no-checkout", url, str(dest))
-                    _git("sparse-checkout", "set", "--no-cone", *sparse, cwd=dest)
-                    _git("checkout", "-q", cwd=dest)
-                else:
-                    _git("clone", "-q", "--depth", "1", url, str(dest))
+                _clone(url, dest, sparse)
             return url
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
             msg = getattr(e, "stderr", "") or str(e)
             log(f"failed {url}: {msg.strip()[:200]}")
-            errors.append(url)
-            shutil.rmtree(dest, ignore_errors=True)
-    raise RuntimeError(f"all sources failed: {errors}")
+    if cached:
+        log(f"all sources unreachable; using the cached copy of {dest.name}")
+        return "cache (previous download)"
+    raise RuntimeError(f"all sources failed for {dest.name}: {urls}")
 
 
 def fetch_files(bases: list[str], files: list[str], dest: Path, log: Log) -> str:
@@ -62,7 +78,10 @@ def fetch_files(bases: list[str], files: list[str], dest: Path, log: Log) -> str
             return base
         except OSError as e:
             log(f"failed {base}: {e}")
-    raise RuntimeError(f"all sources failed: {bases}")
+    if all((dest / name).exists() for name in files):
+        log(f"all sources unreachable; using the cached copy of {dest.name}")
+        return "cache (previous download)"
+    raise RuntimeError(f"all sources failed for {dest.name}: {bases}")
 
 
 def fetch_all(dest: Path, log: Log, sources: dict[str, list[str]] | None = None) -> dict[str, str]:

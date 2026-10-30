@@ -176,3 +176,21 @@ def test_unknown_status_filter_rejected(data_dir):
 def test_problem_detail_reports_test_count(data_dir):
     assert problems.problem_detail("pair-sum")["test_count"] == 4
     assert problems.problem_detail("fill-in-place")["test_count"] == 0
+
+
+def test_unreachable_runner_is_503(data_dir, monkeypatch):
+    from localcode import config
+    from localcode.judging import runner_client
+
+    monkeypatch.setattr(config, "RUNNER_URL", "http://127.0.0.1:9")
+    with pytest.raises(ServiceError) as e:
+        judge.submit(runner_client.execute, "pair-sum", "python", "code")
+    assert e.value.status == 503 and "runner" in e.value.message.lower()
+
+
+def test_queries_before_import_are_503_and_create_nothing(tmp_path, monkeypatch):
+    monkeypatch.setattr(db, "CONTENT_DB", tmp_path / "content.db")
+    monkeypatch.setattr(db, "USER_DB", tmp_path / "user.db")
+    with pytest.raises(db.ContentNotImported):
+        problems.list_problems()
+    assert not (tmp_path / "content.db").exists()

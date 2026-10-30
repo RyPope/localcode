@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 from localcode import db
 from localcode.api import static
 from localcode.api.routes import companies, judge, problems, progress, system
+from localcode.db import ContentNotImported
 from localcode.importer import manager
 from localcode.services.errors import ServiceError
 
@@ -26,6 +27,10 @@ def create_app() -> FastAPI:
     @app.exception_handler(ServiceError)
     def _service_error(_: Request, e: ServiceError) -> JSONResponse:
         return JSONResponse({"detail": e.message}, status_code=e.status)
+
+    @app.exception_handler(ContentNotImported)
+    def _not_imported(_: Request, __: ContentNotImported) -> JSONResponse:
+        return JSONResponse({"detail": "Problem data has not been imported yet"}, status_code=503)
 
     for module in (system, problems, judge, companies, progress):
         app.include_router(module.router)

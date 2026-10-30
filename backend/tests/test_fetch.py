@@ -41,3 +41,26 @@ def test_fetch_files_falls_back(tmp_path):
     used = fetch_files([(tmp_path / "nope").as_uri(), src.as_uri()], ["f.jsonl"], tmp_path / "out", log=lambda m: None)
     assert used == src.as_uri()
     assert (tmp_path / "out" / "f.jsonl").read_text() == "{}\n"
+
+
+def test_failed_update_keeps_cached_checkout(tmp_path):
+    good = make_repo(tmp_path / "mirror")
+    fetch_git([good], tmp_path / "out", log=lambda m: None)
+    used = fetch_git([(tmp_path / "gone").as_uri()], tmp_path / "out", log=lambda m: None)
+    assert used.startswith("cache")
+    assert (tmp_path / "out" / "a.txt").read_text() == "hello"
+
+
+def test_failed_clone_without_cache_still_raises(tmp_path):
+    import pytest
+
+    with pytest.raises(RuntimeError):
+        fetch_git([(tmp_path / "gone").as_uri()], tmp_path / "out", log=lambda m: None)
+
+
+def test_fetch_files_uses_cache_when_offline(tmp_path):
+    (tmp_path / "out").mkdir()
+    (tmp_path / "out" / "f.jsonl").write_text("old\n")
+    used = fetch_files([(tmp_path / "nope").as_uri()], ["f.jsonl"], tmp_path / "out", log=lambda m: None)
+    assert used.startswith("cache")
+    assert (tmp_path / "out" / "f.jsonl").read_text() == "old\n"

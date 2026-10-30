@@ -66,14 +66,22 @@ def user_session() -> Iterator[sqlite3.Connection]:
     return _session(connect_user())
 
 
+class ContentNotImported(Exception):
+    """content.db does not exist yet (the first import has not finished)."""
+
+
 @contextmanager
 def content_session() -> Iterator[sqlite3.Connection]:
-    """content.db with user.db attached as schema `u` (for per-user status in queries).
+    """Read-only content.db with user.db attached as schema `u` (for per-user status in queries).
 
-    Opened per call because imports replace content.db on disk.
+    Opened per call because imports replace content.db on disk. Never creates content.db:
+    only the importer does, so its existence means an import completed.
     """
+    if not CONTENT_DB.exists():
+        raise ContentNotImported
     connect_user().close()  # make sure user.db and its schema exist before attaching
-    con = connect_content()
+    con = sqlite3.connect(f"{CONTENT_DB.as_uri()}?mode=ro", uri=True, check_same_thread=False)
+    con.row_factory = sqlite3.Row
     con.execute("attach database ? as u", (str(USER_DB),))
     with _session(con) as c:
         yield c
