@@ -182,6 +182,8 @@ def test_python_has_a_gigabyte(run):
 
 
 def test_java_null_for_primitive_is_a_clear_error(run):
-    r = run("java", "class Solution { public int f(int x) { return x; } }", "f", [{"name": "x", "type": "int"}], [[None]])
+    r = run(
+        "java", "class Solution { public int f(int x) { return x; } }", "f", [{"name": "x", "type": "int"}], [[None]]
+    )
     assert r["results"][0]["ok"] is False
     assert "null is not a valid int" in r["results"][0]["error"]

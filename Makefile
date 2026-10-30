@@ -59,7 +59,8 @@ update: ## Re-download sources and rebuild problem data (your progress is kept)
 validate-cases: ## Maintainers: regenerate the excluded test-case list (slow)
 	docker compose up -d --scale runner=3
 	docker compose exec -T app python -m localcode.tools.validate_cases /data/excluded_cases.json \
-		--runners http://localcode-runner-1:8080 http://localcode-runner-2:8080 http://localcode-runner-3:8080
+		--runners $$(docker compose ps --format '{{.Name}}' runner | sed 's#.*#http://&:8080#')
 	docker compose cp app:/data/excluded_cases.json backend/localcode/data/excluded_cases.json
+	docker compose up -d --scale runner=1
 
 .PHONY: help up down logs setup test test-backend test-runner test-web lint format dev-web api-types smoke update validate-cases
