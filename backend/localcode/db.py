@@ -6,7 +6,7 @@ from localcode.config import CONTENT_DB, USER_DB
 
 CONTENT_SCHEMA = """
 create table if not exists problems(slug text primary key, frontend_id int, title text, difficulty text,
-  tags text, acceptance real, description_html text, method text, params text, compare_mode text,
+  tags text, acceptance real, description_html text, method text, params text, ret text, compare_mode text,
   examples text, ref_python text, has_tests int, langs text);
 create table if not exists starters(slug text, lang text, code text, cpp_sig text, primary key(slug, lang));
 create table if not exists solutions(slug text, idx int, title text, explanation_md text, code text,

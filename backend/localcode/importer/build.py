@@ -65,6 +65,7 @@ def _problem_rows(ds: DatasetProblem | None, dc: DoocsProblem | None, acceptance
         description,
         method,
         json.dumps(ds.params) if ds else None,
+        ds.ret if ds else None,
         ds.compare_mode if ds else "exact",
         json.dumps(examples),
         ds.ref_python if ds else None,
@@ -106,7 +107,7 @@ def build_content_db(src: Path, out: Path, progress: Progress, sources_used: dic
     slugs = sorted(set(dataset) | set(doocs))
     for i, slug in enumerate(slugs):
         problem, starters, solutions, tests = _problem_rows(dataset.get(slug), doocs.get(slug), acceptance.get(slug))
-        con.execute("insert into problems values (?,?,?,?,?,?,?,?,?,?,?,?,?,?)", problem)
+        con.execute("insert into problems values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", problem)
         con.executemany("insert into starters values (?,?,?,?)", starters)
         con.executemany("insert into solutions values (?,?,?,?,?)", solutions)
         if tests:

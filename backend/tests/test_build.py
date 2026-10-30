@@ -29,6 +29,7 @@ def test_build_from_fixtures(tmp_path):
     assert p["title"] == "Pair Sum" and p["frontend_id"] == 7
     assert json.loads(p["langs"]) == ["python", "java", "cpp", "kotlin"]
     assert p["has_tests"] == 1 and p["acceptance"] == 0.55
+    assert p["ret"] == "List[int]"
     assert "<code>goal</code>" in p["description_html"]
     fill = con.execute("select * from problems where slug='fill-in-place'").fetchone()
     assert fill["has_tests"] == 0 and fill["title"] == "Fill In Place"
