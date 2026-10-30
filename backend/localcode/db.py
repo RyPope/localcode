@@ -5,6 +5,7 @@ user.db holds drafts and submissions and is never touched by an import.
 """
 
 import sqlite3
+import threading
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
@@ -26,30 +27,70 @@ create index if not exists company_problems_slug on company_problems(slug);
 create table if not exists meta(key text primary key, value text);
 """
 
-USER_SCHEMA = """
-create table if not exists drafts(slug text, lang text, code text, updated_at text, primary key(slug, lang));
-create table if not exists submissions(id integer primary key, slug text, lang text, code text, verdict text,
-  passed int, total int, runtime_ms real, memory_kb int, failing text, created_at text);
-create index if not exists submissions_slug on submissions(slug);
-create table if not exists settings(key text primary key, value text);
-"""
+# user.db outlives every release, so its schema only changes through migrations.
+# Append new entries; never edit or reorder existing ones. The index + 1 is the schema version
+# recorded in PRAGMA user_version. Version 1 uses "if not exists" so pre-versioning databases adopt it.
+USER_MIGRATIONS: list[str] = [
+    """
+    create table if not exists drafts(slug text, lang text, code text, updated_at text, primary key(slug, lang));
+    create table if not exists submissions(id integer primary key, slug text, lang text, code text, verdict text,
+      passed int, total int, runtime_ms real, memory_kb int, failing text, created_at text);
+    create index if not exists submissions_slug on submissions(slug);
+    create table if not exists settings(key text primary key, value text);
+    """,
+]
+
+_migrated: set[Path] = set()
+_migrate_lock = threading.Lock()
 
 
-def connect(path: Path, schema: str) -> sqlite3.Connection:
-    """Open a connection and ensure the schema exists. Callers own closing it."""
+def migrate_user_db(path: Path | None = None) -> int:
+    """Bring user.db up to the latest schema, one transaction per migration. Returns the version."""
+    path = path or USER_DB
+    path.parent.mkdir(parents=True, exist_ok=True)
+    con = sqlite3.connect(path, isolation_level=None)
+    try:
+        current = con.execute("pragma user_version").fetchone()[0]
+        if current > len(USER_MIGRATIONS):
+            raise RuntimeError(
+                f"{path} was written by a newer localcode (schema v{current}); upgrade localcode to open it"
+            )
+        for version, sql in enumerate(USER_MIGRATIONS[current:], start=current + 1):
+            try:
+                con.executescript(f"begin;\n{sql}\npragma user_version = {version};\ncommit;")
+            except sqlite3.Error:
+                if con.in_transaction:
+                    con.execute("rollback")
+                raise
+        return len(USER_MIGRATIONS)
+    finally:
+        con.close()
+
+
+def connect(path: Path, schema: str | None = None) -> sqlite3.Connection:
+    """Open a connection (creating `schema` if given). Callers own closing it."""
     path.parent.mkdir(parents=True, exist_ok=True)
     con = sqlite3.connect(path, check_same_thread=False)
     con.row_factory = sqlite3.Row
-    con.executescript(schema)
+    if schema:
+        con.executescript(schema)
     return con
 
 
 def connect_content(path: Path | None = None) -> sqlite3.Connection:
+    """Writable content.db with its schema; used by the importer."""
     return connect(path or CONTENT_DB, CONTENT_SCHEMA)
 
 
 def connect_user(path: Path | None = None) -> sqlite3.Connection:
-    return connect(path or USER_DB, USER_SCHEMA)
+    """user.db, migrated to the latest schema on first use in this process."""
+    path = path or USER_DB
+    if path not in _migrated:
+        with _migrate_lock:
+            if path not in _migrated:
+                migrate_user_db(path)
+                _migrated.add(path)
+    return connect(path)
 
 
 @contextmanager

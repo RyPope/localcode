@@ -28,7 +28,7 @@ def save_draft(slug: str, lang: str, code: str) -> None:
         raise bad_request(f"Unknown language {lang!r}")
     with user_session() as u:
         u.execute(
-            "insert into drafts values (?,?,?,?) on conflict(slug, lang) do update set "
+            "insert into drafts (slug, lang, code, updated_at) values (?,?,?,?) on conflict(slug, lang) do update set "
             "code = excluded.code, updated_at = excluded.updated_at",
             (slug, lang, code, now_iso()),
         )
