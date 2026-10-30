@@ -29,6 +29,12 @@ def load_problem(con: sqlite3.Connection, slug: str) -> sqlite3.Row:
     return row
 
 
+def content_version(con: sqlite3.Connection) -> str:
+    """Identifies the imported content; changes on every import."""
+    row = con.execute("select value from meta where key = 'imported_at'").fetchone()
+    return row[0] if row else ""
+
+
 def _difficulty_counts(con: sqlite3.Connection) -> dict[str, list[int]]:
     counts = {d.lower(): [0, 0] for d in DIFFICULTIES}
     for diff, solved, n in con.execute(

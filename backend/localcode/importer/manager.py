@@ -6,7 +6,6 @@ import traceback
 from localcode import config, db
 from localcode.importer.build import build_content_db
 from localcode.importer.fetch import fetch_all
-from localcode.services.judge import expected_cache
 
 STEPS = ["download", "problems", "solutions", "tests", "companies", "done"]
 _lock = threading.Lock()
@@ -27,7 +26,6 @@ def _work() -> None:
         used = fetch_all(config.SOURCES_DIR, _log)
         _log("building database")
         stats = build_content_db(config.SOURCES_DIR, db.CONTENT_DB, _progress, used)
-        expected_cache.clear()
         _log(f"imported {stats['problems']} problems, {stats['with_tests']} with tests, {stats['companies']} companies")
     except Exception as e:  # surfaced on the setup screen
         state["error"] = f"{type(e).__name__}: {e}"

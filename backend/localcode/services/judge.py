@@ -2,7 +2,9 @@
 
 import json
 import sqlite3
-from collections.abc import Callable
+import threading
+from collections import OrderedDict
+from collections.abc import Callable, Mapping
 from typing import Any
 
 from localcode import config
@@ -13,38 +15,52 @@ from localcode.judging.types import RunnerRequest, RunnerResult
 from localcode.judging.verdicts import grade_run, grade_submission
 from localcode.services import progress
 from localcode.services.errors import ServiceError, bad_request
-from localcode.services.problems import load_problem
+from localcode.services.problems import content_version, load_problem
 
 Runner = Callable[[RunnerRequest], RunnerResult]
 
 
 class ExpectedCache:
-    """Reference outputs for Run inputs, keyed by (slug, args). Process-local, so a restart clears it."""
+    """Reference outputs for Run inputs, computed by running the Python reference solution.
 
-    def __init__(self) -> None:
-        self._values: dict[tuple[str, str], Any] = {}
+    Keyed by content version as well as (slug, args), so a re-import invalidates entries without the
+    importer knowing this cache exists. Least-recently-used entries are evicted beyond `max_entries`.
+    """
 
-    @staticmethod
-    def _key(slug: str, args: list[Any]) -> tuple[str, str]:
-        return slug, json.dumps(args)
+    def __init__(self, max_entries: int = 10_000) -> None:
+        self._values: OrderedDict[tuple[str, str, str], Any] = OrderedDict()
+        self._max = max_entries
+        self._lock = threading.Lock()
 
-    def resolve(self, runner: Runner, problem: sqlite3.Row, arg_lists: list[list[Any]]) -> list[Any]:
-        slug = problem["slug"]
-        missing = [a for a in arg_lists if self._key(slug, a) not in self._values]
+    def __len__(self) -> int:
+        return len(self._values)
+
+    def resolve(
+        self, runner: Runner, problem: Mapping[str, Any], arg_lists: list[list[Any]], version: str
+    ) -> list[Any]:
+        keys = [(version, problem["slug"], json.dumps(a)) for a in arg_lists]
+        with self._lock:
+            missing = [a for a, k in zip(arg_lists, keys, strict=True) if k not in self._values]
         if missing:
-            res = _execute(
-                runner,
-                _request(
-                    problem, "python", problem["ref_python"], missing, config.LIMITS.run_per_case_ms * len(missing)
-                ),
-            )
-            for args, r in zip(missing, res["results"], strict=False):
-                if r.get("ok"):
-                    self._values[self._key(slug, args)] = r["value"]
-        return [self._values.get(self._key(slug, a)) for a in arg_lists]
+            timeout = config.LIMITS.run_per_case_ms * len(missing)
+            res = _execute(runner, _request(problem, "python", problem["ref_python"], missing, timeout))
+            with self._lock:
+                for args, r in zip(missing, res["results"], strict=False):
+                    if r.get("ok"):
+                        self._values[(version, problem["slug"], json.dumps(args))] = r["value"]
+        with self._lock:
+            out = []
+            for k in keys:
+                if k in self._values:
+                    self._values.move_to_end(k)
+                out.append(self._values.get(k))
+            while len(self._values) > self._max:
+                self._values.popitem(last=False)
+            return out
 
     def clear(self) -> None:
-        self._values.clear()
+        with self._lock:
+            self._values.clear()
 
 
 expected_cache = ExpectedCache()
@@ -58,7 +74,7 @@ def _execute(runner: Runner, req: RunnerRequest) -> RunnerResult:
 
 
 def _request(
-    p: sqlite3.Row, lang: str, code: str, cases: list[list[Any]], timeout_ms: int, cpp_sig: dict | None = None
+    p: Mapping[str, Any], lang: str, code: str, cases: list[list[Any]], timeout_ms: int, cpp_sig: dict | None = None
 ) -> RunnerRequest:
     return {
         "lang": lang,
@@ -108,8 +124,9 @@ def run(runner: Runner, slug: str, lang: str, code: str, custom: list[str] | Non
         p = load_problem(con, slug)
         _check_runnable(p, lang)
         cpp_sig = _cpp_sig(con, slug, lang)
+        version = content_version(con)
     arg_lists = json.loads(p["examples"]) + parse_custom_cases(p, custom or [])
-    expected = expected_cache.resolve(runner, p, arg_lists)
+    expected = expected_cache.resolve(runner, p, arg_lists, version)
     res = _execute(runner, _request(p, lang, code, arg_lists, config.LIMITS.run_per_case_ms * len(arg_lists), cpp_sig))
     return grade_run(arg_lists, expected, res, p["compare_mode"]).to_dict()
 
