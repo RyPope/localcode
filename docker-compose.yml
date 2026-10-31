@@ -8,6 +8,8 @@ services:
     volumes:
       - localcode-data:/data
       - runner-socket:/run/localcode:ro
+      # Repo-kept problems: `git pull` then Refresh content picks up changes without a rebuild.
+      - ./content:/content:ro
     environment:
       LOCALCODE_RUNNER: unix:/run/localcode
       # Optional fallbacks if an upstream disappears (comma-separated):

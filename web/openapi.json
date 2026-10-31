@@ -417,21 +417,42 @@
             "title": "Companies",
             "type": "integer"
           },
+          "kept_cases": {
+            "title": "Kept Cases",
+            "type": "integer"
+          },
+          "kept_problems": {
+            "title": "Kept Problems",
+            "type": "integer"
+          },
+          "kept_solutions": {
+            "title": "Kept Solutions",
+            "type": "integer"
+          },
+          "local_problems": {
+            "title": "Local Problems",
+            "type": "integer"
+          },
+          "local_solutions": {
+            "title": "Local Solutions",
+            "type": "integer"
+          },
           "problems": {
             "title": "Problems",
             "type": "integer"
+          },
+          "skipped": {
+            "items": {
+              "$ref": "#/components/schemas/SkippedFile"
+            },
+            "title": "Skipped",
+            "type": "array"
           },
           "with_tests": {
             "title": "With Tests",
             "type": "integer"
           }
         },
-        "required": [
-          "problems",
-          "with_tests",
-          "cases",
-          "companies"
-        ],
         "title": "ImportStats",
         "type": "object"
       },
@@ -499,8 +520,15 @@
             "type": "boolean"
           },
           "id": {
-            "title": "Id",
-            "type": "integer"
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
           },
           "langs": {
             "items": {
@@ -514,6 +542,10 @@
             },
             "title": "Langs",
             "type": "array"
+          },
+          "local": {
+            "title": "Local",
+            "type": "boolean"
           },
           "next": {
             "anyOf": [
@@ -583,6 +615,7 @@
         "required": [
           "slug",
           "id",
+          "local",
           "title",
           "difficulty",
           "tags",
@@ -639,8 +672,15 @@
             "type": "string"
           },
           "id": {
-            "title": "Id",
-            "type": "integer"
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
           },
           "slug": {
             "title": "Slug",
@@ -698,8 +738,19 @@
             "type": "boolean"
           },
           "id": {
-            "title": "Id",
-            "type": "integer"
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "local": {
+            "title": "Local",
+            "type": "boolean"
           },
           "slug": {
             "title": "Slug",
@@ -735,7 +786,8 @@
           "tags",
           "frequency",
           "status",
-          "has_tests"
+          "has_tests",
+          "local"
         ],
         "title": "ProblemRow",
         "type": "object"
@@ -868,6 +920,24 @@
         "title": "RunResult",
         "type": "object"
       },
+      "SkippedFile": {
+        "properties": {
+          "path": {
+            "title": "Path",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "reason"
+        ],
+        "title": "SkippedFile",
+        "type": "object"
+      },
       "Solution": {
         "properties": {
           "code": {
@@ -880,6 +950,10 @@
           "explanation_md": {
             "title": "Explanation Md",
             "type": "string"
+          },
+          "local": {
+            "title": "Local",
+            "type": "boolean"
           },
           "notes": {
             "additionalProperties": {
@@ -897,7 +971,8 @@
           "title",
           "explanation_md",
           "code",
-          "notes"
+          "notes",
+          "local"
         ],
         "title": "Solution",
         "type": "object"

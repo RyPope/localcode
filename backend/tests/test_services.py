@@ -213,3 +213,24 @@ def test_search_treats_wildcards_literally(data_dir, q):
 
 def test_company_search_treats_wildcards_literally(data_dir):
     assert companies.list_companies("%") == []
+
+
+def test_local_problem_flag_and_null_id_sorted_last(local_data_dir):
+    items = problems.list_problems()["items"]
+    assert items[-1]["slug"] == "count-vowels" and items[-1]["id"] is None and items[-1]["local"] is True
+    assert all(not i["local"] for i in items[:-1])
+    assert [i["slug"] for i in problems.list_problems(sort="id")["items"]][-1] == "count-vowels"
+
+
+def test_local_problem_detail_neighbours(local_data_dir):
+    d = problems.problem_detail("count-vowels")
+    assert d["id"] is None and d["local"] is True and d["next"] is None
+    last_numbered = problems.list_problems()["items"][-2]["slug"]
+    assert d["prev"] == last_numbered
+    assert problems.problem_detail(last_numbered)["next"] == "count-vowels"
+    assert problems.problem_detail("pair-sum")["local"] is False
+
+
+def test_solution_local_flag(local_data_dir):
+    sols = problems.solutions("pair-sum")
+    assert [s["local"] for s in sols] == [False, False, True] and sols[-1]["title"] == "Brute force"

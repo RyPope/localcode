@@ -27,7 +27,7 @@ class DifficultyCounts(TypedDict):
 
 class ProblemRow(TypedDict):
     slug: str
-    id: int
+    id: int | None  # None for repo-kept problems without a number
     title: str
     difficulty: Difficulty
     acceptance: float | None
@@ -35,6 +35,7 @@ class ProblemRow(TypedDict):
     frequency: float | None
     status: Status
     has_tests: bool
+    local: bool  # from the repo's content/ folder
 
 
 class ProblemList(TypedDict):
@@ -56,7 +57,8 @@ class CompanyRef(TypedDict):
 
 class ProblemDetail(TypedDict):
     slug: str
-    id: int
+    id: int | None
+    local: bool
     title: str
     difficulty: Difficulty
     tags: list[str]
@@ -79,6 +81,7 @@ class Solution(TypedDict):
     explanation_md: str
     code: dict[str, str]
     notes: dict[str, str]
+    local: bool
 
 
 class Draft(TypedDict):
@@ -142,7 +145,7 @@ class Company(TypedDict):
 
 class ProblemRef(TypedDict):
     slug: str
-    id: int
+    id: int | None
     title: str
     difficulty: Difficulty
 
@@ -198,11 +201,22 @@ class ImportState(TypedDict):
     error: str | None
 
 
-class ImportStats(TypedDict):
+class SkippedFile(TypedDict):
+    path: str
+    reason: str
+
+
+class ImportStats(TypedDict, total=False):
     problems: int
     with_tests: int
     cases: int
     companies: int
+    local_problems: int
+    local_solutions: int
+    kept_problems: int  # kept although their source no longer has them
+    kept_solutions: int
+    kept_cases: int
+    skipped: list[SkippedFile]  # local content files that could not be used
 
 
 class ContentMeta(TypedDict, total=False):

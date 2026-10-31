@@ -17,8 +17,10 @@ COPY backend/pyproject.toml backend/
 COPY backend/localcode backend/localcode
 RUN pip install --no-cache-dir ./backend
 COPY --from=web /web/dist /app/web_dist
+# A copy of the repo-kept problems for runs without the compose bind mount (which takes precedence).
+COPY content /content
 COPY backend/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
-ENV LOCALCODE_WEB=/app/web_dist LOCALCODE_DATA=/data HOME=/tmp PYTHONDONTWRITEBYTECODE=1
+ENV LOCALCODE_WEB=/app/web_dist LOCALCODE_DATA=/data LOCALCODE_CONTENT=/content HOME=/tmp PYTHONDONTWRITEBYTECODE=1
 EXPOSE 4173
 ENTRYPOINT ["docker-entrypoint"]
 CMD ["uvicorn", "localcode.api.app:app", "--host", "0.0.0.0", "--port", "4173", "--no-server-header"]

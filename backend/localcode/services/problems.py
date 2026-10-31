@@ -15,8 +15,10 @@ STATUS_FILTERS = {
     "todo": "status = 'todo'",
     "unsolved": "status != 'solved'",
 }
+# Problems without a number (repo-kept ones) come after numbered ones, ordered by slug.
+ORDER_KEY = "coalesce(frontend_id, 1000000000), slug"
 SORTS = {
-    "id": "frontend_id",
+    "id": ORDER_KEY,
     "frequency": "frequency desc",
     "acceptance": "acceptance desc",
     "difficulty": "case difficulty when 'Easy' then 0 when 'Medium' then 1 else 2 end",
@@ -88,7 +90,7 @@ def list_problems(
         raise bad_request(f"status must be one of {', '.join(STATUS_FILTERS)}")
 
     inner = (
-        f"select p.slug, p.frontend_id, p.title, p.difficulty, p.acceptance, p.tags, p.has_tests, "
+        f"select p.slug, p.frontend_id, p.title, p.difficulty, p.acceptance, p.tags, p.has_tests, p.source, "
         f"{freq} as frequency, {STATUS} as status from problems p {join}"
         + (" where " + " and ".join(where) if where else "")
     )
@@ -97,7 +99,7 @@ def list_problems(
     with content_session() as con:
         total = con.execute(f"select count(*) from ({query})", args).fetchone()[0]
         rows = con.execute(
-            f"{query} order by {order}, frontend_id limit ? offset ?",
+            f"{query} order by {order}, {ORDER_KEY} limit ? offset ?",
             [*args, page_size, (max(page, 1) - 1) * page_size],
         ).fetchall()
         counts = _difficulty_counts(con)
@@ -115,6 +117,7 @@ def list_problems(
                 "frequency": r["frequency"],
                 "status": r["status"],
                 "has_tests": bool(r["has_tests"]),
+                "local": r["source"] == "local",
             }
             for r in rows
         ],
@@ -141,15 +144,19 @@ def problem_detail(slug: str) -> ProblemDetail:
                 (slug,),
             )
         ]
+        key = (p["frontend_id"] if p["frontend_id"] is not None else 1_000_000_000, slug)
         neighbours = con.execute(
-            "select (select slug from problems where frontend_id < ? order by frontend_id desc limit 1), "
-            "(select slug from problems where frontend_id > ? order by frontend_id limit 1)",
-            (p["frontend_id"], p["frontend_id"]),
+            "select (select slug from problems where (coalesce(frontend_id, 1000000000), slug) < (?, ?) "
+            "order by coalesce(frontend_id, 1000000000) desc, slug desc limit 1), "
+            "(select slug from problems where (coalesce(frontend_id, 1000000000), slug) > (?, ?) "
+            f"order by {ORDER_KEY} limit 1)",
+            (*key, *key),
         ).fetchone()
         tests = con.execute("select json_array_length(cases) from tests where slug = ?", (slug,)).fetchone()
     return {
         "slug": p["slug"],
         "id": p["frontend_id"],
+        "local": p["source"] == "local",
         "title": p["title"],
         "difficulty": p["difficulty"],
         "tags": json.loads(p["tags"]),
@@ -173,7 +180,7 @@ def solutions(slug: str) -> list[Solution]:
     with content_session() as con:
         load_problem(con, slug)
         rows = con.execute(
-            "select title, explanation_md, code from solutions where slug = ? order by idx", (slug,)
+            "select title, explanation_md, code, source from solutions where slug = ? order by idx", (slug,)
         ).fetchall()
     out = []
     for r in rows:
@@ -181,5 +188,13 @@ def solutions(slug: str) -> list[Solution]:
         if "kotlin" not in code and "java" in code:
             code["kotlin"] = code["java"]
             notes["kotlin"] = KOTLIN_FALLBACK_NOTE
-        out.append({"title": r["title"], "explanation_md": r["explanation_md"], "code": code, "notes": notes})
+        out.append(
+            {
+                "title": r["title"],
+                "explanation_md": r["explanation_md"],
+                "code": code,
+                "notes": notes,
+                "local": r["source"] == "local",
+            }
+        )
     return out

@@ -8,6 +8,8 @@ DATA_DIR = Path(os.environ.get("LOCALCODE_DATA", "/data"))
 CONTENT_DB = DATA_DIR / "content.db"
 USER_DB = DATA_DIR / "user.db"
 SOURCES_DIR = DATA_DIR / "sources"
+# Problems, tests and solutions kept in the repo (content/), merged over the upstream sources on import.
+CONTENT_DIR = Path(os.environ.get("LOCALCODE_CONTENT", "/content"))
 # Host names the app answers to (DNS-rebinding protection). Add yours if you reach localcode by another name.
 ALLOWED_HOSTS = [
     h.strip() for h in os.environ.get("LOCALCODE_ALLOWED_HOSTS", "localhost,127.0.0.1,::1").split(",") if h.strip()

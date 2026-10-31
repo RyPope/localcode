@@ -96,7 +96,12 @@ def _validate_one(slug: str, runner_url: str) -> tuple[list[str], dict[str, str]
 def validate(out: Path, only: list[str] | None = None, runners: list[str] | None = None) -> dict[str, list[str]]:
     """Validate every runnable problem, one worker per runner (default: every runner the app can reach)."""
     with content_session() as con:
-        slugs = [r[0] for r in con.execute("select slug from problems where has_tests = 1 order by frontend_id")]
+        slugs = [
+            r[0]
+            for r in con.execute(
+                "select slug from problems where has_tests = 1 order by coalesce(frontend_id, 1000000000), slug"
+            )
+        ]
     result: dict[str, list[str]] = json.loads(out.read_text()) if out.exists() else {}
     todo = [s for s in slugs if s in only] if only else [s for s in slugs if s not in result]
     lock = threading.Lock()

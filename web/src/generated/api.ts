@@ -392,13 +392,25 @@ export interface components {
         /** ImportStats */
         ImportStats: {
             /** Cases */
-            cases: number;
+            cases?: number;
             /** Companies */
-            companies: number;
+            companies?: number;
+            /** Kept Cases */
+            kept_cases?: number;
+            /** Kept Problems */
+            kept_problems?: number;
+            /** Kept Solutions */
+            kept_solutions?: number;
+            /** Local Problems */
+            local_problems?: number;
+            /** Local Solutions */
+            local_solutions?: number;
             /** Problems */
-            problems: number;
+            problems?: number;
+            /** Skipped */
+            skipped?: components["schemas"]["SkippedFile"][];
             /** With Tests */
-            with_tests: number;
+            with_tests?: number;
         };
         /** Param */
         Param: {
@@ -425,9 +437,11 @@ export interface components {
             /** Has Tests */
             has_tests: boolean;
             /** Id */
-            id: number;
+            id: number | null;
             /** Langs */
             langs: ("python" | "java" | "cpp" | "kotlin")[];
+            /** Local */
+            local: boolean;
             /** Next */
             next: string | null;
             /** Params */
@@ -468,7 +482,7 @@ export interface components {
              */
             difficulty: "Easy" | "Medium" | "Hard";
             /** Id */
-            id: number;
+            id: number | null;
             /** Slug */
             slug: string;
             /** Title */
@@ -488,7 +502,9 @@ export interface components {
             /** Has Tests */
             has_tests: boolean;
             /** Id */
-            id: number;
+            id: number | null;
+            /** Local */
+            local: boolean;
             /** Slug */
             slug: string;
             /**
@@ -541,6 +557,13 @@ export interface components {
             /** Verdict */
             verdict: string;
         };
+        /** SkippedFile */
+        SkippedFile: {
+            /** Path */
+            path: string;
+            /** Reason */
+            reason: string;
+        };
         /** Solution */
         Solution: {
             /** Code */
@@ -549,6 +572,8 @@ export interface components {
             };
             /** Explanation Md */
             explanation_md: string;
+            /** Local */
+            local: boolean;
             /** Notes */
             notes: {
                 [key: string]: string;
