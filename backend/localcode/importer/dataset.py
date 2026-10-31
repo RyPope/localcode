@@ -100,7 +100,7 @@ def parse_cases(test_src: str, params: list[dict], ret: str = "") -> list[dict]:
     names = [p["name"] for p in params]
     try:
         fn = ast.parse(test_src).body[0]
-    except (SyntaxError, IndexError):
+    except SyntaxError, IndexError:
         return []
     cases = []
     for st in getattr(fn, "body", []):
@@ -131,7 +131,7 @@ def parse_cases(test_src: str, params: list[dict], ret: str = "") -> list[dict]:
                 expected = []
             json.dumps(expected)  # must be JSON-representable
             cases.append({"args": args, "expected": expected})
-        except (ValueError, TypeError, SyntaxError):
+        except ValueError, TypeError, SyntaxError:
             continue
     return cases
 

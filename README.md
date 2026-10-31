@@ -9,7 +9,7 @@
 About 4,100 problems · 2,830 judged against 274k hidden tests · company frequency lists for 423 companies · Python, Java, C++ and Kotlin
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-86A3FF.svg)](LICENSE)
-![Python 3.12](https://img.shields.io/badge/python-3.12-3776AB.svg)
+![Python 3.14](https://img.shields.io/badge/python-3.14-3776AB.svg)
 ![React 18](https://img.shields.io/badge/react-18-61DAFB.svg)
 ![Docker Compose](https://img.shields.io/badge/docker-compose-2496ED.svg)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-4FC48C.svg)](CONTRIBUTING.md)
@@ -95,7 +95,7 @@ flowchart LR
     B["Browser<br/>localhost:4173"] --> A
     subgraph Docker["Docker Compose"]
         A["app<br/>FastAPI + React UI"]
-        R["runner<br/>Python 3.12 · JDK 21 · Clang 19 · Kotlin 2.0<br/>no network"]
+        R["runner<br/>Python 3.14 · JDK 25 · Clang 19 · Kotlin 2.4<br/>no network"]
         D[("localcode-data volume<br/>content.db · user.db")]
         A -- "code + test inputs<br/>(Unix socket)" --> R
         R -- "raw outputs" --> A

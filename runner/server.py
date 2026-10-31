@@ -29,7 +29,7 @@ def versions() -> dict:
             try:
                 p = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
                 return (p.stdout or p.stderr).strip().splitlines()[0]
-            except (OSError, subprocess.TimeoutExpired, IndexError):
+            except OSError, subprocess.TimeoutExpired, IndexError:
                 return "unavailable"
 
         _versions = {

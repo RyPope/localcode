@@ -14,7 +14,7 @@ logs: ## Follow app and runner logs
 	docker compose logs -f
 
 setup: ## Install local dev dependencies (Python venv + web node_modules)
-	python3.12 -m venv backend/.venv
+	python3.14 -m venv backend/.venv
 	$(PY)/pip install -e 'backend[dev]'
 	npm --prefix web ci
 
