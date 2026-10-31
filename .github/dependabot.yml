@@ -9,12 +9,22 @@ updates:
     groups:
       web-dev:
         dependency-type: development
+  # The runner's Python is the version submissions are judged with, and the app and CI share it;
+  # moving Python or Node to a new major/minor is a deliberate change, so only take patch updates.
   - package-ecosystem: docker
     directory: /runner
     schedule: { interval: monthly }
+    ignore:
+      - dependency-name: python
+        update-types: [version-update:semver-major, version-update:semver-minor]
   - package-ecosystem: docker
     directory: /backend
     schedule: { interval: monthly }
+    ignore:
+      - dependency-name: python
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: node
+        update-types: [version-update:semver-major]
   - package-ecosystem: github-actions
     directory: /
     schedule: { interval: monthly }
