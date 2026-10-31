@@ -16,7 +16,7 @@
     "screenshots": "node scripts/screenshots.mjs"
   },
   "dependencies": {
-    "@fontsource/geist-mono": "^5.1.0",
+    "@fontsource/geist-mono": "^5.3.0",
     "@fontsource/geist-sans": "^5.1.0",
     "@monaco-editor/react": "4.6.0",
     "@tanstack/react-query": "5.62.8",
