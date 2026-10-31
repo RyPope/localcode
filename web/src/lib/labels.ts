@@ -22,6 +22,6 @@ export function refreshSummary(s: ImportStats): string[] {
     s.kept_solutions ? count(s.kept_solutions, "solution") : "",
     s.kept_cases ? count(s.kept_cases, "test case") : "",
   ].filter(Boolean);
-  if (kept.length) out.push(`kept ${kept.join(", ")} no longer upstream`);
+  if (kept.length) out.push(`kept ${kept.join(", ")} no longer in its source`);
   return out;
 }

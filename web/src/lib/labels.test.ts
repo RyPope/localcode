@@ -24,7 +24,7 @@ describe("refreshSummary", () => {
       "4,100 problems",
       "423 companies",
       "2 local problems, 5 local solutions",
-      "kept 1 problem, 12 test cases no longer upstream",
+      "kept 1 problem, 12 test cases no longer in its source",
     ]));
   it("omits parts that are zero or missing (imports from older versions)", () =>
     expect(refreshSummary({ problems: 10, companies: 1 })).toEqual(["10 problems", "1 company"]));
