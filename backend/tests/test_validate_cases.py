@@ -70,3 +70,30 @@ def test_from_sources_builds_an_unfiltered_database(tmp_path, monkeypatch):
     con = sqlite3.connect(db.CONTENT_DB)
     cases = con.execute("select cases from tests where slug = 'pair-sum'").fetchone()[0]
     assert len(json.loads(cases)) == 4
+
+
+def test_checker_rejections_are_never_order_only(monkeypatch):
+    from localcode.judging import checkers
+    from localcode.tools.validate_cases import differs_only_in_order
+
+    # On an invalid input the reference repeats the recorded (invalid) answer; the checker rejects it.
+    monkeypatch.setitem(checkers.CHECKERS, "test-strict", lambda args, expected, actual: False)
+    assert not differs_only_in_order([1, 2], [1, 2], "checker:test-strict", [])
+    assert not differs_only_in_order([1, 2], [2, 1], "checker:test-strict", [])
+
+
+def test_order_only_cases_are_reported_but_still_fail(monkeypatch):
+    from localcode.judging import runner_client
+    from localcode.tools import validate_cases
+
+    values = [[[1, 2]], [[2, 1]], [[9]]]
+    monkeypatch.setattr(
+        runner_client,
+        "execute",
+        lambda req, url=None: {"compile_error": None, "results": [{"ok": True, "value": v} for v in values]},
+    )
+    problem = {"method": "f", "params": "[]", "ret": "List[List[int]]", "compare_mode": "exact"}
+    cases = [{"args": [i], "expected": [[1, 2]]} for i in range(3)]
+    ok, order_only = validate_cases._outcomes(problem, "java", "code", cases, None, "unix:test")
+    assert ok == [True, False, False]
+    assert order_only == [False, True, False]

@@ -183,3 +183,18 @@ def fair_candy_swap(args: list[Any], expected: Any, actual: Any) -> bool:
         return False
     a, b = actual
     return a in set(alice) and b in set(bob) and sum(alice) - a + b == sum(bob) - b + a
+
+
+@checker("find-k-pairs-with-smallest-sums")
+def k_smallest_pairs(args: list[Any], expected: Any, actual: Any) -> bool:
+    """Distinct (nums1, nums2) index pairs, in any order, whose sums are the k smallest."""
+    nums1, nums2, _ = args
+    if not isinstance(actual, list) or len(actual) != len(expected):
+        return False
+    if not all(_int_list(pair, 2) for pair in actual):
+        return False
+    count1, count2 = Counter(nums1), Counter(nums2)
+    pairs = Counter((u, v) for u, v in actual)
+    if any(n > count1[u] * count2[v] for (u, v), n in pairs.items()):
+        return False
+    return sorted(u + v for u, v in actual) == sorted(u + v for u, v in expected)

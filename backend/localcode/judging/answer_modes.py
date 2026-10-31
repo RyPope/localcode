@@ -27,7 +27,15 @@ _EACH_ANY_ORDER = (
     "find-the-difference-of-two-arrays",
 )
 
+# Problems whose answers may be in any order although the statement doesn't say "in any order"
+# (found by validate_cases' order report).
+_ANY_ORDER = (
+    "concatenated-words",
+    "high-access-employees",
+)
+
 MODES: dict[str, str] = {
+    **dict.fromkeys(_ANY_ORDER, "any_order"),
     **dict.fromkeys(_ANY_ORDER_DEEP, "any_order_deep"),
     **dict.fromkeys(_EACH_ANY_ORDER, "each_any_order"),
 }

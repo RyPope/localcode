@@ -29,7 +29,7 @@ from localcode.db import content_session
 from localcode.importer.build import build_content_db
 from localcode.importer.case_filter import case_key
 from localcode.judging import runner_client
-from localcode.judging.compare import judge
+from localcode.judging.compare import CHECKER_PREFIX, judge
 
 # A reference is trusted when it passes at least TRUST_THRESHOLD of a suite; trusted references that
 # agree on a failure exclude the case. A reference passing CONFIDENT_THRESHOLD excludes on its own.
@@ -50,7 +50,12 @@ def cases_to_exclude(outcomes: dict[str, list[bool]]) -> set[int]:
 
 
 def differs_only_in_order(expected: Any, actual: Any, mode: str, args: list[Any]) -> bool:
-    """A wrong answer under `mode` that is right once list order is ignored at every level."""
+    """A wrong answer under `mode` that is right once list order is ignored at every level.
+
+    Never true for a checker: it already accepts every valid ordering, so its rejections are real.
+    """
+    if mode.startswith(CHECKER_PREFIX):
+        return False
     return not judge(expected, actual, mode, args) and judge(expected, actual, "any_order_deep", args)
 
 
@@ -59,9 +64,9 @@ def _outcomes(
 ) -> tuple[list[bool], list[bool]]:
     """Per-case pass/fail, and which failures differ only in list order.
 
-    Order-only differences count as passes: they point at a compare mode to curate
-    (see `localcode.judging.answer_modes`), not at an invalid input. A case that hangs or crashes
-    fails; the cases after it are run again.
+    Order-only differences still fail (an invalid input can look like a reordering), but are reported
+    so the problem's compare mode can be reviewed in `localcode.judging.answer_modes`. A case that hangs
+    or crashes fails; the cases after it are run again.
     """
     ok = [False] * len(cases)
     order_only = [False] * len(cases)
@@ -89,7 +94,7 @@ def _outcomes(
                 continue
             expected, args = cases[i]["expected"], cases[i]["args"]
             order_only[i] = differs_only_in_order(expected, r["value"], problem["compare_mode"], args)
-            ok[i] = order_only[i] or judge(expected, r["value"], problem["compare_mode"], args)
+            ok[i] = judge(expected, r["value"], problem["compare_mode"], args)
         done = len(res["results"])
         if done < len(chunk):  # chunk[done] hung or crashed the process; retry what followed it
             pending = chunk[done + 1 :]
@@ -135,7 +140,8 @@ def validate(out: Path, only: list[str] | None = None, runners: list[str] | None
     """Validate every runnable problem, one worker per runner (default: every runner the app can reach).
 
     Problems whose references differ from the expected answers only in list order are recorded in
-    `<out>.order.json` with the number of such cases: candidates for a curated compare mode.
+    `<out>.order.json` with the number of such cases: review each for a curated compare mode, then
+    re-run those problems with `--only`.
     """
     with content_session() as con:
         slugs = [
@@ -166,8 +172,11 @@ def validate(out: Path, only: list[str] | None = None, runners: list[str] | None
             done += 1
             result[slug] = keys
             out.write_text(json.dumps(result, indent=0, sort_keys=True))
-            if order_only:
-                order[slug] = order_only
+            if order_only or slug in order:  # re-validating a problem replaces its old entry
+                if order_only:
+                    order[slug] = order_only
+                else:
+                    del order[slug]
                 order_out.write_text(json.dumps(order, indent=0, sort_keys=True))
             note = f", {order_only} differ only in order" if order_only else ""
             print(f"[{done}/{len(todo)}] {slug}: {summary} exclude {len(keys)}{note}", flush=True)

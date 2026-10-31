@@ -156,3 +156,17 @@ def test_checker(slug: str, args: list[Any], expected: Any, valid: list[Any], in
         assert judge(expected, answer, mode, args), f"{slug} rejected valid {answer}"
     for answer in invalid:
         assert not judge(expected, answer, mode, args), f"{slug} accepted invalid {answer}"
+
+
+def test_find_k_pairs_with_smallest_sums():
+    slug = "checker:find-k-pairs-with-smallest-sums"
+    args = [[1, 1, 2], [1, 2, 3], 2]
+    expected = [[1, 1], [1, 1]]
+    assert judge(expected, [[1, 1], [1, 1]], slug, args)
+    tie = [[1, 2, 4], [1, 3], 2]  # sums 2, then 3 and 3 tie for second place
+    assert judge([[1, 1], [2, 1]], [[1, 1], [2, 1]], slug, tie)
+    assert judge([[1, 1], [2, 1]], [[2, 1], [1, 1]], slug, tie)  # any order
+    assert not judge([[1, 1], [2, 1]], [[1, 1], [1, 3]], slug, tie)  # sum 4 is not among the 2 smallest
+    assert not judge(expected, [[1, 1], [1, 1], [1, 1]], slug, args)  # wrong count
+    assert not judge(expected, [[1, 1], [5, 1]], slug, args)  # 5 is not in nums1
+    assert not judge([[1, 1], [1, 2]], [[1, 1], [1, 1]], slug, [[1], [1, 2], 2])  # (1, 1) exists only once
