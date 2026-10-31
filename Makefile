@@ -68,7 +68,10 @@ validate-cases: ## Maintainers: regenerate the excluded test-case list from the 
 	docker compose exec -T -u localcode app python -m localcode.tools.validate_cases \
 		--from-sources /data/validate /data/validate/excluded_cases.json
 	docker compose cp app:/data/validate/excluded_cases.json backend/localcode/data/excluded_cases.json
-	docker compose exec -T -u localcode app sh -c 'cat /data/validate/excluded_cases.order.json 2>/dev/null' || true
+	@echo "Order-only differences (give these a compare mode):"
+	@docker compose exec -T -u localcode app cat /data/validate/excluded_cases.order.json
+	@echo "Exclusions to confirm by hand (no reference passed half the suite):"
+	@docker compose exec -T -u localcode app cat /data/validate/excluded_cases.review.json
 	docker compose up -d --scale runner=1
 
 check-checkers: ## Maintainers: every answer checker must accept the dataset's expected answers

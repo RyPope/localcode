@@ -116,16 +116,28 @@ def test_agreement_needs_two_references_and_three_surviving_cases():
 
 
 def test_fresh_run_ignores_previous_output(tmp_path, monkeypatch):
+    import json
+
     from localcode.tools import validate_cases
 
     out = tmp_path / "excluded.json"
     out.write_text('{"stale-problem": ["abc"]}')
     out.with_suffix(".order.json").write_text('{"stale-problem": 3}')
     monkeypatch.setattr(validate_cases, "_runnable_slugs", lambda: ["pair-sum"])
-    monkeypatch.setattr(validate_cases, "_validate_one", lambda slug, url: (["k1"], {"java": "3/4"}, 0))
+    monkeypatch.setattr(validate_cases, "_validate_one", lambda slug, url: (["k1"], {"java": "3/4"}, 0, True))
     monkeypatch.setattr(validate_cases.runner_client, "endpoints", lambda: ["unix:test"])
 
     assert validate_cases.validate(out, fresh=True) == {"pair-sum": ["k1"]}
-    assert not out.with_suffix(".order.json").exists() or out.with_suffix(".order.json").read_text() == "{}"
+    assert json.loads(out.with_suffix(".order.json").read_text()) == {}
+    assert json.loads(out.with_suffix(".review.json").read_text()) == {"pair-sum": [1, 4]}
     out.write_text('{"kept": []}')
     assert validate_cases.validate(out) == {"kept": [], "pair-sum": ["k1"]}
+
+
+def test_exclusions_without_a_trusted_reference_need_review():
+    from localcode.tools.validate_cases import needs_review
+
+    most_fail = {"java": passing_all_but(10, *range(6)), "cpp": passing_all_but(10, *range(6))}
+    assert needs_review(most_fail)
+    assert not needs_review({"java": passing_all_but(10, 1), "cpp": passing_all_but(10, 1)})
+    assert not needs_review({"java": passing_all_but(10, *range(8))})  # nothing excluded

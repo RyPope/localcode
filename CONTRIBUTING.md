@@ -75,7 +75,7 @@ New problems, extra solutions and corrected test cases go in [`content/`](conten
 
 ## Maintainer tasks
 
-- **Regenerate the test-case exclusion list** after a dataset update or a judging change: `make validate-cases` (about an hour with three runner replicas), then commit `backend/localcode/data/excluded_cases.json`. It also prints problems whose references differ from the expected answers only in list order; give those a mode in `backend/localcode/judging/answer_modes.py`.
+- **Regenerate the test-case exclusion list** after a dataset update or a judging change: `make validate-cases` (about an hour with three runner replicas), then commit `backend/localcode/data/excluded_cases.json`. It also prints two lists to act on: problems whose references differ from the expected answers only in list order (give those a mode in `backend/localcode/judging/answer_modes.py` and re-run them with `--only`), and problems whose exclusions rest on the references agreeing although none passes half the suite (check that those inputs really break the problem's constraints).
 - **Check the answer checkers** after a dataset update: `make check-checkers`. Every checker must accept the dataset's expected answers on every non-excluded case.
 - **Check reference pass rates** against a scratch instance: `backend/.venv/bin/python -m localcode.tools.sample_refs -n 100`.
 - **Release:** move the `Unreleased` section of [CHANGELOG.md](CHANGELOG.md) under a version heading, tag `vX.Y.Z`, and publish a GitHub release.

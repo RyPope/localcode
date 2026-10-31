@@ -60,6 +60,16 @@ def cases_to_exclude(outcomes: dict[str, list[bool]]) -> set[int]:
     return {i for i in range(len(trusted[0])) if not any(o[i] for o in trusted) or not all(o[i] for o in confident)}
 
 
+def needs_review(outcomes: dict[str, list[bool]]) -> bool:
+    """Cases are excluded although no reference passes TRUST_THRESHOLD of the suite (agreement only).
+
+    References are often translations of one algorithm and can share a bug or a limit, so these
+    exclusions are listed for a person to confirm that the inputs really break the constraints.
+    """
+    rates = [sum(o) / len(o) for o in outcomes.values() if o]
+    return bool(cases_to_exclude(outcomes)) and max(rates, default=0) < TRUST_THRESHOLD
+
+
 def differs_only_in_order(expected: Any, actual: Any, mode: str, args: list[Any]) -> bool:
     """A wrong answer under `mode` that is right once list order is ignored at every level.
 
@@ -124,8 +134,9 @@ def _load(slug: str) -> tuple[dict, list[dict], dict[str, str], dict | None]:
     return p, cases, codes, json.loads(cpp_row[0]) if cpp_row else None
 
 
-def _validate_one(slug: str, runner_url: str) -> tuple[list[str], dict[str, str], int]:
-    """Case keys to exclude, a pass summary per language, and how many cases differed only in order."""
+def _validate_one(slug: str, runner_url: str) -> tuple[list[str], dict[str, str], int, bool]:
+    """Case keys to exclude, a pass summary per language, how many cases differed only in order, and
+    whether the exclusions need review."""
     p, cases, codes, cpp_sig = _load(slug)
     results = {
         lang: _outcomes(p, lang, codes[lang], cases, cpp_sig if lang == "cpp" else None, runner_url)
@@ -136,7 +147,7 @@ def _validate_one(slug: str, runner_url: str) -> tuple[list[str], dict[str, str]
     order_only = sum(any(flags) for flags in zip(*(o for _, o in results.values()), strict=True)) if results else 0
     bad = cases_to_exclude(outcomes)
     summary = {k: f"{sum(o)}/{len(o)}" for k, o in outcomes.items()}
-    return sorted(case_key(cases[i]["args"]) for i in bad), summary, order_only
+    return sorted(case_key(cases[i]["args"]) for i in bad), summary, order_only, needs_review(outcomes)
 
 
 def prepare_from_sources(sources: Path, work: Path) -> None:
@@ -145,6 +156,31 @@ def prepare_from_sources(sources: Path, work: Path) -> None:
     (work / "content.db").unlink(missing_ok=True)  # nothing may be carried forward from an older build
     build_content_db(sources, work / "content.db", lambda *a: None, excluded={})
     db.CONTENT_DB, db.USER_DB = work / "content.db", work / "user.db"
+
+
+class _Report:
+    """A JSON object of slug -> finding, rewritten on every change; re-validating a slug replaces it."""
+
+    def __init__(self, path: Path, keep: bool) -> None:
+        self.path = path
+        self.data: dict[str, object] = json.loads(path.read_text()) if keep and path.exists() else {}
+        self._write()
+
+    def record(self, slug: str, finding: object | None) -> None:
+        if finding is None and slug not in self.data:
+            return
+        if finding is None:
+            del self.data[slug]
+        else:
+            self.data[slug] = finding
+        self._write()
+
+    def _write(self) -> None:
+        self.path.write_text(json.dumps(self.data, indent=0, sort_keys=True))
+
+
+def _case_count(summary: dict[str, str]) -> int:
+    return max((int(s.split("/")[1]) for s in summary.values()), default=0)
 
 
 def _runnable_slugs() -> list[str]:
@@ -162,17 +198,16 @@ def validate(
 
     Resumes from `out` unless `fresh`; with `only`, re-validates those problems and keeps the rest.
 
-    Problems whose references differ from the expected answers only in list order are recorded in
-    `<out>.order.json` with the number of such cases: review each for a curated compare mode, then
-    re-run those problems with `--only`.
+    Two reports sit next to `out`, for a person to act on:
+    - `<out>.order.json`: problems whose references differ from the expected answers only in list
+      order, with the number of such cases. Give each a compare mode, then re-run it with `--only`.
+    - `<out>.review.json`: problems whose exclusions rest on references agreeing although none passes
+      half the suite (see `needs_review`), as `[excluded, total]`. Confirm the inputs are invalid.
     """
     slugs = _runnable_slugs()
-    order_out = out.with_suffix(".order.json")
     keep = not fresh
     result: dict[str, list[str]] = json.loads(out.read_text()) if keep and out.exists() else {}
-    order: dict[str, int] = json.loads(order_out.read_text()) if keep and order_out.exists() else {}
-    if fresh:
-        order_out.write_text("{}")
+    reports = {name: _Report(out.with_suffix(f".{name}.json"), keep) for name in ("order", "review")}
     todo = [s for s in slugs if s in only] if only else [s for s in slugs if s not in result]
     lock = threading.Lock()
     done = 0
@@ -185,20 +220,17 @@ def validate(
         nonlocal done
         url = pool_urls.get()
         try:
-            keys, summary, order_only = _validate_one(slug, url)
+            keys, summary, order_only, review = _validate_one(slug, url)
         finally:
             pool_urls.put(url)
         with lock:
             done += 1
             result[slug] = keys
             out.write_text(json.dumps(result, indent=0, sort_keys=True))
-            if order_only or slug in order:  # re-validating a problem replaces its old entry
-                if order_only:
-                    order[slug] = order_only
-                else:
-                    del order[slug]
-                order_out.write_text(json.dumps(order, indent=0, sort_keys=True))
+            reports["order"].record(slug, order_only or None)
+            reports["review"].record(slug, [len(keys), _case_count(summary)] if review else None)
             note = f", {order_only} differ only in order" if order_only else ""
+            note += ", needs review" if review else ""
             print(f"[{done}/{len(todo)}] {slug}: {summary} exclude {len(keys)}{note}", flush=True)
 
     with ThreadPoolExecutor(max_workers=max(1, len(targets))) as pool:
