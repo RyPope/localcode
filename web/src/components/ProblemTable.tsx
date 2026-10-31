@@ -1,3 +1,4 @@
+import { problemLabel } from "../lib/labels";
 import { Link } from "react-router-dom";
 import { pct } from "../lib/format";
 import type { ProblemRow } from "../api";
@@ -37,8 +38,13 @@ export default function ProblemTable({
           </span>
           <span role="cell" className="titleCell">
             <Link className="ttl" to={`/problems/${r.slug}${linkSuffix}`}>
-              {r.id}. {r.title}
+              {problemLabel(r)}
             </Link>
+            {r.local && (
+              <span className="tag local" title="From this repo's content/ folder">
+                local
+              </span>
+            )}
             {!r.has_tests && (
               <span className="tag" title="Readable, but there are no tests to run">
                 read-only

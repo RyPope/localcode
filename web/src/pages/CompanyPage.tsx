@@ -1,3 +1,4 @@
+import { problemLabel } from "../lib/labels";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api, WINDOW_LABEL, type Difficulty } from "../api";
@@ -126,9 +127,7 @@ export default function CompanyPage() {
             <h3 className="lbl">Next unsolved, by frequency</h3>
             {s.next_unsolved.map((p) => (
               <Link key={p.slug} className={styles.link} to={`/problems/${p.slug}${suffix}`}>
-                <span>
-                  {p.id}. {p.title}
-                </span>
+                <span>{problemLabel(p)}</span>
                 <DiffText d={p.difficulty} />
               </Link>
             ))}

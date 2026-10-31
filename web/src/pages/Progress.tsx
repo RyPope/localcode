@@ -1,3 +1,4 @@
+import { refreshSummary } from "../lib/labels";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { api, type Stats } from "../api";
@@ -133,21 +134,32 @@ function ProgressView({ stats: s }: { stats: Stats }) {
         <div className={styles.dataText}>
           <div className="strong">Problem data</div>
           <div className="note">
-            {meta?.stats
-              ? `${meta.stats.problems.toLocaleString()} problems · ${meta.stats.companies} companies · `
-              : ""}
-            imported {meta?.imported_at ? new Date(meta.imported_at).toLocaleString() : "—"}. Updating never touches
-            your submissions or drafts.
+            {meta?.stats ? `${refreshSummary(meta.stats).join(" · ")} · ` : ""}
+            imported {meta?.imported_at ? new Date(meta.imported_at).toLocaleString() : "—"}. Refreshing downloads every
+            source and re-reads the repo&apos;s content/ folder. It adds and updates problems but never removes any, and
+            never touches your submissions or drafts.
           </div>
-          {imp?.running && (
-            <div className="note">
-              Updating: {imp.step} {imp.total ? `${imp.done}/${imp.total}` : ""}
+          {meta?.stats?.skipped && meta.stats.skipped.length > 0 && (
+            <div className="note bad">
+              Skipped {meta.stats.skipped.length} local file{meta.stats.skipped.length === 1 ? "" : "s"}:
+              <ul className={styles.skipped}>
+                {meta.stats.skipped.map((s) => (
+                  <li key={s.path}>
+                    <code>{s.path}</code>: {s.reason}
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
-          {imp?.error && <div className="note bad">Last update failed: {imp.error}</div>}
+          {imp?.running && (
+            <div className="note">
+              Refreshing: {imp.step} {imp.total ? `${imp.done}/${imp.total}` : ""}
+            </div>
+          )}
+          {imp?.error && <div className="note bad">Last refresh failed: {imp.error}</div>}
         </div>
         <button className="btn" disabled={imp?.running || update.isPending} onClick={() => update.mutate()}>
-          <Icon d={ICONS.refresh} /> {imp?.running ? "Updating…" : "Check for updates"}
+          <Icon d={ICONS.refresh} /> {imp?.running ? "Refreshing…" : "Refresh content"}
         </button>
       </section>
     </main>

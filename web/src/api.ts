@@ -16,6 +16,7 @@ export type Company = Schemas["Company"];
 export type CompanySummary = Schemas["CompanySummary"];
 export type Stats = Schemas["Stats"];
 export type AppStatus = Schemas["AppStatus"];
+export type ImportStats = Schemas["ImportStats"];
 export type Tag = Schemas["Tag"];
 export type ProblemQuery = NonNullable<operations["list_problems_api_problems_get"]["parameters"]["query"]>;
 

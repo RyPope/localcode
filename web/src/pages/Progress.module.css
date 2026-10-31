@@ -78,3 +78,7 @@
 .wideGrid {
   --grid-min: 460px;
 }
+.skipped {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}

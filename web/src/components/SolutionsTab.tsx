@@ -41,7 +41,11 @@ export default function SolutionsTab({
       )}
       <div>
         <h2 className="title-2">{s.title}</h2>
-        <span className="note">Reference solution · doocs/leetcode · CC BY-SA 4.0</span>
+        <span className="note">
+          {s.local
+            ? "Local solution · from this repo's content/ folder"
+            : "Reference solution · doocs/leetcode · CC BY-SA 4.0"}
+        </span>
       </div>
       <div className="row tight">
         {shown && (
