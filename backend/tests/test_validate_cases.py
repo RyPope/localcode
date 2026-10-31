@@ -97,3 +97,35 @@ def test_order_only_cases_are_reported_but_still_fail(monkeypatch):
     ok, order_only = validate_cases._outcomes(problem, "java", "code", cases, None, "unix:test")
     assert ok == [True, False, False]
     assert order_only == [False, True, False]
+
+
+def test_references_failing_exactly_the_same_cases_exclude_them_even_when_most_fail():
+    # Mostly-invalid suites (inputs that break the constraints) leave every reference below the
+    # trusted bar; two references agreeing case for case is still strong evidence.
+    failing = set(range(6))
+    outcomes = {"java": passing_all_but(10, *failing), "cpp": passing_all_but(10, *failing)}
+    assert cases_to_exclude(outcomes) == failing
+
+
+def test_agreement_needs_two_references_and_three_surviving_cases():
+    assert cases_to_exclude({"java": passing_all_but(10, *range(6))}) == set()
+    both = passing_all_but(10, *range(8))
+    assert cases_to_exclude({"java": both, "cpp": list(both)}) == set()
+    disagree = {"java": passing_all_but(10, *range(6)), "cpp": passing_all_but(10, *range(1, 8))}
+    assert cases_to_exclude(disagree) == set()
+
+
+def test_fresh_run_ignores_previous_output(tmp_path, monkeypatch):
+    from localcode.tools import validate_cases
+
+    out = tmp_path / "excluded.json"
+    out.write_text('{"stale-problem": ["abc"]}')
+    out.with_suffix(".order.json").write_text('{"stale-problem": 3}')
+    monkeypatch.setattr(validate_cases, "_runnable_slugs", lambda: ["pair-sum"])
+    monkeypatch.setattr(validate_cases, "_validate_one", lambda slug, url: (["k1"], {"java": "3/4"}, 0))
+    monkeypatch.setattr(validate_cases.runner_client, "endpoints", lambda: ["unix:test"])
+
+    assert validate_cases.validate(out, fresh=True) == {"pair-sum": ["k1"]}
+    assert not out.with_suffix(".order.json").exists() or out.with_suffix(".order.json").read_text() == "{}"
+    out.write_text('{"kept": []}')
+    assert validate_cases.validate(out) == {"kept": [], "pair-sum": ["k1"]}

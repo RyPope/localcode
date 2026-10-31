@@ -26,7 +26,7 @@ from typing import Any
 
 from localcode import config, db
 from localcode.db import content_session
-from localcode.importer.build import build_content_db
+from localcode.importer.build import MIN_CASES, build_content_db
 from localcode.importer.case_filter import case_key
 from localcode.judging import runner_client
 from localcode.judging.compare import CHECKER_PREFIX, judge
@@ -40,7 +40,18 @@ REFERENCE_LANGS = ("java", "cpp")
 
 
 def cases_to_exclude(outcomes: dict[str, list[bool]]) -> set[int]:
-    """Indices failed by every trusted reference, or by any confident one."""
+    """Indices failed by every trusted reference, or by any confident one.
+
+    When every reference (at least two) fails exactly the same cases, those are excluded however many
+    there are, as long as MIN_CASES survive: independent implementations agreeing case for case means
+    the inputs, not the references, are wrong (suites where most inputs break the constraints).
+    """
+    present = [o for o in outcomes.values() if o]
+    failures = {frozenset(i for i, ok in enumerate(o) if not ok) for o in present}
+    if len(present) >= 2 and len(failures) == 1:
+        (agreed,) = failures
+        if len(present[0]) - len(agreed) >= MIN_CASES:
+            return set(agreed)
     rates = {lang: sum(o) / len(o) for lang, o in outcomes.items() if o}
     trusted = [outcomes[lang] for lang, rate in rates.items() if rate >= TRUST_THRESHOLD]
     confident = [outcomes[lang] for lang, rate in rates.items() if rate >= CONFIDENT_THRESHOLD]
@@ -136,23 +147,32 @@ def prepare_from_sources(sources: Path, work: Path) -> None:
     db.CONTENT_DB, db.USER_DB = work / "content.db", work / "user.db"
 
 
-def validate(out: Path, only: list[str] | None = None, runners: list[str] | None = None) -> dict[str, list[str]]:
+def _runnable_slugs() -> list[str]:
+    with content_session() as con:
+        rows = con.execute(
+            "select slug from problems where has_tests = 1 order by coalesce(frontend_id, 1000000000), slug"
+        )
+        return [r[0] for r in rows]
+
+
+def validate(
+    out: Path, only: list[str] | None = None, runners: list[str] | None = None, *, fresh: bool = False
+) -> dict[str, list[str]]:
     """Validate every runnable problem, one worker per runner (default: every runner the app can reach).
+
+    Resumes from `out` unless `fresh`; with `only`, re-validates those problems and keeps the rest.
 
     Problems whose references differ from the expected answers only in list order are recorded in
     `<out>.order.json` with the number of such cases: review each for a curated compare mode, then
     re-run those problems with `--only`.
     """
-    with content_session() as con:
-        slugs = [
-            r[0]
-            for r in con.execute(
-                "select slug from problems where has_tests = 1 order by coalesce(frontend_id, 1000000000), slug"
-            )
-        ]
-    result: dict[str, list[str]] = json.loads(out.read_text()) if out.exists() else {}
+    slugs = _runnable_slugs()
     order_out = out.with_suffix(".order.json")
-    order: dict[str, int] = json.loads(order_out.read_text()) if order_out.exists() else {}
+    keep = not fresh
+    result: dict[str, list[str]] = json.loads(out.read_text()) if keep and out.exists() else {}
+    order: dict[str, int] = json.loads(order_out.read_text()) if keep and order_out.exists() else {}
+    if fresh:
+        order_out.write_text("{}")
     todo = [s for s in slugs if s in only] if only else [s for s in slugs if s not in result]
     lock = threading.Lock()
     done = 0
@@ -189,12 +209,12 @@ def validate(out: Path, only: list[str] | None = None, runners: list[str] | None
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("out", type=Path, help="JSON file to write (resumes if it exists)")
+    ap.add_argument("out", type=Path, help="JSON file to write (resumes if it exists, unless --from-sources)")
     ap.add_argument(
         "--from-sources",
         type=Path,
         metavar="DIR",
-        help="first build an unfiltered content.db in DIR from the downloaded sources (recommended)",
+        help="first build an unfiltered content.db in DIR from the downloaded sources and start a fresh list",
     )
     ap.add_argument("--only", nargs="*", help="limit to these problem slugs")
     ap.add_argument(
@@ -206,7 +226,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.from_sources:
         prepare_from_sources(config.SOURCES_DIR, args.from_sources)
     t0 = time.time()
-    result = validate(args.out, args.only, args.runners)
+    result = validate(args.out, args.only, args.runners, fresh=bool(args.from_sources and not args.only))
     print(
         f"done: {sum(map(len, result.values()))} cases excluded across {len(result)} problems "
         f"in {time.time() - t0:.0f}s",

@@ -64,8 +64,7 @@ validate-content: ## Check content/ against the running stack (FULL=1 also runs 
 	docker compose exec -T -u localcode app python -m localcode.tools.validate_content $(if $(FULL),--full)
 
 validate-cases: ## Maintainers: regenerate the excluded test-case list from the unfiltered sources (slow)
-	docker compose up -d --scale runner=3
-	docker compose exec -T -u localcode app sh -c 'rm -f /data/validate/excluded_cases*.json'
+	docker compose up -d --build --scale runner=3
 	docker compose exec -T -u localcode app python -m localcode.tools.validate_cases \
 		--from-sources /data/validate /data/validate/excluded_cases.json
 	docker compose cp app:/data/validate/excluded_cases.json backend/localcode/data/excluded_cases.json
