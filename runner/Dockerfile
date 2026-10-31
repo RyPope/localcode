@@ -1,5 +1,5 @@
 # Pinned toolchains: every localcode user judges against exactly these versions.
-FROM python:3.12.12-slim-trixie AS runtime
+FROM python:3.15.0-slim-trixie AS runtime
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends clang g++ nlohmann-json3-dev curl unzip ca-certificates \
