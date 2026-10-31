@@ -1,6 +1,7 @@
 import pytest
 
 from localcode import db
+from localcode.db import user_session
 from localcode.services import companies, judge, problems, progress
 from localcode.services.errors import ServiceError
 
@@ -160,6 +161,26 @@ def test_stats_counts_first_accept(data_dir, runner):
     s = progress.stats()
     assert s["totals"]["easy"] == [1, 3]
     assert sum(w["easy"] for w in s["solved_by_week"]) == 1
+
+
+def test_stats_lists_solved_problems_with_first_accept_and_languages(data_dir, runner):
+    runner.user = ok([[1, 2], [0, 1], [0, 2], [0, 1]])
+    judge.submit(runner, "pair-sum", "python", "code")
+    judge.submit(runner, "pair-sum", "java", "code")
+    judge.submit(runner, "pair-sum", "python", "code")
+    runner.user = ok([[9, 9], [9, 9], [9, 9], [9, 9]])
+    judge.submit(runner, "pair-sum", "cpp", "code")  # wrong answers don't count
+    (solved,) = progress.stats()["solved"]
+    with user_session() as u:
+        first = u.execute("select min(created_at) from submissions where verdict = 'Accepted'").fetchone()[0]
+    assert solved["slug"] == "pair-sum"
+    assert solved["difficulty"] == "Easy"
+    assert solved["first_accepted_at"] == first
+    assert solved["langs"] == ["java", "python"]
+
+
+def test_stats_solved_is_empty_before_any_accept(data_dir):
+    assert progress.stats()["solved"] == []
 
 
 def test_unsolved_filter_includes_attempted(data_dir):

@@ -1,11 +1,12 @@
-import { refreshSummary } from "../lib/labels";
+import { problemLabel, refreshSummary } from "../lib/labels";
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { api, type Stats } from "../api";
+import { api, LANG_LABEL, type Stats } from "../api";
 import { CardHeader, Meter, PageHeader, Stat } from "../components/layout";
 import QueryState from "../components/QueryState";
 import { useAppStatus } from "../hooks/useAppStatus";
-import { CompanyBadge, Icon } from "../components/ui";
+import { CompanyBadge, DiffText, Icon } from "../components/ui";
 import { ICONS } from "../lib/icons";
 import styles from "./Progress.module.css";
 
@@ -14,6 +15,9 @@ const DIFFS = [
   ["medium", "Medium", "var(--med)"],
   ["hard", "Hard", "var(--hard)"],
 ] as const;
+
+/** Solved problems shown before "Show all". */
+const SOLVED_PREVIEW = 10;
 
 export default function Progress() {
   const stats = useQuery({ queryKey: ["stats"], queryFn: api.stats });
@@ -47,13 +51,21 @@ function ProgressView({ stats: s }: { stats: Stats }) {
 
       <section className="grid">
         <div className="card stack">
-          <h2 className="lbl">Solved</h2>
+          <h2 className="lbl">
+            <Link className={styles.statLink} to="/?status=solved">
+              Solved
+            </Link>
+          </h2>
           <Stat value={solved} of={total} />
           <Meter ratio={solved / total} />
         </div>
         {DIFFS.map(([k, label, color]) => (
           <div className="card stack" key={k}>
-            <h2 className="lbl">{label}</h2>
+            <h2 className="lbl">
+              <Link className={styles.statLink} to={`/?status=solved&difficulty=${label}`}>
+                {label}
+              </Link>
+            </h2>
             <Stat value={s.totals[k][0]} of={s.totals[k][1]} />
             <Meter ratio={s.totals[k][0] / s.totals[k][1]} color={color} />
           </div>
@@ -93,6 +105,8 @@ function ProgressView({ stats: s }: { stats: Stats }) {
           </div>
         </div>
       </section>
+
+      <SolvedList solved={s.solved} />
 
       <section className={`grid ${styles.wideGrid}`}>
         <div className="card">
@@ -163,5 +177,40 @@ function ProgressView({ stats: s }: { stats: Stats }) {
         </button>
       </section>
     </main>
+  );
+}
+
+function SolvedList({ solved }: { solved: Stats["solved"] }) {
+  const [showAll, setShowAll] = useState(false);
+  const rows = showAll ? solved : solved.slice(0, SOLVED_PREVIEW);
+  return (
+    <section className="card">
+      <CardHeader title="Solved problems" note="Most recent first">
+        <div className="spacer" />
+        {solved.length > 0 && (
+          <Link className="text-sm" to="/?status=solved">
+            Open in Problems →
+          </Link>
+        )}
+      </CardHeader>
+      {solved.length === 0 && <span className="note">Problems you get Accepted on will be listed here.</span>}
+      {rows.map((p) => (
+        <div key={p.slug} className={styles.solvedRow}>
+          <Link className="fg strong" to={`/problems/${p.slug}`}>
+            {problemLabel(p)}
+          </Link>
+          <DiffText d={p.difficulty} />
+          <span className="note">{p.langs.map((l) => LANG_LABEL[l]).join(", ")}</span>
+          <time className={styles.count} dateTime={p.first_accepted_at}>
+            {new Date(p.first_accepted_at).toLocaleDateString()}
+          </time>
+        </div>
+      ))}
+      {solved.length > SOLVED_PREVIEW && (
+        <button className="btn ghost text-sm" onClick={() => setShowAll(!showAll)}>
+          {showAll ? "Show fewer" : `Show all ${solved.length.toLocaleString()}`}
+        </button>
+      )}
+    </section>
   );
 }

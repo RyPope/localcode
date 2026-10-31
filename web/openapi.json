@@ -977,6 +977,65 @@
         "title": "Solution",
         "type": "object"
       },
+      "SolvedProblem": {
+        "properties": {
+          "difficulty": {
+            "enum": [
+              "Easy",
+              "Medium",
+              "Hard"
+            ],
+            "title": "Difficulty",
+            "type": "string"
+          },
+          "first_accepted_at": {
+            "title": "First Accepted At",
+            "type": "string"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "langs": {
+            "items": {
+              "enum": [
+                "python",
+                "java",
+                "cpp",
+                "kotlin"
+              ],
+              "type": "string"
+            },
+            "title": "Langs",
+            "type": "array"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slug",
+          "id",
+          "title",
+          "difficulty",
+          "first_accepted_at",
+          "langs"
+        ],
+        "title": "SolvedProblem",
+        "type": "object"
+      },
       "Stats": {
         "properties": {
           "by_company": {
@@ -1004,6 +1063,13 @@
             ],
             "title": "Since"
           },
+          "solved": {
+            "items": {
+              "$ref": "#/components/schemas/SolvedProblem"
+            },
+            "title": "Solved",
+            "type": "array"
+          },
           "solved_by_week": {
             "items": {
               "$ref": "#/components/schemas/WeekCount"
@@ -1020,7 +1086,8 @@
           "totals",
           "solved_by_week",
           "by_topic",
-          "by_company"
+          "by_company",
+          "solved"
         ],
         "title": "Stats",
         "type": "object"

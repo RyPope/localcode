@@ -184,12 +184,22 @@ class CompanyProgress(TypedDict):
     total: int
 
 
+class SolvedProblem(TypedDict):
+    slug: str
+    id: int | None
+    title: str
+    difficulty: Difficulty
+    first_accepted_at: str
+    langs: list[Lang]  # languages with an accepted submission
+
+
 class Stats(TypedDict):
     since: str | None
     totals: DifficultyCounts
     solved_by_week: list[WeekCount]
     by_topic: list[TopicProgress]
     by_company: list[CompanyProgress]
+    solved: list[SolvedProblem]  # newest first accept first
 
 
 class ImportState(TypedDict):
