@@ -4,7 +4,7 @@
 
 | Service | Image | Network | Responsibility |
 |---|---|---|---|
-| `app` | `backend/Dockerfile` (Python 3.12 + built web UI) | default (for downloads); reaches the runner via `/run/localcode/runner-*.sock` | HTTP API, static UI, content import, judging, user data |
+| `app` | `backend/Dockerfile` (Python 3.14 + built web UI) | default (for downloads); reaches the runner via `/run/localcode/runner-*.sock` | HTTP API, static UI, content import, judging, user data |
 | `runner` | `runner/Dockerfile` (pinned toolchains) | none (`network_mode: none`); serves on a Unix socket in the `runner-socket` volume | Compile and execute submissions; return raw per-case results |
 
 Data lives in the `localcode-data` volume mounted at `/data`:

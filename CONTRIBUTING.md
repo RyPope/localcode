@@ -10,7 +10,7 @@ Everyone taking part is expected to follow the [Code of Conduct](CODE_OF_CONDUCT
 
 ## Getting set up
 
-You need Docker (with Compose v2), Python 3.12, Node 22 and `make`.
+You need Docker (with Compose v2), Python 3.14, Node 22 and `make`.
 
 ```bash
 git clone https://github.com/RyPope/localcode.git && cd localcode

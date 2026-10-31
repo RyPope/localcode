@@ -73,6 +73,6 @@ def versions() -> dict[str, str] | None:
                 with _client(endpoint, 60) as client:
                     _versions = client.get("/health").json()["versions"]
                     break
-            except (httpx.HTTPError, KeyError, ValueError):
+            except httpx.HTTPError, KeyError, ValueError:
                 continue
     return _versions
