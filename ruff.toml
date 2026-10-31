@@ -6,7 +6,6 @@ extend-exclude = ["web", "**/.venv"]
 select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
 ignore = [
   "RUF001", "RUF002", "RUF003",  # unicode punctuation in user-facing strings is intentional
-  "UP038",  # deprecated upstream; tuples in isinstance are clearer
 ]
 
 [lint.isort]
