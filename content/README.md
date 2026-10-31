@@ -69,7 +69,7 @@ class Solution { ... }
 
 Write code in LeetCode's `class Solution` style, with one fenced block per language, tagged `python`, `java`, `cpp` or `kotlin`. Files are shown in name order, after any upstream solutions.
 
-- A **new problem's** function signature comes from its Python solution, so a new problem needs one. A language becomes available to solve in once a solution includes it. Java also enables Kotlin.
+- A **new problem's** function signature comes from the first public method (one whose name doesn't start with `_`) of its Python solution, so a new problem needs one. A language becomes available to solve in once a solution includes it. Java also enables Kotlin.
 - For an **existing problem**, a solution in a language the problem didn't support yet (for example its first C++ solution) adds that language, as long as the method name and parameter count match.
 
 ## Checking your change
