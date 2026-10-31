@@ -82,3 +82,11 @@ def test_params_skip_commented_node_definition():
     assert method == "addTwoNumbers"
     assert [p["name"] for p in params] == ["l1", "l2"]
     assert ret == "ListNode"
+
+
+def test_signature_skips_private_helpers():
+    from localcode.importer.dataset import params_from_starter
+
+    code = "class Solution:\n    def _h(self, x: int) -> int:\n        return x\n\n    def main(self, a: int, b: int) -> int:\n        return a\n"
+    method, params, ret = params_from_starter(code)
+    assert method == "main" and [p["name"] for p in params] == ["a", "b"]

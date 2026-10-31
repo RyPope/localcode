@@ -211,7 +211,9 @@ def _copy_rows(con: sqlite3.Connection, table: str, where: str, args: tuple, ove
     return cur.rowcount
 
 
-def _carry_forward(con: sqlite3.Connection, previous: Path, excluded: dict[str, set[str]]) -> dict:
+def _carry_forward(
+    con: sqlite3.Connection, previous: Path, excluded: dict[str, set[str]], local_slugs: set[str]
+) -> dict:
     """Keep everything the previous content.db had that this build lacks; never override new values."""
     kept = {"kept_problems": 0, "kept_solutions": 0, "kept_cases": 0}
     con.execute("attach database ? as prev", (str(previous),))
@@ -224,14 +226,19 @@ def _carry_forward(con: sqlite3.Connection, previous: Path, excluded: dict[str, 
                     _copy_rows(con, table, "slug = ?", (slug,))
                 kept["kept_problems"] += 1
                 continue
-            _merge_previous(con, slug, excluded.get(slug, set()), kept)
+            _merge_previous(con, slug, excluded.get(slug, set()), kept, slug in local_slugs)
     finally:
         con.commit()
         con.execute("detach database prev")
     return kept
 
 
-def _merge_previous(con: sqlite3.Connection, slug: str, excluded: set[str], kept: dict) -> None:
+def _merge_previous(con: sqlite3.Connection, slug: str, excluded: set[str], kept: dict, has_folder: bool) -> None:
+    """Fold the previous import's rows for `slug` into the new ones.
+
+    While a problem's content/ folder exists it is the record of its local solutions (so renaming one
+    doesn't leave a copy behind); once the folder is gone, its local solutions are kept like any other.
+    """
     new = con.execute("select * from main.problems where slug = ?", (slug,)).fetchone()
     old = con.execute("select * from prev.problems where slug = ?", (slug,)).fetchone()
     old_cols = set(old.keys())
@@ -257,13 +264,13 @@ def _merge_previous(con: sqlite3.Connection, slug: str, excluded: set[str], kept
     for idx, title, source in con.execute(
         f"select idx, title, {old_source} from prev.solutions where slug = ? order by idx", (slug,)
     ).fetchall():
-        if (title, source) not in have:
+        if (title, source) not in have and not (has_folder and source == "local"):
             _copy_rows(con, "solutions", "slug = ? and idx = ?", (slug, idx), {"idx": next_idx})
             next_idx += 1
             kept["kept_solutions"] += 1
 
-    if new["method"] is None:
-        return
+    if new["method"] is None or (new["params"], new["ret"]) != (old["params"], old["ret"]):
+        return  # cases written for another signature can't be judged against this one
     row = con.execute("select cases from main.tests where slug = ?", (slug,)).fetchone()
     cases = json.loads(row[0]) if row else []
     old_row = con.execute("select cases from prev.tests where slug = ?", (slug,)).fetchone()
@@ -336,7 +343,7 @@ def _write_content(
     progress("companies", len(names), len(names))
 
     kept = (
-        _carry_forward(con, previous, excluded)
+        _carry_forward(con, previous, excluded, set(local))
         if previous
         else {"kept_problems": 0, "kept_solutions": 0, "kept_cases": 0}
     )

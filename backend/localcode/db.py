@@ -124,5 +124,9 @@ def content_session() -> Iterator[sqlite3.Connection]:
     con = sqlite3.connect(f"{CONTENT_DB.as_uri()}?mode=ro", uri=True, check_same_thread=False)
     con.row_factory = sqlite3.Row
     con.execute("attach database ? as u", (str(USER_DB),))
+    for table in ("problems", "solutions"):
+        if "source" not in {r[1] for r in con.execute(f"pragma main.table_info({table})")}:
+            # content.db from before repo content existed: everything in it came from upstream.
+            con.execute(f"create temp view {table} as select *, 'upstream' as source from main.{table}")
     with _session(con) as c:
         yield c

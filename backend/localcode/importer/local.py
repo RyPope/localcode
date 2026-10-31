@@ -51,6 +51,8 @@ class LocalProblem:
 def _front_matter(text: str, allowed: set[str]) -> tuple[dict, str]:
     m = _FRONT_RE.match(text)
     if not m:
+        if text.startswith("---"):
+            raise ContentError("front matter starts with --- but has no closing --- line")
         return {}, text
     try:
         meta = yaml.safe_load(m.group(1)) or {}

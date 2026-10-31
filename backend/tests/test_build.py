@@ -315,3 +315,40 @@ def test_carry_forward_from_db_without_source_column(tmp_path):
     con, stats = rebuild(tmp_path, mutate=lambda src: drop_dataset_row(src, "tree-mirror"))
     assert con.execute("select source from problems where slug='tree-mirror'").fetchone()[0] == "upstream"
     assert stats["kept_problems"] == 1
+
+
+def _int_problem(root: Path, typ: str, ret: str, cases: list) -> Path:
+    return write_content(
+        root,
+        "typed",
+        {
+            "tests.json": json.dumps(cases),
+            "solutions/01.md": f"---\ntitle: A\n---\n```python\nclass Solution:\n"
+            f"    def f(self, a: {typ}) -> {ret}:\n        return a\n```\n",
+        },
+    )
+
+
+def test_type_change_drops_carried_cases(tmp_path):
+    rebuild(tmp_path, _int_problem(tmp_path / "c1", "int", "int", [{"args": [n], "expected": n} for n in range(3)]))
+    strs = [{"args": [s], "expected": s} for s in "abc"]
+    con, stats = rebuild(tmp_path, _int_problem(tmp_path / "c2", "str", "str", strs))
+    cases = json.loads(con.execute("select cases from tests where slug='typed'").fetchone()[0])
+    assert cases == strs and stats["kept_cases"] == 0
+
+
+def test_renamed_local_solution_is_not_duplicated(tmp_path):
+    rebuild(tmp_path, CONTENT)
+    renamed = tmp_path / "c"
+    shutil.copytree(CONTENT, renamed)
+    sol = renamed / "problems/count-vowels/solutions/01-scan.md"
+    sol.write_text(sol.read_text().replace("title: Single scan", "title: One pass"))
+    con, stats = rebuild(tmp_path, renamed)
+    titles = [r[0] for r in con.execute("select title from solutions where slug='count-vowels'")]
+    assert titles == ["One pass"] and stats["kept_solutions"] == 0
+
+
+def test_local_solutions_kept_when_whole_folder_removed(tmp_path):
+    rebuild(tmp_path, CONTENT)
+    con, _ = rebuild(tmp_path, tmp_path / "empty")
+    assert [r[0] for r in con.execute("select title from solutions where slug='count-vowels'")] == ["Single scan"]

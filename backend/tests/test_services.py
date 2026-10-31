@@ -234,3 +234,16 @@ def test_local_problem_detail_neighbours(local_data_dir):
 def test_solution_local_flag(local_data_dir):
     sols = problems.solutions("pair-sum")
     assert [s["local"] for s in sols] == [False, False, True] and sols[-1]["title"] == "Brute force"
+
+
+def test_content_db_from_before_source_column_still_serves(data_dir):
+    import sqlite3
+
+    con = sqlite3.connect(db.CONTENT_DB)
+    con.execute("alter table problems drop column source")
+    con.execute("alter table solutions drop column source")
+    con.commit()
+    con.close()
+    assert problems.list_problems()["items"][0]["local"] is False
+    assert problems.problem_detail("pair-sum")["local"] is False
+    assert problems.solutions("pair-sum")[0]["local"] is False

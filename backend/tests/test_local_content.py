@@ -56,3 +56,11 @@ def test_invalid_entries_are_reported(tmp_path):
 
 def test_missing_root_is_empty(tmp_path):
     assert load_local(tmp_path / "nope") == ({}, [])
+
+
+def test_unclosed_front_matter_is_reported(tmp_path):
+    d = tmp_path / "problems" / "open-front"
+    d.mkdir(parents=True)
+    (d / "problem.md").write_text("---\ntitle: X\ndifficulty: Easy\n\nStatement.\n")
+    problems, [entry] = load_local(tmp_path)
+    assert problems == {} and "closing ---" in entry["reason"]
