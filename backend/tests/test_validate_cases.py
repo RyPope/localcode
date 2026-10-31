@@ -42,3 +42,31 @@ def test_order_only_differences_are_flagged():
     assert not differs_only_in_order([[1, 2]], [[1, 2]], "exact", [])  # not a failure at all
     assert not differs_only_in_order([[1, 2]], [[1, 3]], "exact", [])  # a real difference
     assert not differs_only_in_order([[1, 2], [3]], [[2, 1], [3]], "any_order_deep", [])
+
+
+def test_from_sources_builds_an_unfiltered_database(tmp_path, monkeypatch):
+    import json
+    import shutil
+    import sqlite3
+    from pathlib import Path
+
+    from localcode import db
+    from localcode.tools.validate_cases import prepare_from_sources
+
+    fix = Path(__file__).parent / "fixtures"
+    src = tmp_path / "sources"
+    (src / "dataset").mkdir(parents=True)
+    shutil.copy(fix / "dataset_rows.jsonl", src / "dataset" / "LeetCodeDataset-train.jsonl")
+    shutil.copytree(fix / "doocs", src / "doocs")
+    monkeypatch.setattr(db, "CONTENT_DB", tmp_path / "unused.db")
+    monkeypatch.setattr(db, "USER_DB", tmp_path / "unused-user.db")
+    monkeypatch.setattr("localcode.importer.build.load_excluded", lambda: {"pair-sum": {"anything"}})
+
+    work = tmp_path / "work"
+    prepare_from_sources(src, work)
+    prepare_from_sources(src, work)  # rebuilds from scratch rather than carrying the old database forward
+
+    assert (work / "content.db", work / "user.db") == (db.CONTENT_DB, db.USER_DB)
+    con = sqlite3.connect(db.CONTENT_DB)
+    cases = con.execute("select cases from tests where slug = 'pair-sum'").fetchone()[0]
+    assert len(json.loads(cases)) == 4

@@ -61,7 +61,7 @@ New problems, extra solutions and corrected test cases go in [`content/`](conten
 - **Write solutions** for problems the upstream data has few of (Kotlin especially), in `content/`.
 - **Triage wrong verdicts.** Reproduce a reported case and, if the test case itself is invalid, add it to the exclusion list.
 - **Kotlin reference solutions.** The upstream dataset has very few, so the Solutions tab falls back to Java. Contributing Kotlin solutions upstream to [doocs/leetcode](https://github.com/doocs/leetcode) helps everyone.
-- **Special judges** for problems that accept several valid answers (for example "return any valid arrangement").
+- **Answer checkers** for problems that accept several valid answers and don't have one yet. A checker is a small function in `backend/localcode/judging/checkers/` that decides whether an answer is valid for the inputs; see the existing ones and their tests, and run `make check-checkers`.
 - **Accessibility and keyboard navigation** improvements in the web app.
 - **Docs**: troubleshooting tips for platforms we haven't tested (Windows, Linux distributions, low-memory machines).
 
@@ -75,6 +75,7 @@ New problems, extra solutions and corrected test cases go in [`content/`](conten
 
 ## Maintainer tasks
 
-- **Regenerate the test-case exclusion list** after a dataset update: `make validate-cases` (about 45 minutes with three runner replicas), then commit `backend/localcode/data/excluded_cases.json`.
+- **Regenerate the test-case exclusion list** after a dataset update or a judging change: `make validate-cases` (about an hour with three runner replicas), then commit `backend/localcode/data/excluded_cases.json`. It also prints problems whose references differ from the expected answers only in list order; give those a mode in `backend/localcode/judging/answer_modes.py`.
+- **Check the answer checkers** after a dataset update: `make check-checkers`. Every checker must accept the dataset's expected answers on every non-excluded case.
 - **Check reference pass rates** against a scratch instance: `backend/.venv/bin/python -m localcode.tools.sample_refs -n 100`.
 - **Release:** move the `Unreleased` section of [CHANGELOG.md](CHANGELOG.md) under a version heading, tag `vX.Y.Z`, and publish a GitHub release.

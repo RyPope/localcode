@@ -7,9 +7,11 @@ disagrees on them, while another language may get lucky (C++ reads out of bounds
 The output is our own derived data, shipped as localcode/data/excluded_cases.json and applied by the
 importer.
 
-Run inside the app container (it needs the runner and an imported content.db):
+Run inside the app container with `make validate-cases`. It needs the runner and the downloaded sources;
+`--from-sources DIR` first builds a content.db in DIR with no cases excluded, so every case is judged:
 
-    docker compose exec -u localcode app python -m localcode.tools.validate_cases /data/excluded_cases.json
+    docker compose exec -u localcode app python -m localcode.tools.validate_cases \
+        --from-sources /data/validate /data/validate/excluded_cases.json
 """
 
 import argparse
@@ -22,8 +24,9 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
 
-from localcode import config
+from localcode import config, db
 from localcode.db import content_session
+from localcode.importer.build import build_content_db
 from localcode.importer.case_filter import case_key
 from localcode.judging import runner_client
 from localcode.judging.compare import judge
@@ -120,6 +123,14 @@ def _validate_one(slug: str, runner_url: str) -> tuple[list[str], dict[str, str]
     return sorted(case_key(cases[i]["args"]) for i in bad), summary, order_only
 
 
+def prepare_from_sources(sources: Path, work: Path) -> None:
+    """Build `work/content.db` from `sources` with nothing excluded, and judge against it."""
+    work.mkdir(parents=True, exist_ok=True)
+    (work / "content.db").unlink(missing_ok=True)  # nothing may be carried forward from an older build
+    build_content_db(sources, work / "content.db", lambda *a: None, excluded={})
+    db.CONTENT_DB, db.USER_DB = work / "content.db", work / "user.db"
+
+
 def validate(out: Path, only: list[str] | None = None, runners: list[str] | None = None) -> dict[str, list[str]]:
     """Validate every runnable problem, one worker per runner (default: every runner the app can reach).
 
@@ -170,6 +181,12 @@ def validate(out: Path, only: list[str] | None = None, runners: list[str] | None
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("out", type=Path, help="JSON file to write (resumes if it exists)")
+    ap.add_argument(
+        "--from-sources",
+        type=Path,
+        metavar="DIR",
+        help="first build an unfiltered content.db in DIR from the downloaded sources (recommended)",
+    )
     ap.add_argument("--only", nargs="*", help="limit to these problem slugs")
     ap.add_argument(
         "--runners",
@@ -177,6 +194,8 @@ def main(argv: list[str] | None = None) -> int:
         help="runner endpoints to spread work across (default: every runner socket the app can see)",
     )
     args = ap.parse_args(argv)
+    if args.from_sources:
+        prepare_from_sources(config.SOURCES_DIR, args.from_sources)
     t0 = time.time()
     result = validate(args.out, args.only, args.runners)
     print(
