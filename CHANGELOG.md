@@ -16,3 +16,5 @@ All notable changes are documented here. The format follows [Keep a Changelog](h
 - The runner has no network; the app reaches it over a group-restricted Unix socket.
 - Both containers run without root privileges or unneeded capabilities, under `no-new-privileges`.
 - Host-header and Origin checks, a content security policy and other security headers.
+- Shared memory, message queues and semaphores a submission creates are removed after each run, and shared memory is capped at 16 MB.
+- The runner reads a submission's output only through files it controls, so a submission can't redirect it to a root-only file.

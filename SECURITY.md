@@ -13,8 +13,9 @@ The **runner** container executes submissions:
 - **No network.** It runs with `network_mode: none`, so there's no internet, DNS or access to the app. The app talks to it over a Unix socket in a shared volume (mode `0660`, app group only), which the sandbox user cannot open.
 - **Unprivileged.** Each submission runs as uid 10001 with no supplementary groups and no capabilities, under `no-new-privileges` (setuid binaries can't elevate) and Docker's default seccomp profile.
 - **Read-only.** The root filesystem is read-only. Each run gets a fresh private directory (mode `0700`).
-- **Limited.** Wall-clock time, address space (or JVM heap), file size, 256 processes per sandbox user, container memory (2 GB) and PIDs (512).
-- **Cleaned.** After every run the runner kills every process the sandbox user still owns and deletes its files from `/tmp` and `/dev/shm`. An init process reaps orphans.
+- **Limited.** Wall-clock time, address space (or JVM heap), file size, 256 processes per sandbox user, 16 MB of shared memory, container memory (2 GB) and PIDs (512).
+- **Cleaned.** After every run the runner kills every process the sandbox user still owns, removes its shared memory segments, semaphores and message queues, and deletes its files from `/tmp`, `/dev/shm` and `/dev/mqueue`. An init process reaps orphans.
+- **Untrusted output.** The runner captures output in files the submission has no path to, and reads its results only from a regular file the sandbox user owns, never through a link.
 - **Minimal privileges for the runner itself.** The root server process keeps only the capabilities it needs to prepare the sandbox and clean up: `CHOWN`, `DAC_OVERRIDE`, `FOWNER`, `SETUID`, `SETGID` and `KILL`.
 
 The **app** container runs as uid 1000 with no capabilities, `no-new-privileges` and a read-only root filesystem.
