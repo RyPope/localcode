@@ -33,3 +33,12 @@ def test_untrusted_references_are_ignored():
     assert cases_to_exclude(outcomes) == {4}
     assert cases_to_exclude({"java": [False, False, True]}) == set()
     assert cases_to_exclude({}) == set()
+
+
+def test_order_only_differences_are_flagged():
+    from localcode.tools.validate_cases import differs_only_in_order
+
+    assert differs_only_in_order([[-1, 0, 1], [-1, -1, 2]], [[-1, -1, 2], [0, -1, 1]], "exact", [])
+    assert not differs_only_in_order([[1, 2]], [[1, 2]], "exact", [])  # not a failure at all
+    assert not differs_only_in_order([[1, 2]], [[1, 3]], "exact", [])  # a real difference
+    assert not differs_only_in_order([[1, 2], [3]], [[2, 1], [3]], "any_order_deep", [])

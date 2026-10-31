@@ -20,6 +20,7 @@ import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from typing import Any
 
 from localcode import config
 from localcode.db import content_session
@@ -45,11 +46,22 @@ def cases_to_exclude(outcomes: dict[str, list[bool]]) -> set[int]:
     return {i for i in range(len(trusted[0])) if not any(o[i] for o in trusted) or not all(o[i] for o in confident)}
 
 
+def differs_only_in_order(expected: Any, actual: Any, mode: str, args: list[Any]) -> bool:
+    """A wrong answer under `mode` that is right once list order is ignored at every level."""
+    return not judge(expected, actual, mode, args) and judge(expected, actual, "any_order_deep", args)
+
+
 def _outcomes(
     problem, lang: str, code: str, cases: list[dict], cpp_sig: dict | None, runner_url: str | None
-) -> list[bool]:
-    """Per-case pass/fail. A case that hangs or crashes fails; the cases after it are run again."""
+) -> tuple[list[bool], list[bool]]:
+    """Per-case pass/fail, and which failures differ only in list order.
+
+    Order-only differences count as passes: they point at a compare mode to curate
+    (see `localcode.judging.answer_modes`), not at an invalid input. A case that hangs or crashes
+    fails; the cases after it are run again.
+    """
     ok = [False] * len(cases)
+    order_only = [False] * len(cases)
     pending = list(range(len(cases)))
     while pending:
         chunk, pending = pending, []
@@ -68,15 +80,17 @@ def _outcomes(
             runner_url,
         )
         if res["compile_error"]:
-            return [False] * len(cases)
+            return [False] * len(cases), order_only
         for i, r in zip(chunk, res["results"], strict=False):
-            ok[i] = bool(r.get("ok")) and judge(
-                cases[i]["expected"], r["value"], problem["compare_mode"], cases[i]["args"]
-            )
+            if not r.get("ok"):
+                continue
+            expected, args = cases[i]["expected"], cases[i]["args"]
+            order_only[i] = differs_only_in_order(expected, r["value"], problem["compare_mode"], args)
+            ok[i] = order_only[i] or judge(expected, r["value"], problem["compare_mode"], args)
         done = len(res["results"])
         if done < len(chunk):  # chunk[done] hung or crashed the process; retry what followed it
             pending = chunk[done + 1 :]
-    return ok
+    return ok, order_only
 
 
 def _load(slug: str) -> tuple[dict, list[dict], dict[str, str], dict | None]:
@@ -91,19 +105,27 @@ def _load(slug: str) -> tuple[dict, list[dict], dict[str, str], dict | None]:
     return p, cases, codes, json.loads(cpp_row[0]) if cpp_row else None
 
 
-def _validate_one(slug: str, runner_url: str) -> tuple[list[str], dict[str, str]]:
+def _validate_one(slug: str, runner_url: str) -> tuple[list[str], dict[str, str], int]:
+    """Case keys to exclude, a pass summary per language, and how many cases differed only in order."""
     p, cases, codes, cpp_sig = _load(slug)
-    outcomes = {
+    results = {
         lang: _outcomes(p, lang, codes[lang], cases, cpp_sig if lang == "cpp" else None, runner_url)
         for lang in REFERENCE_LANGS
         if lang in codes and lang in json.loads(p["langs"])
     }
+    outcomes = {lang: ok for lang, (ok, _) in results.items()}
+    order_only = sum(any(flags) for flags in zip(*(o for _, o in results.values()), strict=True)) if results else 0
     bad = cases_to_exclude(outcomes)
-    return sorted(case_key(cases[i]["args"]) for i in bad), {k: f"{sum(o)}/{len(o)}" for k, o in outcomes.items()}
+    summary = {k: f"{sum(o)}/{len(o)}" for k, o in outcomes.items()}
+    return sorted(case_key(cases[i]["args"]) for i in bad), summary, order_only
 
 
 def validate(out: Path, only: list[str] | None = None, runners: list[str] | None = None) -> dict[str, list[str]]:
-    """Validate every runnable problem, one worker per runner (default: every runner the app can reach)."""
+    """Validate every runnable problem, one worker per runner (default: every runner the app can reach).
+
+    Problems whose references differ from the expected answers only in list order are recorded in
+    `<out>.order.json` with the number of such cases: candidates for a curated compare mode.
+    """
     with content_session() as con:
         slugs = [
             r[0]
@@ -112,6 +134,8 @@ def validate(out: Path, only: list[str] | None = None, runners: list[str] | None
             )
         ]
     result: dict[str, list[str]] = json.loads(out.read_text()) if out.exists() else {}
+    order_out = out.with_suffix(".order.json")
+    order: dict[str, int] = json.loads(order_out.read_text()) if order_out.exists() else {}
     todo = [s for s in slugs if s in only] if only else [s for s in slugs if s not in result]
     lock = threading.Lock()
     done = 0
@@ -124,14 +148,18 @@ def validate(out: Path, only: list[str] | None = None, runners: list[str] | None
         nonlocal done
         url = pool_urls.get()
         try:
-            keys, summary = _validate_one(slug, url)
+            keys, summary, order_only = _validate_one(slug, url)
         finally:
             pool_urls.put(url)
         with lock:
             done += 1
             result[slug] = keys
             out.write_text(json.dumps(result, indent=0, sort_keys=True))
-            print(f"[{done}/{len(todo)}] {slug}: {summary} exclude {len(keys)}", flush=True)
+            if order_only:
+                order[slug] = order_only
+                order_out.write_text(json.dumps(order, indent=0, sort_keys=True))
+            note = f", {order_only} differ only in order" if order_only else ""
+            print(f"[{done}/{len(todo)}] {slug}: {summary} exclude {len(keys)}{note}", flush=True)
 
     with ThreadPoolExecutor(max_workers=max(1, len(targets))) as pool:
         for f in [pool.submit(work, s) for s in todo]:
