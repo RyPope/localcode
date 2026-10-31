@@ -1,6 +1,6 @@
 """Import or update problem content from the command line.
 
-docker compose exec app python -m localcode.importer
+docker compose exec -u localcode app python -m localcode.importer
 """
 
 import argparse

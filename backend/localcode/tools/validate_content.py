@@ -4,8 +4,8 @@ Builds a throwaway content.db from content/ (on its own, or over the downloaded 
 --full) using the importer itself, then runs each local solution in each of its languages in the
 runner sandbox. Run inside the app container, where the runner is reachable:
 
-    docker compose exec -T app python -m localcode.tools.validate_content          # what CI runs
-    docker compose exec -T app python -m localcode.tools.validate_content --full   # also upstream tests
+    docker compose exec -T -u localcode app python -m localcode.tools.validate_content          # what CI runs
+    docker compose exec -T -u localcode app python -m localcode.tools.validate_content --full   # also upstream tests
 """
 
 import argparse

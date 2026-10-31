@@ -7,7 +7,7 @@ shipped as localcode/data/excluded_cases.json and applied by the importer.
 
 Run inside the app container (it needs the runner and an imported content.db):
 
-    docker compose exec app python -m localcode.tools.validate_cases /data/excluded_cases.json
+    docker compose exec -u localcode app python -m localcode.tools.validate_cases /data/excluded_cases.json
 """
 
 import argparse
