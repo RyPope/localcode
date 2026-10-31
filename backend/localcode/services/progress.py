@@ -68,11 +68,13 @@ def _week_start(d: date) -> date:
 
 
 def stats() -> Stats:
-    """Totals by difficulty, first-accepted problems per week, and coverage by topic and company."""
+    """Totals by difficulty, first-accepted problems per week, coverage by topic and company, and every
+    solved problem."""
     with content_session() as con:
         firsts = con.execute(
-            "select s.slug, min(s.created_at) as at, p.difficulty, p.tags from u.submissions s "
-            "join problems p on p.slug = s.slug where s.verdict = 'Accepted' group by s.slug"
+            "select s.slug, min(s.created_at) as at, p.frontend_id, p.title, p.difficulty, p.tags, "
+            "json_group_array(distinct s.lang) as langs from u.submissions s "
+            "join problems p on p.slug = s.slug where s.verdict = 'Accepted' group by s.slug order by at desc"
         ).fetchall()
         difficulty_totals = dict(con.execute("select difficulty, count(*) from problems group by 1").fetchall())
         topic_totals = Counter(
@@ -114,6 +116,17 @@ def stats() -> Stats:
             {"name": n, "solved": topic_solved[n], "total": t} for n, t in topic_totals.most_common(STATS_TOPICS)
         ],
         "by_company": by_company,
+        "solved": [
+            {
+                "slug": r["slug"],
+                "id": r["frontend_id"],
+                "title": r["title"],
+                "difficulty": r["difficulty"],
+                "first_accepted_at": r["at"],
+                "langs": sorted(json.loads(r["langs"])),
+            }
+            for r in firsts
+        ],
     }
 
 

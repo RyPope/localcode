@@ -581,6 +581,24 @@ export interface components {
             /** Title */
             title: string;
         };
+        /** SolvedProblem */
+        SolvedProblem: {
+            /**
+             * Difficulty
+             * @enum {string}
+             */
+            difficulty: "Easy" | "Medium" | "Hard";
+            /** First Accepted At */
+            first_accepted_at: string;
+            /** Id */
+            id: number | null;
+            /** Langs */
+            langs: ("python" | "java" | "cpp" | "kotlin")[];
+            /** Slug */
+            slug: string;
+            /** Title */
+            title: string;
+        };
         /** Stats */
         Stats: {
             /** By Company */
@@ -589,6 +607,8 @@ export interface components {
             by_topic: components["schemas"]["TopicProgress"][];
             /** Since */
             since: string | null;
+            /** Solved */
+            solved: components["schemas"]["SolvedProblem"][];
             /** Solved By Week */
             solved_by_week: components["schemas"]["WeekCount"][];
             totals: components["schemas"]["DifficultyCounts"];
