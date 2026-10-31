@@ -2,7 +2,7 @@
 import { loader } from "@monaco-editor/react";
 import type { Lang } from "./api";
 import * as monaco from "monaco-editor";
-import EditorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
+import EditorWorker from "monaco-editor/editor/editor.worker?worker";
 
 self.MonacoEnvironment = { getWorker: () => new EditorWorker() };
 
