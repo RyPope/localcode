@@ -14,6 +14,10 @@ All notable changes are documented here. The format follows [Keep a Changelog](h
 - The Progress page lists every solved problem, with when it was first accepted and in which languages; the solved counts link to the filtered problem list.
 - **Refresh content** never removes problems, solutions or test cases that an earlier import had.
 
+### Fixed
+
+- `LOCALCODE_ALLOWED_HOSTS` set when starting Docker Compose now reaches the app, so it can be served under another host name as the README describes.
+
 ### Security
 
 - The runner has no network; the app reaches it over a group-restricted Unix socket.
