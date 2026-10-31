@@ -13,7 +13,7 @@ Everyone taking part is expected to follow the [Code of Conduct](CODE_OF_CONDUCT
 You need Docker (with Compose v2), Python 3.12, Node 22 and `make`.
 
 ```bash
-git clone https://github.com/ryanpope/localcode.git && cd localcode
+git clone https://github.com/RyPope/localcode.git && cd localcode
 make setup     # Python venv in backend/.venv + web dependencies
 make up        # full stack at http://localhost:4173 (first run imports ~200 MB of data)
 make dev-web   # optional: hot-reloading UI on http://localhost:5173 against the running API
