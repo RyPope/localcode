@@ -67,7 +67,7 @@ def grade_run(arg_lists: list[list[Any]], expected: list[Any], res: RunnerResult
     for i, (args, exp) in enumerate(zip(arg_lists, expected, strict=False)):
         r = res["results"][i] if i < len(res["results"]) else None
         if r and r.get("ok"):
-            passed = exp is not None and judge(exp, r["value"], mode)
+            passed = exp is not None and judge(exp, r["value"], mode, args)
             grade.cases.append(
                 RunCase(
                     args,
@@ -111,7 +111,7 @@ def grade_submission(cases: list[Case], res: RunnerResult, mode: str) -> SubmitG
         return grade
     for i, case in enumerate(cases):
         r = res["results"][i] if i < len(res["results"]) else None
-        if r and r.get("ok") and judge(case["expected"], r["value"], mode):
+        if r and r.get("ok") and judge(case["expected"], r["value"], mode, case["args"]):
             grade.passed += 1
             continue
         if r and r.get("ok"):

@@ -28,7 +28,7 @@ title: Longest Vowel Run
 difficulty: Easy          # Easy, Medium or Hard
 tags: [String]            # topics, as shown in the filter list
 id: 9001                  # optional problem number; leave it out for new problems
-compare: exact            # optional: exact (default) or any_order
+compare: exact            # optional: exact (default), any_order, any_order_deep or each_any_order
 ---
 The statement, in Markdown. Use $...$ for math.
 ```

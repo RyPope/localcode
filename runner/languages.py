@@ -16,7 +16,7 @@ CASES, RESULTS = "cases.json", "results.jsonl"
 # Implicit imports share the user's first line so reported line numbers match the editor.
 JAVA_IMPORTS = (
     "import java.util.*; import java.util.function.*; import java.util.stream.*; import java.math.*; "
-    "import javafx.util.Pair; "
+    "import java.text.*; import javafx.util.Pair; "
 )
 KOTLIN_IMPORTS = "import java.util.*; import kotlin.math.*; "
 JVM_CLASSPATH = ".:/opt/lib/gson.jar:/opt/lib/driver.jar"

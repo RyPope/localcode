@@ -47,7 +47,7 @@ Every runnable problem stores:
 - `ret`: the abstract return type.
 - `cases`: `[{args: [...], expected: ...}]` as JSON. Linked lists and trees use LeetCode's array and level-order forms. A null node result is `[]`.
 - `examples`: argument lists parsed from the statement, used by Run.
-- `compare_mode`: `exact`, or `any_order` when the statement says "in any order".
+- `compare_mode`: how an answer is judged (`localcode/judging/compare.py`): `exact`; `any_order` when the statement says "in any order"; `any_order_deep` or `each_any_order` for nested answers (curated in `judging/answer_modes.py`); or `checker:<slug>`, a per-problem function in `judging/checkers/` that validates the answer against the inputs, for problems that accept several valid answers.
 
 Run computes expected values by executing the dataset's Python reference solution. They're cached per input, keyed by the content version, so a re-import invalidates them.
 

@@ -352,3 +352,24 @@ def test_local_solutions_kept_when_whole_folder_removed(tmp_path):
     rebuild(tmp_path, CONTENT)
     con, _ = rebuild(tmp_path, tmp_path / "empty")
     assert [r[0] for r in con.execute("select title from solutions where slug='count-vowels'")] == ["Single scan"]
+
+
+def test_checker_and_curated_modes_set_compare_mode(tmp_path, monkeypatch):
+    from localcode.judging import answer_modes, checkers
+
+    monkeypatch.setitem(checkers.CHECKERS, "pair-sum", lambda args, expected, actual: True)
+    monkeypatch.setitem(answer_modes.MODES, "tree-mirror", "any_order_deep")
+    con, _ = build_with_content(tmp_path, tmp_path / "none")
+    modes = dict(con.execute("select slug, compare_mode from problems"))
+    assert modes["pair-sum"] == "checker:pair-sum"
+    assert modes["tree-mirror"] == "any_order_deep"
+    assert modes["list-reverse"] == "exact"
+
+
+def test_local_compare_overrides_the_registry(tmp_path, monkeypatch):
+    from localcode.judging import checkers
+
+    monkeypatch.setitem(checkers.CHECKERS, "pair-sum", lambda args, expected, actual: True)
+    content = write_content(tmp_path / "c", "pair-sum", {"problem.md": "---\ncompare: any_order\n---\n"})
+    con, _ = build_with_content(tmp_path, content)
+    assert con.execute("select compare_mode from problems where slug='pair-sum'").fetchone()[0] == "any_order"

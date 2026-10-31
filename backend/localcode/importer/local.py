@@ -14,7 +14,7 @@ from markdown_it import MarkdownIt
 
 SLUG_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 DIFFICULTIES = ("Easy", "Medium", "Hard")
-COMPARE_MODES = ("exact", "any_order")
+COMPARE_MODES = ("exact", "any_order", "any_order_deep", "each_any_order")
 LANG_TAGS = {"python": "python", "python3": "python", "java": "java", "cpp": "cpp", "c++": "cpp", "kotlin": "kotlin"}
 PROBLEM_KEYS = {"title", "difficulty", "tags", "id", "compare"}
 SOLUTION_KEYS = {"title"}
