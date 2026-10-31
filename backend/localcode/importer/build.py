@@ -16,6 +16,7 @@ from localcode.importer.dataset import DatasetProblem, load_rows, params_from_st
 from localcode.importer.doocs import DoocsProblem, iter_problem_dirs, parse_problem_dir
 from localcode.importer.local import LocalProblem, load_local
 from localcode.importer.signatures import cpp_starter, java_starter, kotlin_starter, parse_cpp_sig, parse_java_sig
+from localcode.judging.answer_modes import answer_mode
 
 Progress = Callable[[str, int, int], None]
 EXCLUDED_CASES = Path(__file__).resolve().parent.parent / "data" / "excluded_cases.json"
@@ -91,6 +92,7 @@ def _problem_rows(
     else:
         ref_python = method = params = ret = None
         compare_mode = "exact"
+    compare_mode = answer_mode(slug, compare_mode)
     if local and local.compare_mode:
         compare_mode = local.compare_mode
     nparams = len(params) if params is not None else None

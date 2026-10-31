@@ -59,7 +59,7 @@ def _run(execute: Execute, p: sqlite3.Row, lang: str, code: str, cases: list[dic
         r = results[i]
         if not r.get("ok"):
             return f"raised on case {i + 1}: args {_short(case['args'])}: {str(r.get('error', ''))[:300]}"
-        if not judge(case["expected"], r["value"], p["compare_mode"]):
+        if not judge(case["expected"], r["value"], p["compare_mode"], case["args"]):
             return (
                 f"fails case {i + 1}: args {_short(case['args'])}, expected {_short(case['expected'])}, "
                 f"got {_short(r['value'])}"

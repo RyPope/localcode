@@ -70,7 +70,9 @@ def _outcomes(
         if res["compile_error"]:
             return [False] * len(cases)
         for i, r in zip(chunk, res["results"], strict=False):
-            ok[i] = bool(r.get("ok")) and judge(cases[i]["expected"], r["value"], problem["compare_mode"])
+            ok[i] = bool(r.get("ok")) and judge(
+                cases[i]["expected"], r["value"], problem["compare_mode"], cases[i]["args"]
+            )
         done = len(res["results"])
         if done < len(chunk):  # chunk[done] hung or crashed the process; retry what followed it
             pending = chunk[done + 1 :]

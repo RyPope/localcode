@@ -52,3 +52,22 @@ def test_run_timeout_marks_missing_cases():
     g = grade_run([[1], [2]], [1, 2], res([1], timed_out=True), "exact")
     assert g.verdict == "Time Limit Exceeded"
     assert g.cases[1].ok is False
+
+
+def _register_double_checker(monkeypatch):
+    from localcode.judging import checkers
+
+    monkeypatch.setitem(checkers.CHECKERS, "test-double", lambda args, expected, actual: actual == args[0] * 2)
+
+
+def test_submission_passes_inputs_to_checkers(monkeypatch):
+    _register_double_checker(monkeypatch)
+    cases = [{"args": [n], "expected": -1} for n in (1, 2, 3)]
+    assert grade_submission(cases, res([2, 4, 6]), "checker:test-double").verdict == "Accepted"
+    assert grade_submission(cases, res([2, 5, 6]), "checker:test-double").verdict == "Wrong Answer"
+
+
+def test_run_passes_inputs_to_checkers(monkeypatch):
+    _register_double_checker(monkeypatch)
+    g = grade_run([[1], [2]], [-1, -1], res([2, 3]), "checker:test-double")
+    assert [c.ok for c in g.cases] == [True, False]
