@@ -43,7 +43,7 @@ make dev-web   # optional: hot-reloading UI on http://localhost:5173 against the
 
 ### Conventions
 
-- **Tests first.** Behaviour changes come with a test that fails without the change. Backend tests use small hand-written fixtures in `backend/tests/fixtures`. **Never commit real problem statements, tests or solutions.**
+- **Tests first.** Behaviour changes come with a test that fails without the change. Backend tests use small hand-written fixtures in `backend/tests/fixtures`. **Never commit problem statements, tests or solutions copied from elsewhere** (fixtures or `content/`).
 - **Keep layers apart.** Routes stay thin and logic lives in `services/`. Grading rules live in `judging/verdicts.py` and are pure. Anything user-facing that can fail raises `ServiceError`.
 - **Runner changes** need a test in `runner/tests` for every language they affect.
 - **API contract.** Responses are `TypedDict`s in `backend/localcode/services/models.py`. After changing one, run `make api-types` and commit `web/openapi.json` and `web/src/generated/`; CI fails if they're stale. Never edit generated files by hand.
@@ -52,8 +52,13 @@ make dev-web   # optional: hot-reloading UI on http://localhost:5173 against the
 - **Commits** follow [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `refactor:`, `docs:`, `chore:`).
 - **UI changes** include before/after screenshots in the PR. If README images change, regenerate them with `make screenshots`.
 
+## Adding problems and solutions
+
+New problems, extra solutions and corrected test cases go in [`content/`](content/README.md) as Markdown and JSON files; that page describes the format. Run `make validate-content` with the stack up before opening the PR. CI runs the same check, which runs every solution against its tests in the sandbox. Contribute only material you wrote yourself.
+
 ## Good first contributions
 
+- **Write solutions** for problems the upstream data has few of (Kotlin especially), in `content/`.
 - **Triage wrong verdicts.** Reproduce a reported case and, if the test case itself is invalid, add it to the exclusion list.
 - **Kotlin reference solutions.** The upstream dataset has very few, so the Solutions tab falls back to Java. Contributing Kotlin solutions upstream to [doocs/leetcode](https://github.com/doocs/leetcode) helps everyone.
 - **Special judges** for problems that accept several valid answers (for example "return any valid arrangement").

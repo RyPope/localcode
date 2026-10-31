@@ -19,16 +19,25 @@ Data lives in the `localcode-data` volume mounted at `/data`:
 config.py            paths, upstream sources (+ mirrors), execution limits (single source of truth)
 db.py                schemas, user.db migrations, content_session() (user.db attached as `u`), user_session()
 importer/            dataset.py · doocs.py · signatures.py · companies.py · case_filter.py
-                     fetch.py (mirror fallback, cached copies) · build.py (merge → content.db)
+                     local.py (repo-kept content/) · fetch.py (mirror fallback, cached copies)
+                     build.py (merge → content.db, carrying forward anything the last import had)
                      pipeline.py (fetch + build) · manager.py (background job) · __main__.py (CLI)
 judging/             compare.py (equality rules) · verdicts.py (pure grading) · kwargs.py
                      types.py (runner wire types) · runner_client.py (HTTP)
 services/            problems · companies · judge · progress · system · models (response types) · errors
 api/                 app.py (factory) · routes/ (one router per domain) · schemas.py (requests) · deps.py · static.py
-tools/               validate_cases · openapi · smoke · sample_refs (maintainer tools)
+tools/               validate_content · validate_cases · openapi · smoke · sample_refs
 ```
 
 Dependencies point one way: `api → services → (judging, importer, db)`, and `importer → (judging, db)`; nothing below `services` imports from it. Services raise `ServiceError(status, message)`, and only the API layer turns that into an HTTP response. `judging.verdicts` is pure, so verdict rules are unit-tested without a runner.
+
+## Content merge
+
+An import builds a new `content.db` in three steps:
+
+1. **Upstream.** The dataset, doocs and company sources are joined by slug.
+2. **Repo content.** `content/problems/<slug>/` (mounted read-only at `/content`) is merged on top, and its fields win. A local Python solution defines the signature of a problem that is new, has no runnable upstream version, or was local in the previous import. Local cases replace upstream cases with the same args. Local solutions are appended. Rows record their `source` (`upstream` or `local`).
+3. **Carry-forward.** Anything in the previous `content.db` that the new build lacks is copied in: whole problems, solutions (by title and source), and test cases (by args). Carried cases still have to fit the current signature. Empty metadata and a lost signature are filled from the previous import too. A refresh therefore never removes content; only `docker compose down -v` does.
 
 ## Test format
 
