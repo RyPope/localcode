@@ -31,7 +31,7 @@ export function useWorkspace(slug: string) {
   const [runResult, setRunResult] = useState<RunResult | null>(null);
   const [submission, setSubmission] = useState<SubmitResult | null>(null);
 
-  const saver = useRef<DraftSaver>();
+  const saver = useRef<DraftSaver | undefined>(undefined);
   saver.current ??= new DraftSaver({
     save: async (l, c, opts) => {
       await api.saveDraft(slug, l as Lang, c, opts);
