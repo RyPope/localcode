@@ -67,11 +67,13 @@ def test_solution_only_overlay_checks_signature_parses(tmp_path):
 
 
 def test_repo_examples_pass_offline_checks():
+    """Every problem in the repo's content/ parses and is runnable (the fake runner echoes the expected values)."""
     root = Path(__file__).resolve().parents[2] / "content"
     answers = {
         json.dumps(c["args"]): c["expected"]
-        for c in json.loads((root / "problems/longest-vowel-run/tests.json").read_text())
+        for tests in sorted(root.glob("problems/*/tests.json"))
+        for c in json.loads(tests.read_text())
     }
     runner = Runner(answers)
     assert validate(root, execute=runner) == []
-    assert sorted(runner.langs) == ["cpp", "java", "kotlin", "python"]
+    assert set(runner.langs) == {"cpp", "java", "kotlin", "python"}
