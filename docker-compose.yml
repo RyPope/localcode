@@ -12,6 +12,8 @@ services:
       - ./content:/content:ro
     environment:
       LOCALCODE_RUNNER: unix:/run/localcode
+      # Host names the app answers to (comma-separated); add one to reach it by another name.
+      LOCALCODE_ALLOWED_HOSTS: ${LOCALCODE_ALLOWED_HOSTS:-localhost,127.0.0.1,::1}
       # Optional fallbacks if an upstream disappears (comma-separated):
       LOCALCODE_DATASET_MIRRORS: ${LOCALCODE_DATASET_MIRRORS:-}
       LOCALCODE_DOOCS_MIRRORS: ${LOCALCODE_DOOCS_MIRRORS:-}
