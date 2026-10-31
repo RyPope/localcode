@@ -187,3 +187,16 @@ def test_java_null_for_primitive_is_a_clear_error(run):
     )
     assert r["results"][0]["ok"] is False
     assert "null is not a valid int" in r["results"][0]["error"]
+
+
+def test_java_text_is_available_without_import(run):
+    code = (
+        "class Solution {\n"
+        "    public String fmt(double x) {\n"
+        '        return new DecimalFormat("#0.000").format(x);\n'
+        "    }\n"
+        "}\n"
+    )
+    r = run("java", code, "fmt", [{"name": "x", "type": "float"}], [[1.5]])
+    assert r["compile_error"] is None, r
+    assert r["results"][0]["value"] == "1.500"
