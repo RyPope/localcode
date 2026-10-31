@@ -68,7 +68,7 @@ Interview prep sites lock the most useful features behind a subscription: compan
 You need [Docker](https://docs.docker.com/get-docker/) with Compose v2, with at least 4 GB of memory available to it.
 
 ```bash
-git clone https://github.com/<you>/localcode.git
+git clone https://github.com/ryanpope/localcode.git
 cd localcode
 docker compose up -d --build
 ```
