@@ -141,3 +141,13 @@ def test_exclusions_without_a_trusted_reference_need_review():
     assert needs_review(most_fail)
     assert not needs_review({"java": passing_all_but(10, 1), "cpp": passing_all_but(10, 1)})
     assert not needs_review({"java": passing_all_but(10, *range(8))})  # nothing excluded
+
+
+def test_cases_whose_own_answer_fails_the_checker_are_unjudgeable(monkeypatch):
+    from localcode.judging import checkers
+    from localcode.tools.validate_cases import unjudgeable_cases
+
+    monkeypatch.setitem(checkers.CHECKERS, "test-even", lambda args, expected, actual: actual % 2 == 0)
+    cases = [{"args": [1], "expected": 2}, {"args": [2], "expected": 3}, {"args": [3], "expected": 4}]
+    assert unjudgeable_cases(cases, "checker:test-even") == {1}
+    assert unjudgeable_cases(cases, "exact") == set()

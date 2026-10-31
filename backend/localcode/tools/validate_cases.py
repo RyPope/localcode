@@ -60,6 +60,14 @@ def cases_to_exclude(outcomes: dict[str, list[bool]]) -> set[int]:
     return {i for i in range(len(trusted[0])) if not any(o[i] for o in trusted) or not all(o[i] for o in confident)}
 
 
+def unjudgeable_cases(cases: list[dict], mode: str) -> set[int]:
+    """Cases whose recorded answer fails the problem's checker: no valid answer exists, or the record is
+    wrong. Either way no submission can be judged fairly on them, with or without a reference."""
+    if not mode.startswith(CHECKER_PREFIX):
+        return set()
+    return {i for i, c in enumerate(cases) if not judge(c["expected"], c["expected"], mode, c["args"])}
+
+
 def needs_review(outcomes: dict[str, list[bool]]) -> bool:
     """Cases are excluded although no reference passes TRUST_THRESHOLD of the suite (agreement only).
 
@@ -145,7 +153,7 @@ def _validate_one(slug: str, runner_url: str) -> tuple[list[str], dict[str, str]
     }
     outcomes = {lang: ok for lang, (ok, _) in results.items()}
     order_only = sum(any(flags) for flags in zip(*(o for _, o in results.values()), strict=True)) if results else 0
-    bad = cases_to_exclude(outcomes)
+    bad = cases_to_exclude(outcomes) | unjudgeable_cases(cases, p["compare_mode"])
     summary = {k: f"{sum(o)}/{len(o)}" for k, o in outcomes.items()}
     return sorted(case_key(cases[i]["args"]) for i in bad), summary, order_only, needs_review(outcomes)
 
