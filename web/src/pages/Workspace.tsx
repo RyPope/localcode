@@ -34,8 +34,16 @@ export default function Workspace() {
   const ws = useWorkspace(slug);
   const [left, setLeft] = useState<LeftTab>("description");
   const [fontSize, setFontSize] = useState<number>(() => pref("fontSize", 14));
-  const cols = useSplit("split.cols", 0.42, "x", 0.25, 0.7);
-  const rows = useSplit("split.rows", 0.6, "y", 0.2, 0.85);
+  const {
+    size: colSize,
+    container: colsContainer,
+    onPointerDown: onColsDrag,
+  } = useSplit("split.cols", 0.42, "x", 0.25, 0.7);
+  const {
+    size: rowSize,
+    container: rowsContainer,
+    onPointerDown: onRowsDrag,
+  } = useSplit("split.rows", 0.6, "y", 0.2, 0.85);
   const status = useQuery({ queryKey: ["status"], queryFn: api.status });
   const companyCtx = useQuery({
     queryKey: ["company", company, window],
@@ -64,8 +72,8 @@ export default function Workspace() {
   };
 
   return (
-    <div ref={cols.container} className={styles.workspace}>
-      <section className={styles.left} style={{ "--cols": `${cols.size * 100}%` } as CSSProperties}>
+    <div ref={colsContainer} className={styles.workspace}>
+      <section className={styles.left} style={{ "--cols": `${colSize * 100}%` } as CSSProperties}>
         <div className="tabs" role="tablist">
           {LEFT_TABS.map((t) => (
             <button
@@ -106,13 +114,13 @@ export default function Workspace() {
         role="separator"
         aria-orientation="vertical"
         aria-label="Resize panels"
-        onPointerDown={cols.onPointerDown}
+        onPointerDown={onColsDrag}
       >
         <span />
       </div>
 
-      <section ref={rows.container} className={styles.right}>
-        <div className={styles.editorPane} style={{ "--rows": `${rows.size * 100}%` } as CSSProperties}>
+      <section ref={rowsContainer} className={styles.right}>
+        <div className={styles.editorPane} style={{ "--rows": `${rowSize * 100}%` } as CSSProperties}>
           <EditorToolbar
             langs={langs}
             lang={ws.lang}
@@ -145,7 +153,7 @@ export default function Workspace() {
           role="separator"
           aria-orientation="horizontal"
           aria-label="Resize editor"
-          onPointerDown={rows.onPointerDown}
+          onPointerDown={onRowsDrag}
         >
           <span />
         </div>

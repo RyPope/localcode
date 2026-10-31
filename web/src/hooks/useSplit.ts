@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { pref, setPref } from "../theme";
 
 /**
@@ -7,12 +7,13 @@ import { pref, setPref } from "../theme";
  */
 export function useSplit(key: string, initial: number, axis: "x" | "y", min = 0.2, max = 0.8) {
   const [size, setSize] = useState<number>(() => pref(key, initial));
-  const container = useRef<HTMLDivElement>(null);
+  // A callback ref kept in state, so render only ever reads plain values.
+  const [element, container] = useState<HTMLElement | null>(null);
 
   const onPointerDown = useCallback(
     (e: React.PointerEvent) => {
       e.preventDefault();
-      const box = container.current?.getBoundingClientRect();
+      const box = element?.getBoundingClientRect();
       if (!box) return;
       let last = size;
       const move = (ev: PointerEvent) => {
@@ -30,7 +31,7 @@ export function useSplit(key: string, initial: number, axis: "x" | "y", min = 0.
       window.addEventListener("pointermove", move);
       window.addEventListener("pointerup", up);
     },
-    [axis, key, max, min, size],
+    [axis, element, key, max, min, size],
   );
 
   return { size, container, onPointerDown };
