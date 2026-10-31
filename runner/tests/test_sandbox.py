@@ -95,3 +95,75 @@ def test_memory_limit_comes_from_the_request(url):
 def test_shared_memory_does_not_survive_a_run(run):
     assert value(run("python", py("open('/dev/shm/leftover', 'w').write('x')\nreturn 1"), "f", INT, [[1]])) == 1
     assert value(run("python", py("return int(os.path.exists('/dev/shm/leftover'))"), "f", INT, [[1]])) == 0
+
+
+IPC_SETUP = """
+import ctypes
+libc = ctypes.CDLL(None, use_errno=True)
+IPC_PRIVATE, IPC_CREAT = 0, 0o1000
+"""
+
+
+def test_ipc_objects_do_not_survive_a_run(run):
+    create = py(
+        IPC_SETUP
+        + """
+ok = libc.shmget(IPC_PRIVATE, 4096, IPC_CREAT | 0o600) >= 0
+ok &= libc.msgget(IPC_PRIVATE, IPC_CREAT | 0o600) >= 0
+ok &= libc.semget(IPC_PRIVATE, 1, IPC_CREAT | 0o600) >= 0
+ok &= libc.mq_open(b"/leftover", os.O_CREAT | os.O_RDWR, 0o600, None) >= 0
+return int(ok)
+"""
+    )
+    assert value(run("python", create, "f", INT, [[1]])) == 1
+    count = py("""
+mine = 0
+for kind in ("shm", "msg", "sem"):
+    with open(f"/proc/sysvipc/{kind}") as fh:
+        header = fh.readline().split()
+        uid = header.index("uid")
+        mine += sum(int(line.split()[uid]) == os.getuid() for line in fh)
+return mine + len(os.listdir("/dev/mqueue"))
+""")
+    assert value(run("python", count, "f", INT, [[1]])) == 0
+
+
+def test_shared_memory_segments_are_size_capped(run):
+    big = py(IPC_SETUP + "return int(libc.shmget(IPC_PRIVATE, 64 * 1024 * 1024, IPC_CREAT | 0o600) >= 0)")
+    assert value(run("python", big, "f", INT, [[1]])) == 0
+
+
+def test_stderr_is_captured(run):
+    r = run("python", py("import sys\nprint('to stderr', file=sys.stderr)\nreturn 1"), "f", INT, [[1]])
+    assert value(r) == 1
+    assert "to stderr" in r["stderr"]
+
+
+def test_replacing_a_log_with_a_symlink_cannot_read_root_files(run):
+    swap = py("""
+for name in ("stderr.log", "stdout.log"):
+    if os.path.lexists(name):
+        os.unlink(name)
+    os.symlink("/etc/shadow", name)
+return 1
+""")
+    r = run("python", swap, "f", INT, [[1]])
+    assert "root:" not in r["stderr"]
+
+
+def test_results_are_not_read_through_a_symlink(tmp_path):
+    import os
+    import shutil
+
+    import execute
+    import sandbox
+
+    secret = tmp_path / "secret.jsonl"
+    secret.write_text('{"ok": true, "value": "secret"}\n')
+    os.chmod(secret, 0o600)
+    workdir = sandbox.make_workdir()
+    try:
+        (workdir / "results.jsonl").symlink_to(secret)
+        assert execute._read_results(workdir / "results.jsonl") == []
+    finally:
+        shutil.rmtree(workdir)

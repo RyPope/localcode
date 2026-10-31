@@ -51,7 +51,7 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - run: docker build --target test -t localcode-runner-test runner
-      - run: docker run --rm --init localcode-runner-test
+      - run: docker run --rm --init --sysctl kernel.shmmax=16777216 --sysctl kernel.shmall=4096 localcode-runner-test
 
   images:
     runs-on: ubuntu-24.04

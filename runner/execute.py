@@ -13,9 +13,8 @@ MAX_MEMORY_MB = 2048  # the app chooses the limit; this only guards against absu
 MAX_LOG = 8000
 
 
-def _log(path: Path, workdir: Path) -> str:
-    text = path.read_text(errors="replace")[-MAX_LOG:] if path.exists() else ""
-    return text.replace(str(workdir) + "/", "")
+def _log(text: str, workdir: Path) -> str:
+    return text[-MAX_LOG:].replace(str(workdir) + "/", "")
 
 
 def _compile(cmd: list[str], workdir: Path) -> str | None:
@@ -24,7 +23,7 @@ def _compile(cmd: list[str], workdir: Path) -> str | None:
     if outcome.timed_out:
         return "Compilation timed out"
     if outcome.exit_code != 0:
-        output = _log(workdir / "stderr.log", workdir) + _log(workdir / "stdout.log", workdir)
+        output = _log(outcome.stderr, workdir) + _log(outcome.stdout, workdir)
         return output.strip() or "Compilation failed"
     return None
 
@@ -32,12 +31,11 @@ def _compile(cmd: list[str], workdir: Path) -> str | None:
 def _read_results(path: Path) -> list[dict]:
     """Complete JSON lines only: a process killed mid-write leaves a partial last line."""
     lines: list[dict] = []
-    if path.exists():
-        for raw in path.read_text(errors="replace").splitlines():
-            try:
-                lines.append(json.loads(raw))
-            except json.JSONDecodeError:
-                break
+    for raw in sandbox.read_output(path).splitlines():
+        try:
+            lines.append(json.loads(raw))
+        except json.JSONDecodeError:
+            break
     return lines
 
 
@@ -68,7 +66,7 @@ def execute(req: dict) -> dict:
             timed_out=outcome.timed_out,
             memory_kb=outcome.max_rss_kb,
             exit_code=outcome.exit_code if outcome.exit_code is not None else -9,
-            stderr=_log(workdir / "stderr.log", workdir),
+            stderr=_log(outcome.stderr, workdir),
         )
         return result
     finally:

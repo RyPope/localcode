@@ -40,6 +40,10 @@ services:
     tmpfs:
       - /tmp:exec,size=512m
     shm_size: 16m
+    # Caps SysV shared memory, which counts against mem_limit and outlives the process that made it.
+    sysctls:
+      kernel.shmmax: 16777216  # bytes per segment
+      kernel.shmall: 4096  # pages in total
     security_opt: [no-new-privileges:true]
     # The root server needs these to prepare each sandbox, drop to the sandbox user, and clean up.
     cap_drop: [ALL]

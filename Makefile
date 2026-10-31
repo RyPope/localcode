@@ -25,7 +25,7 @@ test-backend: ## Backend unit tests
 
 test-runner: ## Runner tests (inside the pinned toolchain image)
 	docker build --target test -t localcode-runner-test runner
-	docker run --rm --init localcode-runner-test
+	docker run --rm --init --sysctl kernel.shmmax=16777216 --sysctl kernel.shmall=4096 localcode-runner-test
 
 test-web: ## Web typecheck, unit tests and production build
 	npm --prefix web run typecheck
