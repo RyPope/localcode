@@ -17,4 +17,5 @@ export const ICONS = {
   right: "M9 18l6-6-6-6",
   plus: "M12 5v14M5 12h14",
   x: "M6 6l12 12M18 6L6 18",
+  filter: "M4 5h16l-6 7v6l-4 2v-8z",
 };

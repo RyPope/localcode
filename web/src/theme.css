@@ -782,6 +782,45 @@ p.note {
   right: 8px;
   top: 7px;
 }
+.hdr-search {
+  width: 280px;
+  min-width: 0;
+}
+
+/* Narrow windows: the header drops its extras, and the search takes whatever room is left. */
+@media (max-width: 900px) {
+  .hdr-host {
+    display: none;
+  }
+}
+@media (max-width: 760px) {
+  .hdr {
+    gap: 8px 12px;
+    padding: 6px 12px;
+  }
+  .hdr .spacer {
+    display: none;
+  }
+  .hdr-search {
+    flex: 1;
+    width: auto;
+  }
+  .hdr-search .kbd {
+    display: none;
+  }
+  .page {
+    padding: 16px 16px 32px;
+  }
+}
+@media (max-width: 560px) {
+  .logo-text {
+    display: none;
+  }
+  .hdr-search {
+    order: 1;
+    flex-basis: 100%;
+  }
+}
 .ptable .empty {
   text-align: center;
   padding: 24px;
@@ -801,6 +840,33 @@ p.note {
   display: flex;
   gap: 4px;
   overflow: hidden;
+}
+
+/* Narrow windows: topics, then acceptance, give way so titles stay readable. */
+@media (max-width: 900px) {
+  .prow {
+    grid-template-columns: 32px minmax(0, 1fr) 80px 84px;
+    min-width: 0;
+  }
+  .ptable.with-freq .prow {
+    grid-template-columns: 32px minmax(0, 1fr) 80px 84px 120px;
+  }
+  .prow .col-topics,
+  .ptable:not(.with-freq) .col-freq {
+    display: none;
+  }
+}
+@media (max-width: 560px) {
+  .prow {
+    grid-template-columns: 28px minmax(0, 1fr) 68px;
+    padding: 0 10px;
+  }
+  .ptable.with-freq .prow {
+    grid-template-columns: 28px minmax(0, 1fr) 68px 84px;
+  }
+  .prow .col-acc {
+    display: none;
+  }
 }
 .picker-list {
   display: flex;

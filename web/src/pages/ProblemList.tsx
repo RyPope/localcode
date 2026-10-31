@@ -1,11 +1,13 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api";
 import CompanyPicker from "../components/CompanyPicker";
 import { SearchInput } from "../components/layout";
 import ProblemTable from "../components/ProblemTable";
-import { CompanyBadge, Pager, Segmented, WindowToggle } from "../components/ui";
+import { CompanyBadge, Icon, Pager, Segmented, WindowToggle } from "../components/ui";
 import { useQueryParams } from "../hooks/useQueryParams";
+import { ICONS } from "../lib/icons";
 import { DIFFICULTY_FILTERS, DIFFICULTY_OPTIONS, oneOf, STATUS_FILTERS, WINDOWS } from "../lib/filters";
 import styles from "./ProblemList.module.css";
 
@@ -44,12 +46,24 @@ export default function ProblemList() {
   const counts = list.data?.counts;
   const solved = counts ? counts.easy[0] + counts.medium[0] + counts.hard[0] : 0;
   const total = counts ? counts.easy[1] + counts.medium[1] + counts.hard[1] : 0;
+  const activeFilters = [get("q"), company, difficulty, status].filter(Boolean).length + tags.length;
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const toggleTag = (name: string, on: boolean) =>
     set({ tags: (on ? [...tags, name] : tags.filter((t) => t !== name)).join(",") });
 
   return (
     <div className={styles.layout}>
-      <aside className={styles.rail}>
+      <button
+        className={`btn ${styles.filtersToggle}`}
+        aria-expanded={filtersOpen}
+        aria-controls="filters"
+        onClick={() => setFiltersOpen((open) => !open)}
+      >
+        <Icon d={ICONS.filter} />
+        {filtersOpen ? "Hide filters" : "Filters"}
+        {activeFilters > 0 && <span className="mono muted">{activeFilters}</span>}
+      </button>
+      <aside id="filters" className={`${styles.rail} ${filtersOpen ? styles.open : ""}`}>
         <SearchInput id="search" label="Search problems" defaultValue={get("q")} onChange={(q) => set({ q })} />
         <CompanyPicker value={company} onChange={(c) => set({ company: c })} />
         <section className="stack">

@@ -39,11 +39,11 @@ export default function Header() {
 
   return (
     <header className="hdr">
-      <NavLink to="/" className="logo">
+      <NavLink to="/" className="logo" aria-label="localcode home">
         <span className="logo-mark">
           <Icon d={ICONS.logo} stroke={2.6} />
         </span>
-        localcode
+        <span className="logo-text">localcode</span>
       </NavLink>
       <nav aria-label="Primary">
         <NavLink className="navlink" to="/" end>
@@ -57,7 +57,7 @@ export default function Header() {
         </NavLink>
       </nav>
       <div className="spacer" />
-      <form onSubmit={jump}>
+      <form className="hdr-search" onSubmit={jump}>
         <SearchInput
           id="jump"
           label="Jump to problem"
@@ -65,7 +65,6 @@ export default function Header() {
           value={q}
           onChange={setQ}
           inputRef={input}
-          width={280}
           trailing={<span className="kbd">⌘K</span>}
         />
       </form>

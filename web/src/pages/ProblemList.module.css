@@ -2,7 +2,6 @@
   display: flex;
   flex: 1;
   min-height: 0;
-  flex-wrap: wrap;
 }
 .rail {
   width: 260px;
@@ -15,7 +14,7 @@
   background: var(--panel);
 }
 .main {
-  flex: 1 1 600px;
+  flex: 1;
   min-width: 0;
   padding: 20px 24px 32px;
   display: flex;
@@ -50,4 +49,34 @@
 .companyText {
   flex: 1;
   min-width: 160px;
+}
+.filtersToggle {
+  display: none;
+}
+
+/* Narrow windows: the filter rail folds into a panel above the list, opened from a button. */
+@media (max-width: 900px) {
+  .layout {
+    flex-direction: column;
+  }
+  .filtersToggle {
+    display: inline-flex;
+    align-self: flex-start;
+    margin: 16px 16px 0;
+  }
+  .rail {
+    display: none;
+    width: auto;
+    flex: none;
+    margin-top: 16px;
+    border-top: 1px solid var(--line);
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .rail.open {
+    display: flex;
+  }
+  .main {
+    padding: 16px 16px 32px;
+  }
 }

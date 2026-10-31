@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { type CSSProperties, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { api, LANG_LABEL, type Lang, type ProblemDetail } from "../api";
 import CodeEditor from "../components/CodeEditor";
@@ -65,7 +65,7 @@ export default function Workspace() {
 
   return (
     <div ref={cols.container} className={styles.workspace}>
-      <section className={styles.left} style={{ width: `${cols.size * 100}%` }}>
+      <section className={styles.left} style={{ "--cols": `${cols.size * 100}%` } as CSSProperties}>
         <div className="tabs" role="tablist">
           {LEFT_TABS.map((t) => (
             <button
@@ -112,7 +112,7 @@ export default function Workspace() {
       </div>
 
       <section ref={rows.container} className={styles.right}>
-        <div className={styles.editorPane} style={{ height: `${rows.size * 100}%` }}>
+        <div className={styles.editorPane} style={{ "--rows": `${rows.size * 100}%` } as CSSProperties}>
           <EditorToolbar
             langs={langs}
             lang={ws.lang}
@@ -149,7 +149,7 @@ export default function Workspace() {
         >
           <span />
         </div>
-        <div className={styles.fill}>
+        <div className={styles.tests}>
           <TestPanel
             tab={ws.tab}
             setTab={ws.setTab}
