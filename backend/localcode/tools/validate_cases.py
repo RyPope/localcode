@@ -1,9 +1,11 @@
 """Maintainer tool: find generated test cases that typed reference solutions reject.
 
 Runs the doocs Java and C++ reference solutions over every problem's suite and records cases that
-every *trusted* typed reference fails (a reference is trusted when it passes most of the suite).
-Those cases almost always violate the problem's constraints. The output is our own derived data,
-shipped as localcode/data/excluded_cases.json and applied by the importer.
+every *trusted* typed reference fails, or that one *confident* reference fails (see the thresholds).
+Those cases almost always violate the problem's constraints: a correct typed solution crashes or
+disagrees on them, while another language may get lucky (C++ reads out of bounds without crashing).
+The output is our own derived data, shipped as localcode/data/excluded_cases.json and applied by the
+importer.
 
 Run inside the app container (it needs the runner and an imported content.db):
 
@@ -25,17 +27,22 @@ from localcode.importer.case_filter import case_key
 from localcode.judging import runner_client
 from localcode.judging.compare import judge
 
+# A reference is trusted when it passes at least TRUST_THRESHOLD of a suite; trusted references that
+# agree on a failure exclude the case. A reference passing CONFIDENT_THRESHOLD excludes on its own.
 TRUST_THRESHOLD = 0.5
+CONFIDENT_THRESHOLD = 0.9
 TIMEOUT_MS = 30_000
 REFERENCE_LANGS = ("java", "cpp")
 
 
 def cases_to_exclude(outcomes: dict[str, list[bool]]) -> set[int]:
-    """Indices failed by every reference that passes at least TRUST_THRESHOLD of the suite."""
-    trusted = [o for o in outcomes.values() if o and sum(o) / len(o) >= TRUST_THRESHOLD]
+    """Indices failed by every trusted reference, or by any confident one."""
+    rates = {lang: sum(o) / len(o) for lang, o in outcomes.items() if o}
+    trusted = [outcomes[lang] for lang, rate in rates.items() if rate >= TRUST_THRESHOLD]
+    confident = [outcomes[lang] for lang, rate in rates.items() if rate >= CONFIDENT_THRESHOLD]
     if not trusted:
         return set()
-    return {i for i in range(len(trusted[0])) if not any(o[i] for o in trusted)}
+    return {i for i in range(len(trusted[0])) if not any(o[i] for o in trusted) or not all(o[i] for o in confident)}
 
 
 def _outcomes(
