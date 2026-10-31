@@ -58,3 +58,18 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - run: docker compose build app
+
+  # Every repo-kept problem parses and its solutions pass its tests in the real sandbox.
+  content:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - run: docker compose up -d --build
+      - name: Wait for the runner
+        run: |
+          for _ in $(seq 60); do
+            docker compose exec -T app python -c "from localcode.judging import runner_client as r; raise SystemExit(0 if r.versions() else 1)" && exit 0
+            sleep 2
+          done
+          docker compose logs; exit 1
+      - run: make validate-content

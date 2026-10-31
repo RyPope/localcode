@@ -1,0 +1,10 @@
+[
+  {"args": ["beautiful"], "expected": 3},
+  {"args": ["rhythm"], "expected": 0},
+  {"args": [""], "expected": 0},
+  {"args": ["a"], "expected": 1},
+  {"args": ["aeiou"], "expected": 5},
+  {"args": ["queueing"], "expected": 5},
+  {"args": ["abecidofu"], "expected": 1},
+  {"args": ["xyzooooxyzaa"], "expected": 4}
+]

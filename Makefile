@@ -59,10 +59,13 @@ smoke: ## End-to-end smoke test against the running stack
 update: ## Re-download sources and rebuild problem data (your progress is kept)
 	docker compose exec app python -m localcode.importer
 
+validate-content: ## Check content/ against the running stack (FULL=1 also runs local solutions on upstream tests)
+	docker compose exec -T app python -m localcode.tools.validate_content $(if $(FULL),--full)
+
 validate-cases: ## Maintainers: regenerate the excluded test-case list (slow)
 	docker compose up -d --scale runner=3
 	docker compose exec -T app python -m localcode.tools.validate_cases /data/excluded_cases.json
 	docker compose cp app:/data/excluded_cases.json backend/localcode/data/excluded_cases.json
 	docker compose up -d --scale runner=1
 
-.PHONY: help up down logs setup test test-backend test-runner test-web lint format dev-web api-types screenshots smoke update validate-cases
+.PHONY: help up down logs setup test test-backend test-runner test-web lint format dev-web api-types screenshots smoke update validate-content validate-cases
