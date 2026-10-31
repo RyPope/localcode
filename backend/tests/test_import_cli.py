@@ -8,8 +8,9 @@ def test_cli_runs_the_pipeline_and_reports_success(monkeypatch, capsys):
     monkeypatch.setattr(
         pipeline,
         "build_content_db",
-        lambda src, out, progress, used, content_dir=None: calls.append("build")
-        or {"problems": 3, "with_tests": 2, "companies": 1},
+        lambda src, out, progress, used, content_dir=None: (
+            calls.append("build") or {"problems": 3, "with_tests": 2, "companies": 1}
+        ),
     )
     assert cli.main([]) == 0
     assert calls == ["fetch", "build"]
