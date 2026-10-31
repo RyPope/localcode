@@ -129,9 +129,9 @@ CASES = [
         [
             ["255.0.0.7/32", "255.0.0.8/29", "255.0.0.16/32"],
             ["255.0.0.16/32", "255.0.0.7/32", "255.0.0.8/29"],
-            ["255.0.0.7/32", "255.0.0.15/29", "255.0.0.16/32"],
         ],
         [
+            ["255.0.0.7/32", "255.0.0.15/29", "255.0.0.16/32"],
             ["255.0.0.0/28"],
             ["255.0.0.7/32", "255.0.0.8/29"],
             ["255.0.0.7/32", "255.0.0.8/30", "255.0.0.12/30", "255.0.0.16/32"],
@@ -153,3 +153,11 @@ def test_checker(slug: str, args: list[Any], expected: Any, valid: list[Any], in
 
 def test_every_slug_has_a_different_valid_answer() -> None:
     assert {slug for slug, *_ in CASES} == {slug for slug, _, _, valid, _ in CASES if len(valid) > 1}
+
+
+def test_ip_to_cidr_requires_canonical_block_addresses():
+    slug = "checker:ip-to-cidr"
+    args = ["255.0.0.7", 10]
+    expected = ["255.0.0.7/32", "255.0.0.8/29", "255.0.0.16/32"]
+    assert judge(expected, expected, slug, args)
+    assert not judge(expected, ["255.0.0.7/32", "255.0.0.15/29", "255.0.0.16/32"], slug, args)

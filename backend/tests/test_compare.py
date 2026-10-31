@@ -77,3 +77,9 @@ def test_checker_that_raises_rejects_the_answer():
 def test_unknown_checker_falls_back_to_exact():
     assert judge([1, 2], [1, 2], "checker:no-such-problem", args=[])
     assert not judge([1, 2], [2, 1], "checker:no-such-problem", args=[])
+
+
+def test_any_order_keeps_float_tolerance():
+    assert judge([3.0, 25.0], [25.0, 2.9999999999999996], "any_order")
+    assert judge([[0.1, 2.0]], [[1.9999999, 0.1]], "any_order_deep")
+    assert not judge([3.0, 25.0], [25.0, 3.1], "any_order")

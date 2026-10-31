@@ -232,16 +232,17 @@ def build_array(args: list[Any], expected: Any, actual: Any) -> bool:
 
 
 def _cidr_range(block: Any) -> tuple[int, int]:
-    """The inclusive address range a CIDR block covers."""
+    """The inclusive address range a canonical CIDR block (no host bits set) covers."""
     m = _CIDR.fullmatch(block)
     if not m or not all(_no_leading_zero(g) for g in m.groups()):
         raise ValueError("malformed CIDR block")
     *octets, prefix = (int(g) for g in m.groups())
     if any(o > 255 for o in octets) or prefix > 32:
         raise ValueError("malformed CIDR block")
-    ip = int.from_bytes(bytes(octets), "big")
+    start = int.from_bytes(bytes(octets), "big")
     size = 1 << (32 - prefix)
-    start = ip & ~(size - 1)
+    if start & (size - 1):
+        raise ValueError("the base address has bits set beyond its prefix")
     return start, start + size - 1
 
 

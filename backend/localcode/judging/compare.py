@@ -17,8 +17,15 @@ FLOAT_TOL = 1e-5
 CHECKER_PREFIX = "checker:"
 
 
+def _rounded(x: Any) -> Any:
+    if isinstance(x, float):
+        return round(x, 4)
+    return [_rounded(e) for e in x] if isinstance(x, list) else x
+
+
 def _sort_key(x: Any) -> str:
-    return json.dumps(x, sort_keys=True)
+    """A stable sort key; floats are rounded so values within FLOAT_TOL sort together."""
+    return json.dumps(_rounded(x), sort_keys=True)
 
 
 def _deep_sorted(x: Any) -> Any:
