@@ -173,6 +173,125 @@ def _problem_rows(
     return problem, starters, solutions, tests
 
 
+PROBLEM_FILL = ("frontend_id", "title", "difficulty", "tags", "description_html", "acceptance")
+SIGNATURE = ("method", "params", "ret", "ref_python", "compare_mode", "examples")
+_EMPTY = (None, "", "[]")
+
+
+def _columns(con: sqlite3.Connection, table: str, schema: str = "main") -> list[str]:
+    return [r[1] for r in con.execute(f"pragma {schema}.table_info({table})")]
+
+
+def _locally_owned(previous: Path | None) -> set[str]:
+    """Slugs the previous import took from local content (they keep their local signature)."""
+    if not previous:
+        return set()
+    con = sqlite3.connect(f"{previous.as_uri()}?mode=ro", uri=True)
+    try:
+        if "source" not in _columns(con, "problems"):
+            return set()
+        return {r[0] for r in con.execute("select slug from problems where source = 'local'")}
+    finally:
+        con.close()
+
+
+def _copy_rows(con: sqlite3.Connection, table: str, where: str, args: tuple, overrides: dict | None = None) -> int:
+    """Copy rows of `table` from the attached previous database, defaulting `source` to upstream."""
+    cols = _columns(con, table)
+    old = set(_columns(con, table, "prev"))
+    exprs = [
+        "?" if overrides and c in overrides else (c if c in old else ("'upstream'" if c == "source" else "null"))
+        for c in cols
+    ]
+    params = tuple(overrides[c] for c in cols if overrides and c in overrides)
+    cur = con.execute(
+        f"insert into main.{table} ({', '.join(cols)}) select {', '.join(exprs)} from prev.{table} where {where}",
+        params + args,
+    )
+    return cur.rowcount
+
+
+def _carry_forward(con: sqlite3.Connection, previous: Path, excluded: dict[str, set[str]]) -> dict:
+    """Keep everything the previous content.db had that this build lacks; never override new values."""
+    kept = {"kept_problems": 0, "kept_solutions": 0, "kept_cases": 0}
+    con.execute("attach database ? as prev", (str(previous),))
+    try:
+        new_slugs = {r[0] for r in con.execute("select slug from main.problems")}
+        for (slug,) in con.execute("select slug from prev.problems").fetchall():
+            if slug not in new_slugs:
+                _copy_rows(con, "problems", "slug = ?", (slug,))
+                for table in ("starters", "solutions", "tests"):
+                    _copy_rows(con, table, "slug = ?", (slug,))
+                kept["kept_problems"] += 1
+                continue
+            _merge_previous(con, slug, excluded.get(slug, set()), kept)
+    finally:
+        con.commit()
+        con.execute("detach database prev")
+    return kept
+
+
+def _merge_previous(con: sqlite3.Connection, slug: str, excluded: set[str], kept: dict) -> None:
+    new = con.execute("select * from main.problems where slug = ?", (slug,)).fetchone()
+    old = con.execute("select * from prev.problems where slug = ?", (slug,)).fetchone()
+    old_cols = set(old.keys())
+    fill = {c: old[c] for c in PROBLEM_FILL if c in old_cols and new[c] in _EMPTY and old[c] not in _EMPTY}
+    if new["method"] is None and old["method"] is not None:  # the source lost its signature: keep the old one
+        fill.update({c: old[c] for c in SIGNATURE})
+    if fill:
+        con.execute(
+            f"update main.problems set {', '.join(f'{c} = ?' for c in fill)} where slug = ?", (*fill.values(), slug)
+        )
+        new = con.execute("select * from main.problems where slug = ?", (slug,)).fetchone()
+    same_signature = (new["method"], new["params"]) == (old["method"], old["params"])
+    if same_signature:
+        _copy_rows(
+            con, "starters", "slug = ? and lang not in (select lang from main.starters where slug = ?)", (slug, slug)
+        )
+
+    have = {tuple(r) for r in con.execute("select title, source from main.solutions where slug = ?", (slug,))}
+    old_source = "source" if "source" in _columns(con, "solutions", "prev") else "'upstream'"
+    next_idx = con.execute("select coalesce(max(idx), -1) + 1 from main.solutions where slug = ?", (slug,)).fetchone()[
+        0
+    ]
+    for idx, title, source in con.execute(
+        f"select idx, title, {old_source} from prev.solutions where slug = ? order by idx", (slug,)
+    ).fetchall():
+        if (title, source) not in have:
+            _copy_rows(con, "solutions", "slug = ? and idx = ?", (slug, idx), {"idx": next_idx})
+            next_idx += 1
+            kept["kept_solutions"] += 1
+
+    if new["method"] is None:
+        return
+    row = con.execute("select cases from main.tests where slug = ?", (slug,)).fetchone()
+    cases = json.loads(row[0]) if row else []
+    old_row = con.execute("select cases from prev.tests where slug = ?", (slug,)).fetchone()
+    params = json.loads(new["params"])
+    java_row = con.execute("select code from main.starters where slug = ? and lang = 'java'", (slug,)).fetchone()
+    java = _sig(parse_java_sig, java_row[0] if java_row else None, new["method"], len(params))
+    keys = {case_key(c["args"]) for c in cases}
+    extra = [
+        c
+        for c in (json.loads(old_row[0]) if old_row else [])
+        if case_key(c["args"]) not in keys and len(c["args"]) == len(params)
+    ]
+    extra = filter_cases(extra, new["ret"], java, excluded)
+    if not extra:
+        return
+    cases += extra
+    kept["kept_cases"] += len(extra)
+    con.execute("insert or replace into main.tests values (?, ?)", (slug, json.dumps(cases)))
+    has_tests = new["ret"] != "None" and len(cases) >= MIN_CASES
+    have_langs = {r[0] for r in con.execute("select lang from main.starters where slug = ?", (slug,))}
+    langs = [lang for lang in ("python", "java", "cpp", "kotlin") if has_tests and lang in have_langs]
+    examples = json.loads(new["examples"] or "[]") or [c["args"] for c in cases[:MIN_CASES]]
+    con.execute(
+        "update main.problems set has_tests = ?, langs = ?, examples = ? where slug = ?",
+        (int(has_tests), json.dumps(langs), json.dumps(examples), slug),
+    )
+
+
 def _write_content(
     con: sqlite3.Connection,
     dataset: dict[str, DatasetProblem],
@@ -183,13 +302,20 @@ def _write_content(
     sources_used: dict,
     progress: Progress,
     skipped: list[dict],
+    local_owned: set[str] = frozenset(),
+    previous: Path | None = None,
 ) -> dict:
     """Insert every problem, its starters, solutions, tests and company rows; returns import stats."""
     acceptance = {r[3]: r[5] for r in company_rows if r[5] is not None}
     slugs = sorted(set(dataset) | set(doocs) | set(local))
     for i, slug in enumerate(slugs):
         problem, starters, solutions, tests = _problem_rows(
-            dataset.get(slug), doocs.get(slug), local.get(slug), acceptance.get(slug), excluded.get(slug, set())
+            dataset.get(slug),
+            doocs.get(slug),
+            local.get(slug),
+            acceptance.get(slug),
+            excluded.get(slug, set()),
+            slug in local_owned,
         )
         con.execute("insert into problems values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", problem)
         con.executemany("insert into starters values (?,?,?,?)", starters)
@@ -209,14 +335,20 @@ def _write_content(
     con.executemany("insert into companies values (?,?)", sorted(names.items()))
     progress("companies", len(names), len(names))
 
+    kept = (
+        _carry_forward(con, previous, excluded)
+        if previous
+        else {"kept_problems": 0, "kept_solutions": 0, "kept_cases": 0}
+    )
     stats = {
-        "problems": len(slugs),
+        "problems": con.execute("select count(*) from problems").fetchone()[0],
         "with_tests": con.execute("select count(*) from problems where has_tests=1").fetchone()[0],
         "cases": con.execute("select coalesce(sum(json_array_length(cases)), 0) from tests").fetchone()[0],
         "companies": len(names),
         "local_problems": con.execute("select count(*) from problems where source = 'local'").fetchone()[0],
         "local_solutions": con.execute("select count(*) from solutions where source = 'local'").fetchone()[0],
         "skipped": skipped,
+        **kept,
     }
     meta = {
         "imported_at": datetime.now(UTC).isoformat(timespec="seconds"),
@@ -234,7 +366,13 @@ def build_content_db(
     sources_used: dict | None = None,
     excluded: dict[str, set[str]] | None = None,
     content_dir: Path | None = None,
+    previous: Path | None = None,
 ) -> dict:
+    """Build `out` from the downloaded sources in `src` and the repo content in `content_dir`.
+
+    Anything in `previous` (default: the existing `out`) that this build lacks is carried forward.
+    """
+    previous = previous or (out if out.exists() else None)
     excluded = load_excluded() if excluded is None else excluded
     progress("problems", 0, 0)
     dataset: dict[str, DatasetProblem] = {}
@@ -262,7 +400,17 @@ def build_content_db(
     con = db.connect_content(tmp)
     try:
         stats = _write_content(
-            con, dataset, doocs, local, company_rows, excluded, sources_used or {}, progress, skipped
+            con,
+            dataset,
+            doocs,
+            local,
+            company_rows,
+            excluded,
+            sources_used or {},
+            progress,
+            skipped,
+            _locally_owned(previous),
+            previous,
         )
         con.commit()
     except BaseException:

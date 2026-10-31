@@ -161,8 +161,10 @@ def test_overlay_solution_with_wrong_signature_adds_no_language(tmp_path):
     content = write_content(
         tmp_path / "c",
         "tree-mirror",
-        {"solutions/01.md": "---\ntitle: Odd\n---\n```java\nclass Solution {\n    public int other(int x) {\n"
-         "        return x;\n    }\n}\n```\n"},
+        {
+            "solutions/01.md": "---\ntitle: Odd\n---\n```java\nclass Solution {\n    public int other(int x) {\n"
+            "        return x;\n    }\n}\n```\n"
+        },
     )
     con, _ = build_with_content(tmp_path, content)
     assert json.loads(con.execute("select langs from problems where slug='tree-mirror'").fetchone()[0]) == ["python"]
@@ -208,3 +210,108 @@ def test_skipped_folder_reported_in_stats(tmp_path):
     _, stats = build_with_content(tmp_path)
     [entry] = stats["skipped"]
     assert entry["path"].endswith("broken/problem.md") and "difficulty" in entry["reason"]
+
+
+def drop_dataset_row(src: Path, slug: str) -> None:
+    f = src / "dataset" / "LeetCodeDataset-train.jsonl"
+    f.write_text("".join(line for line in f.read_text().splitlines(True) if json.loads(line)["task_id"] != slug))
+
+
+def rebuild(tmp_path: Path, content: Path | None = None, mutate=None) -> tuple[sqlite3.Connection, dict]:
+    """Build again into the same content.db from freshly copied sources, after `mutate(src)`."""
+    work = tmp_path / f"run-{len(list(tmp_path.glob('run-*')))}"
+    src = make_src(work)
+    if mutate:
+        mutate(src)
+    out = tmp_path / "content.db"
+    stats = build_content_db(src, out, progress=lambda *a: None, content_dir=content)
+    con = sqlite3.connect(out)
+    con.row_factory = sqlite3.Row
+    return con, stats
+
+
+EXTRA = {
+    "solutions/01-extra.md": "---\ntitle: Extra\n---\n```python\nclass Solution:\n"
+    "    def pairSum(self, nums: List[int], goal: int) -> List[int]:\n        return []\n```\n",
+    "tests.json": json.dumps([{"args": [[3, 4], 7], "expected": [0, 1]}]),
+}
+
+
+def test_second_import_keeps_removed_problem_solution_and_case(tmp_path):
+    first = write_content(tmp_path / "c1", "pair-sum", EXTRA)
+    rebuild(tmp_path, first)
+    con, stats = rebuild(tmp_path, tmp_path / "empty", mutate=lambda src: drop_dataset_row(src, "list-reverse"))
+    lr = con.execute("select * from problems where slug='list-reverse'").fetchone()
+    assert lr is not None and lr["has_tests"] == 1 and lr["method"] == "rev"
+    assert con.execute("select count(*) from starters where slug='list-reverse'").fetchone()[0] >= 1
+    titles = [r[0] for r in con.execute("select title from solutions where slug='pair-sum' order by idx")]
+    assert titles == ["Hash Map", "Solution 2", "Extra"]
+    cases = json.loads(con.execute("select cases from tests where slug='pair-sum'").fetchone()[0])
+    assert [[3, 4], 7] in [c["args"] for c in cases]
+    assert stats["kept_problems"] == 1 and stats["kept_solutions"] == 1 and stats["kept_cases"] == 1
+
+
+def test_second_import_is_stable(tmp_path):
+    rebuild(tmp_path, CONTENT)
+    con, stats = rebuild(tmp_path, CONTENT)
+    assert stats["kept_problems"] == stats["kept_solutions"] == stats["kept_cases"] == 0
+    assert con.execute("select count(*) from solutions where slug='count-vowels'").fetchone()[0] == 1
+
+
+def test_kept_cases_filtered_by_new_signature(tmp_path):
+    rebuild(tmp_path, CONTENT)
+    changed = write_content(
+        tmp_path / "c2",
+        "count-vowels",
+        {
+            "tests.json": json.dumps(
+                [{"args": ["ab", "a"], "expected": 1} for _ in range(1)]
+                + [{"args": ["x", "y"], "expected": 0}, {"args": ["aa", "a"], "expected": 2}]
+            ),
+            "solutions/01-scan.md": "---\ntitle: Single scan\n---\n```python\nclass Solution:\n"
+            "    def countVowels(self, s: str, vowels: str) -> int:\n        return sum(c in vowels for c in s)\n```\n",
+        },
+    )
+    con, stats = rebuild(tmp_path, changed)
+    cases = json.loads(con.execute("select cases from tests where slug='count-vowels'").fetchone()[0])
+    assert len(cases) == 3 and all(len(c["args"]) == 2 for c in cases)
+    assert stats["kept_cases"] == 0
+    assert con.execute("select count(*) from solutions where slug='count-vowels'").fetchone()[0] == 1
+
+
+def test_carry_forward_never_overrides_local_case(tmp_path):
+    rebuild(tmp_path)
+    override = write_content(
+        tmp_path / "c", "pair-sum", {"tests.json": json.dumps([{"args": [[0, 1], 1], "expected": [9, 9]}])}
+    )
+    con, _ = rebuild(tmp_path, override)
+    cases = json.loads(con.execute("select cases from tests where slug='pair-sum'").fetchone()[0])
+    assert [c["expected"] for c in cases if c["args"] == [[0, 1], 1]] == [[9, 9]]
+
+
+def test_local_problem_keeps_control_when_upstream_adds_it(tmp_path):
+    local = write_content(
+        tmp_path / "c",
+        "list-reverse",
+        {
+            "tests.json": json.dumps([{"args": [n], "expected": n} for n in range(3)]),
+            "solutions/01.md": "---\ntitle: Mine\n---\n```python\nclass Solution:\n"
+            "    def same(self, n: int) -> int:\n        return n\n```\n",
+        },
+    )
+    rebuild(tmp_path, local, mutate=lambda src: drop_dataset_row(src, "list-reverse"))
+    con, _ = rebuild(tmp_path, local)
+    p = con.execute("select * from problems where slug='list-reverse'").fetchone()
+    assert p["source"] == "local" and p["method"] == "same" and p["has_tests"] == 1
+
+
+def test_carry_forward_from_db_without_source_column(tmp_path):
+    rebuild(tmp_path)
+    old = sqlite3.connect(tmp_path / "content.db")
+    old.execute("alter table problems drop column source")
+    old.execute("alter table solutions drop column source")
+    old.commit()
+    old.close()
+    con, stats = rebuild(tmp_path, mutate=lambda src: drop_dataset_row(src, "tree-mirror"))
+    assert con.execute("select source from problems where slug='tree-mirror'").fetchone()[0] == "upstream"
+    assert stats["kept_problems"] == 1
