@@ -1,0 +1,5 @@
+[
+  {"args": ["hello"], "expected": 2},
+  {"args": ["xyz"], "expected": 0},
+  {"args": ["aeiou"], "expected": 5}
+]
