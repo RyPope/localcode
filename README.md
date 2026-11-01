@@ -95,7 +95,7 @@ flowchart LR
     B["Browser<br/>localhost:4173"] --> A
     subgraph Docker["Docker Compose"]
         A["app<br/>FastAPI + React UI"]
-        R["runner<br/>Python 3.14 · JDK 25 · Clang 19 · Kotlin 2.4<br/>no network"]
+        R["runner<br/>Python 3.14 · JDK 25 · Clang 23 · Kotlin 2.4<br/>no network"]
         D[("localcode-data volume<br/>content.db · user.db")]
         A -- "code + test inputs<br/>(Unix socket)" --> R
         R -- "raw outputs" --> A
@@ -162,7 +162,7 @@ docker compose cp app:/data/user.db ./localcode-user-backup.db
 - **Kotlin reference solutions are sparse upstream**, so the Solutions tab shows Java for most Kotlin problems. Kotlin submissions are judged normally.
 - **Problems with several valid answers** are judged by checking the answer, not by matching one expected output: 75 problems ("return any valid arrangement", course orders, Gray codes, CIDR covers, …) have a checker that validates the answer against the input, and "in any order" answers are compared ignoring order (at every level where the problem allows it). A multi-answer problem without a checker yet is still compared against one expected answer; please report it.
 - **Design, SQL, shell and concurrency problems** can be read but not run.
-- **C++ is compiled with Clang 19 and `-std=c++23 -O2`** but without AddressSanitizer, so some out-of-bounds bugs may go unnoticed instead of failing with a runtime error.
+- **C++ is compiled with Clang 23 and `-std=c++23 -O2`** but without AddressSanitizer, so some out-of-bounds bugs may go unnoticed instead of failing with a runtime error.
 - **Cold-start compile times** are about 1 to 2 s for Java and C++ and about 4 s for Kotlin.
 
 ## Troubleshooting

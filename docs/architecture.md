@@ -62,7 +62,7 @@ Each runner replica serves HTTP on `/run/localcode/runner-<host>.sock` (mode 066
 |---|---|---|
 | Python | `harness/py_driver.py` | Converts arguments using `params` types; per-case stdout capture; 128 MB thread stack |
 | Java / Kotlin | `harness/jvm/Driver.java` | Reflection over the `Solution` method's generic types; Gson; `javafx.util.Pair` provided |
-| C++ | `harness/cpp_gen.py` + `cpp/lc.hpp` | Clang 19, `-std=c++23 -O2` (as LeetCode); generated `main` from the C++ signature; precompiled prelude and JSON I/O object; stdout captured at the file-descriptor level |
+| C++ | `harness/cpp_gen.py` + `cpp/lc.hpp` | Clang 23, `-std=c++23 -O2`; generated `main` from the C++ signature; precompiled prelude and JSON I/O object; stdout captured at the file-descriptor level |
 
 Limits are defined once in `config.Limits` and sent with every request: Run gets 2 s per case and Submit 10 s in total, plus a per-language start-up allowance; memory is 1 GiB, applied as an address-space limit (Python, C++) or a heap of 75% of it (JVM). Output files are capped and the sandbox user is limited to 256 processes.
 

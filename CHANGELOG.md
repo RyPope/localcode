@@ -7,12 +7,16 @@ All notable changes are documented here. The format follows [Keep a Changelog](h
 ### Added
 
 - First public version: about 4,100 problems (2,830 runnable against 274k hidden tests), company frequency lists for 423 companies, reference solutions with explanations.
-- Judging in Python 3.14, Java 25, C++23 (Clang 19) and Kotlin 2.4 in a sandboxed runner with no network access.
+- Judging in Python 3.14, Java 25, C++23 (Clang 23) and Kotlin 2.4 in a sandboxed runner with no network access.
 - Problem list, company pages, workspace with Run/Submit and custom cases, submission history, progress dashboard and export.
 - One-command setup with Docker Compose; content imported from open datasets at first run, with mirror fallbacks.
 - Repo-kept content in `content/`: new problems and extra solutions, tests or corrections for existing ones, checked in CI by `make validate-content` and marked "local" in the app.
 - The Progress page lists every solved problem, with when it was first accepted and in which languages; the solved counts link to the filtered problem list.
 - **Refresh content** never removes problems, solutions or test cases that an earlier import had.
+
+### Changed
+
+- Dependencies brought up to date: Clang 23 from LLVM's apt repository (was Debian's Clang 19), Node 26 LTS for the web build and CI (was 22), Gson 2.15, TanStack Query 5.105.1. The excluded test cases were regenerated with the new toolchain. TypeScript stays on 5.9 until openapi-typescript and typescript-eslint support 7.
 
 ### Fixed
 
