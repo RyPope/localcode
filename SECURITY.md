@@ -33,7 +33,7 @@ The app has no login, so it defends against other web pages instead:
 ## Supply chain
 
 - Dependencies are pinned, and Dependabot proposes updates.
-- Toolchain downloads in the runner image (Kotlin, Gson) are verified against pinned SHA-256 checksums.
+- Toolchain downloads in the runner image (Kotlin, Gson) are verified against pinned SHA-256 checksums, and the LLVM apt repository that provides Clang is trusted only through its signing key, itself pinned by checksum.
 - CI actions are pinned to commit SHAs.
 - Problem content is downloaded at runtime from the configured sources over HTTPS. It is rendered only after sanitisation, and the reference solutions it contains are only ever executed inside the sandbox.
 
