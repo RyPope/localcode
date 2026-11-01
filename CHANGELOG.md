@@ -16,13 +16,15 @@ All notable changes are documented here. The format follows [Keep a Changelog](h
 
 ### Changed
 
-- Dependencies brought up to date: Clang 23 from LLVM's apt repository (was Debian's Clang 19), Node 26 LTS for the web build and CI (was 22), Gson 2.15, TanStack Query 5.105.1. The excluded test cases were regenerated with the new toolchain. TypeScript stays on 5.9 until openapi-typescript and typescript-eslint support 7.
+- Dependencies brought up to date: Clang 23 from LLVM's apt repository (was Debian's Clang 19), Node 26 LTS for the web build and CI (was 22), Gson 2.15, TanStack Query 5.105.1. The excluded test cases were regenerated with the new toolchain. TypeScript 6.0 (7 waits on typescript-eslint support).
 
 ### Fixed
 
 - `LOCALCODE_ALLOWED_HOSTS` set when starting Docker Compose now reaches the app, so it can be served under another host name as the README describes.
 
 ### Security
+
+- Monaco's bundled DOMPurify is pinned to our patched 3.4.17 (Monaco 0.57 pins 3.4.15, affected by several XSS advisories); `npm audit --omit=dev` reports no vulnerabilities.
 
 - The runner has no network; the app reaches it over a group-restricted Unix socket.
 - Both containers run without root privileges or unneeded capabilities, under `no-new-privileges`.
