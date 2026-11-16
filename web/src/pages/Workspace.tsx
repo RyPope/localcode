@@ -34,6 +34,7 @@ export default function Workspace() {
   const ws = useWorkspace(slug);
   const [left, setLeft] = useState<LeftTab>("description");
   const [fontSize, setFontSize] = useState<number>(() => pref("fontSize", 14));
+  const [vim, setVim] = useState<boolean>(() => pref("vim", false));
   const {
     size: colSize,
     container: colsContainer,
@@ -69,6 +70,10 @@ export default function Workspace() {
     const size = Math.min(FONT_RANGE.max, Math.max(FONT_RANGE.min, fontSize + delta));
     setFontSize(size);
     setPref("fontSize", size);
+  };
+  const toggleVim = () => {
+    setVim(!vim);
+    setPref("vim", !vim);
   };
 
   return (
@@ -128,6 +133,8 @@ export default function Workspace() {
             onReset={ws.resetToStarter}
             fontSize={fontSize}
             onFontSize={changeFont}
+            vim={vim}
+            onVim={toggleVim}
             save={ws.save}
             canRun={canRun}
             onRun={ws.run}
@@ -139,6 +146,7 @@ export default function Workspace() {
               value={ws.code}
               onChange={ws.setCode}
               fontSize={fontSize}
+              vim={vim}
               onRun={() => canRun && ws.run()}
               onSubmit={() => canRun && ws.submit()}
             />
