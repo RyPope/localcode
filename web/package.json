@@ -24,6 +24,7 @@
     "katex": "^0.19.1",
     "marked": "18.1.2",
     "monaco-editor": "0.57.0",
+    "monaco-vim": "0.4.4",
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "react-router-dom": "^7.18.5"

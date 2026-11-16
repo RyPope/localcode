@@ -18,6 +18,8 @@ export function EditorToolbar(props: {
   onReset: () => void;
   fontSize: number;
   onFontSize: (delta: number) => void;
+  vim: boolean;
+  onVim: () => void;
   save: SaveState;
   canRun: boolean;
   onRun: () => void;
@@ -44,6 +46,14 @@ export function EditorToolbar(props: {
       <span className="mono muted text-xs">{props.fontSize}px</span>
       <button className="btn ghost ibtn" aria-label="Larger font" onClick={() => props.onFontSize(1)}>
         A+
+      </button>
+      <button
+        className={props.vim ? "btn" : "btn ghost"}
+        aria-pressed={props.vim}
+        onClick={props.onVim}
+        title="Toggle Vim keybindings"
+      >
+        Vim
       </button>
       <span className={props.save === "error" ? "note bad" : "note"}>{SAVE_LABEL[props.save]}</span>
       <div className="spacer" />

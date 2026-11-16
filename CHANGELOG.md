@@ -13,6 +13,7 @@ All notable changes are documented here. The format follows [Keep a Changelog](h
 - Repo-kept content in `content/`: new problems and extra solutions, tests or corrections for existing ones, checked in CI by `make validate-content` and marked "local" in the app.
 - The Progress page lists every solved problem, with when it was first accepted and in which languages; the solved counts link to the filtered problem list.
 - **Refresh content** never removes problems, solutions or test cases that an earlier import had.
+- Optional Vim keybindings in the editor: a **Vim** toggle in the editor toolbar, remembered between sessions, with a mode line under the editor.
 
 ### Changed
 
