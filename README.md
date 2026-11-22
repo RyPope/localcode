@@ -209,6 +209,14 @@ Please read the [Code of Conduct](CODE_OF_CONDUCT.md). Security issues go throug
 
 localcode exists because of the people behind [LeetCodeDataset](https://github.com/newfacade/LeetCodeDataset), [doocs/leetcode](https://github.com/doocs/leetcode) and [leetcode-company-wise-problems](https://github.com/liquidslr/leetcode-company-wise-problems). It is built with [FastAPI](https://fastapi.tiangolo.com/), [React](https://react.dev/), [TanStack Query](https://tanstack.com/query), [Monaco Editor](https://microsoft.github.io/monaco-editor/), [KaTeX](https://katex.org/) and [Geist](https://vercel.com/font).
 
+## Contributors
+
+Thanks to everyone who has contributed to localcode.
+
+<a href="https://github.com/RyPope/localcode/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=RyPope/localcode" alt="Contributors to localcode">
+</a>
+
 ## License
 
 [MIT](LICENSE) © 2026 Ryan Pope. Problem content downloaded at runtime is subject to its sources' licenses (see [NOTICE.md](NOTICE.md)).
